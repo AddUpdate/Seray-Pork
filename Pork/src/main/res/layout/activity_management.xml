@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_management_tare"
+            android:layout_width="0px"
+            android:layout_height="@dimen/dp_60"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="扣重设置"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/managerTipTextSize" />
+
+        <Button
+            android:id="@+id/btn_management_float_range"
+            android:layout_width="0px"
+            android:layout_height="@dimen/dp_60"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="设置浮动率"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/managerTipTextSize" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_out"
+            android:layout_width="0px"
+            android:layout_height="@dimen/dp_60"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="退出应用"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/managerTipTextSize" />
+
+        <Button
+            android:id="@+id/btn_return"
+            android:layout_width="0px"
+            android:layout_height="@dimen/dp_60"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/fntopagebutton_bottom"
+            android:text="@string/operation_back"
+            android:textColor="@color/white"
+            android:textSize="@dimen/managerTipTextSize" />
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="@dimen/dp_8"
+        android:orientation="horizontal"
+        android:weightSum="6">
+
+        <TextView
+            android:id="@+id/entry_search_begin"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.9"
+            android:gravity="center"
+            android:hint="开始日期"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:id="@+id/entry_search_end"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.9"
+            android:gravity="center"
+            android:hint="结束日期"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:id="@+id/entry_search_plu"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.4"
+            android:gravity="center"
+            android:hint="选择品名"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:id="@+id/entry_search_suppliers"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.4"
+            android:gravity="center"
+            android:hint="供应商"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <Button
+            android:id="@+id/entry_search_ok"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginEnd="2.5dp"
+            android:layout_marginTop="@dimen/dp_4"
+            android:layout_weight="0.7"
+            android:background="@drawable/fntopagebutton_bottom"
+            android:text="查询"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <Button
+            android:id="@+id/entry_search_reset"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginStart="2.5dp"
+            android:layout_marginTop="@dimen/dp_4"
+            android:layout_weight="0.7"
+            android:background="@drawable/fntopagebutton_bottom"
+            android:text="重置"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="2dp"
+        android:background="@color/light" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:weightSum="7">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="日期"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="供应商"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="采购单号"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="品名"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="采购数量"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="实际数量"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="是否核实"
+            android:textColor="@color/red"
+            android:textSize="@dimen/managerCategoryTextSize" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/entry_search_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></ListView>
+
+    </LinearLayout>
+
+</LinearLayout>

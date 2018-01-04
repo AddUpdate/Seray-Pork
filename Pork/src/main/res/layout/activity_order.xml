@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/dp_8"
+    >
+    <LinearLayout
+        android:layout_width="500dp"
+        android:layout_height="@dimen/dp_60"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/dp_4"
+        >
+        <TextView
+            android:id="@+id/tv_order_wait"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="待配货"
+            android:textColor="@color/white"
+            android:textSize="@dimen/pluTextSize"
+            android:gravity="center"
+            android:background="@drawable/radio_selected"
+            />
+        <TextView
+            android:id="@+id/tv_order_finish"
+            android:layout_marginLeft="@dimen/dp_25"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/shapeone"
+            android:textColor="@color/black"
+            android:text="已配货"
+            android:gravity="center"
+            android:textSize="@dimen/pluTextSize"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/order_category_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@color/stock_back"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dp_4"
+        android:weightSum="3">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="订单号"
+            android:textColor="@color/white"
+            android:textSize="25sp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="订单时间"
+            android:textColor="@color/white"
+            android:textSize="25sp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="客户"
+            android:textColor="@color/white"
+            android:textSize="25sp"/>
+
+    </LinearLayout>
+    <ListView
+        android:id="@+id/lv_order"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+</LinearLayout>

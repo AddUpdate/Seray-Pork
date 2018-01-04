@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shapeone"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:gravity="center_horizontal"
+        android:text="提示"
+        android:textColor="@color/black"
+        android:textSize="@dimen/pluTextSize" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray" />
+    <TextView
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="20dp"
+        android:lineSpacingExtra="3dp"
+        android:textColor="@color/black"
+        android:textSize="@dimen/configTextSize" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_80"
+        android:orientation="horizontal"
+        android:padding="@dimen/dp_8"
+        >
+
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:background="@drawable/radio_gray"
+            android:gravity="center"
+            android:text="@string/reprint_cancel"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+
+        <TextView
+            android:id="@+id/submit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:background="@drawable/radio_selected"
+            android:gravity="center"
+            android:text="@string/reprint_ok"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize"
+            android:layout_marginLeft="@dimen/dp_8"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

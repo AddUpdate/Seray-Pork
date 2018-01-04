@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:weightSum="6">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/internelCount"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/numPluTextSize" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <TextView
+            android:id="@+id/weight"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/numPluTextSize" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/calibration"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="@string/operation_check"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/numPluTextSize" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <EditText
+            android:id="@+id/et_calload"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:cursorVisible="false"
+            android:hint="请输入砝码重量"
+            android:inputType="number|numberDecimal"
+            android:textSize="@dimen/numPluTextSize" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <Button
+            android:id="@+id/maxuint"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="最大量程"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/numPluTextSize"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white"/>
+
+        <EditText
+            android:id="@+id/et_maxuint"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="5dp"
+            android:cursorVisible="false"
+            android:hint="按钮确认"
+            android:inputType="number|numberDecimal"
+            android:textSize="@dimen/numPluTextSize"/>
+
+        <Button
+            android:id="@+id/et_zero_btn"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1.2"
+            android:background="@drawable/shapeone"
+            android:text="获取零点值"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/numPluTextSize"/>
+
+        <TextView
+            android:id="@+id/et_zero"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="0.8"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/numPluTextSize" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <Spinner
+            android:id="@+id/setting_sp_rangeMode"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="2" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <Spinner
+            android:id="@+id/setting_sp_fdn"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:spinnerMode="dropdown" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <Spinner
+            android:id="@+id/setting_sp_bigFdn"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/setting_sp_type"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <Spinner
+            android:id="@+id/setting_sp_zerotrack"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/setting_sp_zeroRange"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
+
+        <Button
+            android:id="@+id/exitApp"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shapeone"
+            android:text="@string/operation_back"
+            android:textColor="@color/black1"
+            android:textSize="@dimen/numPluTextSize" />
+    </LinearLayout>
+
+</LinearLayout>

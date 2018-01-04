@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@color/stock_back"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="确定数量"
+            android:textColor="@color/white"
+            android:textSize="@dimen/pluTextSize"
+            android:layout_centerInParent="true"
+            android:gravity="center_vertical"
+            android:textStyle="bold" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/dp_10"
+        android:orientation="vertical"
+        android:weightSum="5">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_10">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="收据号"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize"
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/dp_4"
+                />
+            <TextView
+                android:id="@+id/tv_in_bulk_batch_number"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/red"
+                android:textSize="@dimen/managerTipTextSize"
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/dp_16"
+                android:layout_marginRight="@dimen/dp_72"
+                />
+
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_10">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="品名"
+                android:textColor="@color/white"
+                android:layout_marginLeft="@dimen/dp_4"
+                android:textSize="@dimen/managerTipTextSize" />
+
+            <TextView
+                android:id="@+id/tv_in_bulk_quantity_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_16"
+                android:layout_marginRight="@dimen/dp_72"
+                android:textColor="@color/red"
+                android:textSize="@dimen/managerTipTextSize" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="计算方式"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize" />
+
+            <TextView
+                android:id="@+id/tv_in_bulk_quantity_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_16"
+                android:textColor="@color/red"
+                android:textSize="@dimen/managerTipTextSize" />
+
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重量(kg)"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize" />
+
+            <TextView
+                android:id="@+id/tv_in_bulk_quantity_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow"
+                android:text="@string/base_weight"
+                android:textSize="@dimen/numPluTextSize"
+                android:layout_marginLeft="@dimen/dp_16"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="当前扣重"
+                android:textColor="@color/red"
+                android:gravity="top"
+                android:textSize="@dimen/managerCategoryTextSize" />
+
+            <TextView
+                android:id="@+id/tv_in_bulk_quantity_tare_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/red"
+                android:text="@string/base_weight"
+                android:textSize="@dimen/configTextSize"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginRight="@dimen/dp_40"
+                android:gravity="top"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="计件(数量)"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize" />
+
+            <EditText
+                android:id="@+id/et_in_bulk_quantity_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow"
+                android:inputType="number"
+                android:scrollHorizontally="true"
+                android:maxLength="7"
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/dp_8"
+                android:textSize="@dimen/numPluTextSize" />
+
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:weightSum="4"
+            android:layout_marginTop="@dimen/dp_25"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bt_in_bulk_quantity_peel"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/radio_selected"
+                android:text="扣重"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize"
+                android:layout_margin="@dimen/dp_10"
+                />
+
+            <Button
+                android:id="@+id/bt_in_bulk_quantity_confirm"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1"
+                android:background="@drawable/radio_selected"
+                android:text="确定"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/dp_10"
+                android:textSize="@dimen/managerTipTextSize" />
+
+            <Button
+                android:id="@+id/bt_in_bulk_quantity_finish"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1"
+                android:layout_marginTop="@dimen/dp_10"
+                android:background="@drawable/radio_selected"
+                android:text="完成"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/dp_10"
+                android:textSize="@dimen/managerTipTextSize" />
+            <Button
+                android:id="@+id/bt_in_bulk_quantity_return"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/radio_selected"
+                android:text="返回"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize"
+                android:layout_margin="@dimen/dp_10"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

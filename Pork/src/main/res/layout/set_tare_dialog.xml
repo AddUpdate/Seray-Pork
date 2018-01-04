@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/fntopagebutton_white">
+<RelativeLayout
+    android:id="@+id/rl_set_tare_dialog"
+    android:layout_width="410dp"
+    android:layout_height="460dp">
+    <TextView
+        android:id="@+id/set_tare_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/pluTextSize" />
+
+    <View
+        android:id="@+id/set_tare_dialog_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/set_tare_dialog_title"
+        android:background="@color/gray" />
+    <ListView
+        android:id="@+id/set_tare_dialog_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:divider="@color/gray"
+        android:dividerHeight="1dp"
+        android:layout_above="@+id/set_tare_dialog_result"
+        android:layout_below="@+id/set_tare_dialog_line"/>
+
+    <LinearLayout
+        android:id="@+id/set_tare_dialog_result"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_72"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/bt_set_tare_dialog_negative"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_gray"
+            android:text="@string/reprint_cancel"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/pluTextSize" />
+
+        <Button
+            android:id="@+id/bt_set_tare_dialog_positive"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selected"
+            android:text="@string/reprint_ok"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/pluTextSize" />
+    </LinearLayout>
+</RelativeLayout>
+</RelativeLayout>

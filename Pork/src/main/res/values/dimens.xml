@@ -1,0 +1,28 @@
+<resources>
+    <dimen name="functionButtonTextSize">35sp</dimen>
+    <dimen name="managerCategoryTextSize">20sp</dimen>
+    <dimen name="managerTipTextSize">30sp</dimen>
+    <dimen name="pluTextSize">30sp</dimen>
+    <dimen name="numPluTextSize">40sp</dimen>
+    <dimen name="configTextSize">25sp</dimen>
+
+    <dimen name="TitleTextSize">40sp</dimen>
+    <dimen name="payResultTextSize">35sp</dimen>
+    <dimen name="sp_16">16sp</dimen>
+
+    <dimen name="def_height">52dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_10">10dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="dp_25">25dp</dimen>
+    <dimen name="dp_40">40dp</dimen>
+    <dimen name="dp_50">50dp</dimen>
+    <dimen name="dp_60">60dp</dimen>
+    <dimen name="dp_72">72dp</dimen>
+    <dimen name="dp_80">80dp</dimen>
+    <dimen name="dp_90">90dp</dimen>
+    <dimen name="dp_100">100dp</dimen>
+
+</resources>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/stock_back"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/confirm_goods_detail_batch_number"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/dp_4"
+            android:gravity="center"
+            android:text="收据号"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center_vertical"
+            android:text="重量确定详情"
+            android:textColor="@color/white"
+            android:textSize="@dimen/pluTextSize"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/confirm_goods_detail_batch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_8"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/light" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="序号"
+            android:textColor="@color/red"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="商品名"
+            android:textColor="@color/red"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="单位(片)"
+            android:textColor="@color/red"
+            android:textSize="@dimen/configTextSize"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/dp_72"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="重量(kg)"
+            android:textColor="@color/red"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="确认"
+            android:textColor="@color/red"
+            android:textSize="@dimen/configTextSize" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/light" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/lv_confirm_goods_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/confirm_goods_detail_ok"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="@dimen/dp_16"
+            />
+        <TextView
+            android:id="@+id/confirm_goods_detail_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/dp_8"
+            android:layout_marginRight="@dimen/dp_100"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_continue"
+            android:textColor="@color/yellow"
+            android:text="0.000"
+            android:textSize="@dimen/pluTextSize" />
+        <Button
+            android:id="@+id/confirm_goods_detail_continue"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginRight="@dimen/dp_4"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_ok"
+            android:background="@drawable/radio_selected"
+            android:text="确定"
+            android:textSize="@dimen/configTextSize" />
+        <Button
+            android:id="@+id/confirm_goods_detail_ok"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginRight="@dimen/dp_4"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_return"
+            android:background="@drawable/radio_selected"
+            android:text="完成"
+            android:textSize="@dimen/configTextSize" />
+
+        <Button
+            android:id="@+id/confirm_goods_detail_return"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginRight="@dimen/dp_4"
+            android:background="@drawable/radio_selected"
+            android:text="返回"
+            android:textSize="@dimen/configTextSize" />
+    </RelativeLayout>
+</LinearLayout>

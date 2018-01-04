@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="app_name">Pork</string>
+    <string name="base_weight">0.000</string>
+
+    <string name="reprint_ok">确定</string>
+    <string name="reprint_cancel">取消</string>
+    <string name="test_clear_title">提醒</string>
+    <string name="operation_reboot">重新启动</string>
+    <string name="source_library">来自↓</string>
+    <string name="to_library">去往↓</string>
+
+    <string name="operation_check">校正</string>
+    <string name="operation_max_weight_1">300.0</string>
+    <string name="operation_max_weight_2">30.0</string>
+    <string name="operation_demarcate_msg">更换秤类型后，为保证正常称量，请：\r\n1、重新标定秤系统\r\n2、重新启动应用程序</string>
+    <string name="operation_back">返回</string>
+    <string name="manager_reboot">重启</string>
+
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        >
+        <TextView
+            android:id="@+id/confirm_goods_item_batch_number"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/configTextSize"
+            android:textColor="@color/white"
+            />
+        <TextView
+            android:id="@+id/confirm_goods_item_suppliers"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/configTextSize"
+            android:textColor="@color/white"/>
+        <TextView
+            android:id="@+id/confirm_goods_item_state"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/configTextSize"
+            android:textColor="@color/white"/>
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/confirm_goods_item_remark"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/configTextSize"
+            android:textColor="@color/white"/>
+
+    </LinearLayout>
+</LinearLayout>

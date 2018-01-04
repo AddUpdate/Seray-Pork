@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    >
+    <include
+        layout="@layout/interfacepage"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+      />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="5"
+        android:orientation="horizontal"
+        >
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/shapetwo"
+            android:orientation="vertical"
+            android:padding="@dimen/dp_10">
+
+            <TextView
+                android:id="@+id/tv_sort_weight_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重量     kg"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize" />
+
+            <TextView
+                android:layout_marginTop="@dimen/dp_4"
+                android:id="@+id/tv_sort_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow"
+                android:textSize="@dimen/numPluTextSize" />
+
+            <TextView
+                android:layout_marginTop="@dimen/dp_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="皮重     kg"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize" />
+
+            <TextView
+                android:layout_marginTop="@dimen/dp_4"
+                android:id="@+id/tv_sort_tare_weight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/yellow"
+                android:text="@string/base_weight"
+                android:textSize="@dimen/numPluTextSize" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/source_library"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_25"
+                />
+            <Spinner
+                android:id="@+id/spinner_sort_come"
+                android:layout_width="130dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/radio_selected"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:spinnerMode="dialog"
+               />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/to_library"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_8"
+                />
+            <Spinner
+                android:id="@+id/spinner_sort_leave"
+                android:layout_width="130dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/radio_selected"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:spinnerMode="dialog"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="vertical"
+            android:weightSum="4">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/shapetwo"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_10">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="品名"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/configTextSize" />
+
+                <TextView
+                    android:id="@+id/tv_sort_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:textColor="@color/red"
+                    android:textSize="@dimen/managerTipTextSize" />
+
+            </LinearLayout>
+
+                <GridView
+                    android:id="@+id/gv_sort_plu"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:horizontalSpacing="5dp"
+                    android:numColumns="4"
+                    android:verticalSpacing="5dp"
+                    android:padding="@dimen/dp_8"
+                    android:background="@drawable/shapetwo"
+                    />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/shapetwo"
+            android:padding="@dimen/dp_4"
+            >
+
+            <ListView
+                android:id="@+id/lv_sort_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/bt_sort_ok"
+                android:layout_alignParentTop="true"
+                />
+
+            <Button
+                android:id="@+id/bt_sort_ok"
+                android:layout_width="140dp"
+                android:layout_height="70dp"
+                android:background="@drawable/radio_selected"
+                android:text="确定"
+                android:textColor="@color/white"
+                android:textSize="@dimen/managerTipTextSize"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="@dimen/dp_4"
+                />
+
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>
