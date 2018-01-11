@@ -133,6 +133,8 @@ public class SeparateActivity extends BaseActivity {
 
         groupListView.setItemsCanFocus(true);// 让ListView的item获得焦点
         groupListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
+        mGridViewPlu.setItemChecked(1, true);
+        mGridViewPlu.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         spinnerCome = (Spinner) findViewById(R.id.spinner_separate_come);
         spinnerCome.setGravity(Gravity.CENTER);
@@ -448,7 +450,7 @@ public class SeparateActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, "", mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "",state);
         logManager.insertOperationLog(log);
     }
 

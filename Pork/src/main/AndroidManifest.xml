@@ -4,7 +4,9 @@
     package="com.seray.pork">
 
     <uses-feature android:name="android.hardware.usb.host"/>
-
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera.any"/>
     <uses-permission android:name="android.permission.SHUTDOWN"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -47,34 +49,53 @@
         </activity>
         <activity
             android:name=".OperationActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name=".BaseActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            />
         <activity
             android:name=".SupplierSelectActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name="com.seray.stock.PurchaseActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name="com.seray.stock.EntrySearchActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name="com.seray.stock.StockActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name=".TemporaryLibraryActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name=".ChooseFunctionActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name=".SeparateActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name=".SortActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            >
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
@@ -90,21 +111,41 @@
         </activity>
         <activity
             android:name="com.seray.stock.ConfirmGoodsActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
         <activity
             android:name="com.seray.stock.ConfirmGoodsDetailActivity"
-            android:screenOrientation="landscape" />
-        <activity android:name="com.seray.stock.ConfirmGoodsHookActivity" />
-        <activity android:name="com.seray.stock.ConfirmInBulkActivity" />
-        <activity android:name="com.seray.stock.InBulkQuantityActivity" />
-        <activity android:name=".FrozenLibraryActivity" />
-        <activity android:name=".FinishProductActivity" />
-        <activity android:name=".ProductsSelectActivity" />
-        <activity android:name=".ExcessStockActivity" />
-        <activity android:name=".ManageActivity" />
-        <activity android:name=".OrderActivity" />
-        <activity android:name=".OrderDetailActivity" />
-        <activity android:name=".OrderWeightActivity" />
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name="com.seray.stock.ConfirmGoodsHookActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name="com.seray.stock.ConfirmInBulkActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name="com.seray.stock.InBulkQuantityActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name=".FrozenLibraryActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+
+        <activity android:name=".FinishProductActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden">
+
+        </activity>
+        <activity android:name=".ProductsSelectActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
+        <activity android:name=".ExcessStockActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
+        <activity android:name=".ManageActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            />
+        <activity android:name=".OrderActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name=".OrderDetailActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name=".OrderWeightActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
 
         <receiver android:name="com.seray.receiver.ShutdownReceiver">
             <intent-filter>
@@ -130,8 +171,10 @@
 
         <service android:name="com.gprinter.service.AllService" />
 
-        <activity android:name=".ManagementActivity" />
-        <activity android:name="com.seray.stock.InBulkGoodsActivity"></activity>
+        <activity android:name=".ManagementActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity android:name="com.seray.stock.InBulkGoodsActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"></activity>
     </application>
 
 </manifest>

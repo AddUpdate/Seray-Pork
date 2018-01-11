@@ -20,30 +20,28 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.seray.cache.ScanGunKeyEventHelper;
+import com.seray.utils.FileHelp;
 import com.camera.simplewebcam.CameraPreview;
-import com.seray.cache.CacheHelper;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
 import com.seray.entity.MonitorLibraryMessage;
 import com.seray.entity.OperationLog;
 import com.seray.http.UploadDataHttp;
-import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
-import com.seray.utils.FileHelp;
+
 import com.seray.utils.LibraryUtil;
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -53,7 +51,7 @@ import java.util.List;
 /**
  * 速冻库
  */
-public class FrozenLibraryActivity extends BaseActivity {
+public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEventHelper.OnScanSuccessListener{
     private TextView tareWeightTv, weightTv, nameTv, standardTv, numberTv;
     private TextView mMaxUnitView, mTimeView;
     private EditText numberEt, codeEt;
@@ -72,7 +70,7 @@ public class FrozenLibraryActivity extends BaseActivity {
     private String comeLibrary;
     private String goLibraryId;
     private String goLibrary;
-    private String codeData, weightData, numberData = "", name, standard, plu = "";
+    private String codeData, weightData, numberData = "", name, standard, plu = "",picture;
     LibraryUtil libraryUtil = new LibraryUtil(this);
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
@@ -80,6 +78,7 @@ public class FrozenLibraryActivity extends BaseActivity {
     private boolean camerIsEnable = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
     LoadingDialog loadingDialog;
+    ScanGunKeyEventHelper scanGunKeyEventHelper = null;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
@@ -104,6 +103,7 @@ public class FrozenLibraryActivity extends BaseActivity {
     }
 
     private void initView() {
+        mCameraPreview = CameraPreview.getInstance();
         loadingDialog = new LoadingDialog(this);
         nameTv = (TextView) findViewById(R.id.tv_frozen_library_name);
         standardTv = (TextView) findViewById(R.id.tv_frozen_library_standard);
@@ -149,6 +149,7 @@ public class FrozenLibraryActivity extends BaseActivity {
     }
 
     private void initListener() {
+        scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
         intoBt.setOnClickListener(this);
         outBt.setOnClickListener(this);
 
@@ -184,74 +185,27 @@ public class FrozenLibraryActivity extends BaseActivity {
 
             }
         });
-        codeEt.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        codeData = codeEt.getText().toString();
-                        if (!TextUtils.isEmpty(codeData))
-                            getBarCode();
-                        return true;
-                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
-                        codeEt.setText("");
-                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
-                        clearEvent();
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
 //        codeEt.setOnKeyListener(new View.OnKeyListener() {
 //            @Override
 //            public boolean onKey(View v, int keyCode, KeyEvent event) {
 //                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-//                    if (keyCode != KeyEvent.KEYCODE_BACK) {
-//                        mMisc.beep();
-//                    }
-//                    String txt = codeEt.getText().toString();
-//                    if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
-//                        txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
-//                    } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-//                        txt += keyCode - KeyEvent.KEYCODE_0;
-//                    } else if (keyCode == KeyEvent.KEYCODE_NUM_LOCK) {
-//                        if (!txt.isEmpty())
-//                            txt = txt.substring(0, txt.length() - 1);
+//                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+//                        codeData = codeEt.getText().toString();
+//                        if (!TextUtils.isEmpty(codeData))
+//                            getBarCode();
+//                        return true;
 //                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
-//                        txt = "";
+//                        codeEt.setText("");
 //                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
 //                        clearEvent();
-//                        txt = "";
 //                        return true;
-//                    } else {
-//                        return false;
 //                    }
-//                    codeEt.setText(txt);
-//                    return true;
 //                }
-//                return true;
+//                return false;
 //            }
 //        });
     }
 
-    private void timer() {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (flag) {
-                    mFrozenHandler.sendEmptyMessage(1);
-                    try {
-                        Thread.sleep(100);
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-    }
 
     private void camera() {
         //生成本地设置  是否开启拍照
@@ -270,7 +224,7 @@ public class FrozenLibraryActivity extends BaseActivity {
                     lastImgName = currImgName;
                     prevRecordImgName = lastImgName;
                 } catch (Exception e) {
-                    prevRecordImgName = null;
+                    prevRecordImgName = "";
                 }
                 camerIsEnable = true;
             }
@@ -288,7 +242,7 @@ public class FrozenLibraryActivity extends BaseActivity {
         // 当前记录没有触发拍照，并且是计重（非计件）模式
         if (lastImgName == null)
             return prevRecordImgName;
-        return lastImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
     }
 
     @Override
@@ -298,6 +252,7 @@ public class FrozenLibraryActivity extends BaseActivity {
             case R.id.bt_frozen_library_into:
                 //    weightData = weightTv.getText().toString();
                 //   numberData = numberEt.getText().toString();
+                camera();
                 if (!TextUtils.isEmpty(codeData)) {
                     //    if (comeLibrary.equals("采购")||comeLibrary.equals("分拣区")||comeLibrary.equals("速冻库")){
                     showNormalDialog("序号：" + codeData + "\n品名：" + name + "\n规格：" + standard);
@@ -316,7 +271,8 @@ public class FrozenLibraryActivity extends BaseActivity {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary);
+                LogUtil.e("getPirture-----",getCameraPic());
+                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary,getCameraPic()==null?"":getCameraPic());
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFrozenHandler.sendEmptyMessage(3);
@@ -332,7 +288,7 @@ public class FrozenLibraryActivity extends BaseActivity {
 
     private void sqlInsert(int state) {
         //state 1 已回收 2 未回收
-        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, name, plu, new BigDecimal(weightData), numberData.equals("") ? 0 : Integer.valueOf(numberData), standard, NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, name, plu, new BigDecimal(weightData), numberData.equals("") ? 0 : Integer.valueOf(numberData), standard, NumFormatUtil.getDateDetail(),getCameraPic(), state);
         logManager.insertOperationLog(log);
     }
 
@@ -407,6 +363,26 @@ public class FrozenLibraryActivity extends BaseActivity {
                 return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int code = event.getKeyCode();
+        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
+            return super.dispatchKeyEvent(event);
+        } else {
+            scanGunKeyEventHelper.analysisKeyEvent(event);
+        }
+        return true;
+    }
+
+    @Override
+    public void onScanSuccess(String barcode) {
+        codeData = barcode;
+        LogUtil.e("codeEt", codeData);
+        codeEt.setText(codeData);
+        if (!TextUtils.isEmpty(codeData))
+            getBarCode();
     }
 
 
@@ -538,6 +514,6 @@ public class FrozenLibraryActivity extends BaseActivity {
         unregisterReceiver(timeReceiver);
         EventBus.getDefault().unregister(this);
         mFrozenHandler.removeCallbacksAndMessages(null);
-        flag = false;
+        scanGunKeyEventHelper.onDestroy();
     }
 }

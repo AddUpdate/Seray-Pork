@@ -66,7 +66,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private JNIScale mScale;
     private TextView tvWeight, tvName, TvTareWeight;
     private TextView mMaxUnitView, mTimeView;
-    private Button initLibraryBt, outLibraryBt;
+    private Button initLibraryBt;
     private Spinner spinnerCome, spinnerLeave;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
@@ -134,12 +134,12 @@ public class TemporaryLibraryActivity extends BaseActivity {
         tvName = (TextView) findViewById(R.id.tv_temporary_name);
         TvTareWeight = (TextView) findViewById(R.id.tv_temporary_tare_weight);
         initLibraryBt = (Button) findViewById(R.id.bt_temporary_into_libraries);
-        outLibraryBt = (Button) findViewById(R.id.bt_temporary_out_libraries);
-
         mGridViewPlu = (GridView) findViewById(R.id.gv_temporary_plu);
         groupListView = (ListView) findViewById(R.id.lv_temporary_group);
         groupListView.setItemsCanFocus(true);// 让ListView的item获得焦点
         groupListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
+        mGridViewPlu.setItemChecked(1, true);
+        mGridViewPlu.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         spinnerCome = (Spinner) findViewById(R.id.spinner_temporary_come);
         spinnerCome.setGravity(Gravity.CENTER);
@@ -205,7 +205,6 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void initListener() {
         initLibraryBt.setOnClickListener(this);
-        outLibraryBt.setOnClickListener(this);
         mGridViewPlu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -510,7 +509,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "",state);
         logManager.insertOperationLog(log);
     }
 

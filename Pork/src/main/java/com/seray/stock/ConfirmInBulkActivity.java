@@ -107,7 +107,6 @@ public class ConfirmInBulkActivity extends BaseActivity {
                     } else {
                         confirmInBulkHandler.sendEmptyMessage(1);
                         showMessage("暂无数据");
-
                     }
                     loadingDialog.dismissDialog();
                 } else {

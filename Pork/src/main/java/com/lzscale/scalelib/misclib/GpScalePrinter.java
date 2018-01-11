@@ -93,17 +93,14 @@ public class GpScalePrinter {
    //     tsc.addBitmap(20, 50, BITMAP_MODE.OVERWRITE, b.getWidth(), b);
         tsc.addQRCode(20, 10, EEC.LEVEL_L, 5, ROTATION.ROTATION_0, barCode);
         // 绘制简体中文
-        tsc.addText(15, 130, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
-                barCode);
-        tsc.addText(250, 70, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
+//        tsc.addText(15, 130, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
+//                barCode);
+        tsc.addText(200, 70, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
                 name);
-        tsc.addText(250, 10, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
-                weight);
-        LogUtil.e("weight",weight);
-
-        tsc.addText(250, 40, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
-                number);
-        LogUtil.e("number",number);
+        tsc.addText(200, 10, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
+                "计重："+weight);
+        tsc.addText(200, 40, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
+               "计件："+ number);
         tsc.addText(15, 160, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,
                 date);
         tsc.addText(15, 185, FONTTYPE.SIMPLIFIED_CHINESE, ROTATION.ROTATION_0, FONTMUL.MUL_1, FONTMUL.MUL_1,

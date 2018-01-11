@@ -22,11 +22,12 @@ public class OperationLog {
     private int number;
     private String unit;//单位（kg,箱，袋）
     private String date;
+    private String picture;
     private int state;  //1 已回收  2未回收
 
     public OperationLog(String comeLibraryId, String comeLibraryName,
                         String goLibraryId, String productName, String plu, BigDecimal weight,
-                        int number, String unit, String date, int state){
+                        int number, String unit, String date,String picture, int state){
         this.comeLibraryId = comeLibraryId;
         this.comeLibraryName = comeLibraryName;
         this.goLibraryId = goLibraryId;
@@ -36,14 +37,15 @@ public class OperationLog {
         this.number = number;
         this.unit = unit;
         this.date = date;
+        this.picture = picture;
         this.state = state;
 
     }
 
-    @Generated(hash = 1702648482)
+    @Generated(hash = 1786373372)
     public OperationLog(Long id, String comeLibraryId, String comeLibraryName,
-            String goLibraryId, String productName, String plu, float weight,
-            int number, String unit, String date, int state) {
+            String goLibraryId, String productName, String plu, float weight, int number,
+            String unit, String date, String picture, int state) {
         this.id = id;
         this.comeLibraryId = comeLibraryId;
         this.comeLibraryName = comeLibraryName;
@@ -54,8 +56,10 @@ public class OperationLog {
         this.number = number;
         this.unit = unit;
         this.date = date;
+        this.picture = picture;
         this.state = state;
     }
+
     @Generated(hash = 2033303483)
     public OperationLog() {
     }
@@ -161,5 +165,13 @@ public class OperationLog {
     }
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    public String getPicture() {
+        return this.picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

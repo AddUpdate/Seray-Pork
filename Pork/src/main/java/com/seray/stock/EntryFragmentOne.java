@@ -54,7 +54,7 @@ import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by pc on 2017/11/8.
- * 首页记录订单信息
+ * 首页记录采购单信息
  */
 
 public class EntryFragmentOne extends BaseTwoFragment {

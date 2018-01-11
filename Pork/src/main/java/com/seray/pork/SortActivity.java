@@ -165,8 +165,8 @@ public class SortActivity extends BaseActivity {
 
         groupListView.setItemsCanFocus(true);// 让ListView的item获得焦点
         groupListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
-        // 默认第一个item被选中
-        // groupListView.setItemChecked(0, true);
+        mGridViewPlu.setItemChecked(1, true);// 让ListView的item获得焦点
+        mGridViewPlu.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
 
         spinnerCome = (Spinner) findViewById(R.id.spinner_sort_come);
         spinnerCome.setGravity(Gravity.CENTER);
@@ -485,8 +485,8 @@ public class SortActivity extends BaseActivity {
                     number = 0;
                     value = "\n重量： " + weight;
                 } else {
-                    weight = "0.000";
                     number = Integer.valueOf(weight);
+                    weight = "0";
                     value = "\n数量： " + number;
                 }
                 if (goLibrary.equals("分拣区") && !source.equals("分拣区")) {
@@ -566,7 +566,7 @@ public class SortActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, "", mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, "", mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(),"",state);
         logManager.insertOperationLog(log);
     }
 

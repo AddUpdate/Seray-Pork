@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -48,8 +49,9 @@ import static android.app.Activity.RESULT_OK;
 
 public class EntryFragmentTwo extends BaseTwoFragment {
 
-    private TextView  productNameTv, pluCodeTv, unitTv;
+    private TextView productNameTv, pluCodeTv, unitTv;
     private EditText quantityEt, numberEt, unitPriceEt;
+    private LinearLayout llQuantityEt, llNumber;
     private Button keepBt;
     private Spinner unitSpinner;
 
@@ -99,6 +101,8 @@ public class EntryFragmentTwo extends BaseTwoFragment {
         TextView mCerImgTv = (TextView) view.findViewById(R.id.entry_frag_two_cer);
         keepBt = (Button) view.findViewById(R.id.entry_frag_two_keep);
 
+        llQuantityEt = (LinearLayout) view.findViewById(R.id.ll_frag_two_quantity);
+        llNumber = (LinearLayout) view.findViewById(R.id.ll_frag_two_number);
 
         mCerImage.setOnClickListener(this);
         cerDeleteBtn.setOnClickListener(this);
@@ -136,12 +140,21 @@ public class EntryFragmentTwo extends BaseTwoFragment {
         unitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!TextUtils.isEmpty(mDetail.getUnit())) {
+                    mMisc.beep();
+                }
                 TextView tv = (TextView) view;
                 tv.setTextColor(getResources().getColor(R.color.white));    //设置颜色
                 tv.setTextSize(25.0f);    //设置大小
                 tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
-                //   showMessage(unitDataList.get(position));
                 mDetail.setUnit(unitDataList.get(position));
+                if (unitDataList.get(position).equals("KG")) {
+                    llQuantityEt.setVisibility(View.VISIBLE);
+                    llNumber.setVisibility(View.GONE);
+                } else {
+                    llQuantityEt.setVisibility(View.GONE);
+                    llNumber.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -209,7 +222,7 @@ public class EntryFragmentTwo extends BaseTwoFragment {
             case R.id.entry_frag_two_plucode:
             case R.id.entry_frag_two_product_name:
                 Intent intent1 = new Intent(getContext(), ProductsSelectActivity.class);
-           //     intent1.putExtra("FromWhere", 2);
+                //     intent1.putExtra("FromWhere", 2);
                 startActivity(intent1);
                 break;
             case R.id.entry_frag_two_cer_iv:
@@ -237,38 +250,37 @@ public class EntryFragmentTwo extends BaseTwoFragment {
                     mLastDetail = mDetail;
                     mDetail = null;
                     clearViewContent();
-                }else {
+                } else {
                     showMessage("将信息填写完整");
                 }
                 break;
         }
     }
 
-    private boolean submitCheck(){
+    private boolean submitCheck() {
         boolean check = false;
-        if (sInterface != null&&mDetail != null&&!mDetail.equals(mLastDetail)) {
-            if (!TextUtils.isEmpty(mDetail.getProductName()) &&!TextUtils.isEmpty(mDetail.getPluCode())){
-                if (mDetail.getUnit().equals("KG")){
-                        if (mDetail.getDecimalQuantity().compareTo(new BigDecimal(0)) > 0){
+        if (sInterface != null && mDetail != null && !mDetail.equals(mLastDetail)) {
+            if (!TextUtils.isEmpty(mDetail.getProductName()) && !TextUtils.isEmpty(mDetail.getPluCode())) {
+                if (mDetail.getUnit().equals("KG")) {
+                    if (mDetail.getDecimalQuantity().compareTo(new BigDecimal(0)) > 0) {
                         check = true;
 //                        if (mDetail.getNumber() == 0){
 //                            mDetail.setNumber(0);
 //                        }
-                    }else
+                    } else
                         check = false;
-                }else {
-                   if (mDetail.getNumber()>0) {
-                       check = true;
-                       if (mDetail.getDecimalQuantity() == null) {
-                           mDetail.setQuantity(BigDecimal.ZERO);
-                       }
-                   }
-                   else
-                       check = false;
+                } else {
+                    if (mDetail.getNumber() > 0) {
+                        check = true;
+                        if (mDetail.getDecimalQuantity() == null) {
+                            mDetail.setQuantity(BigDecimal.ZERO);
+                        }
+                    } else
+                        check = false;
                 }
-            }else
+            } else
                 check = false;
-        }else
+        } else
             check = false;
         return check;
     }
@@ -284,7 +296,7 @@ public class EntryFragmentTwo extends BaseTwoFragment {
                 case KEY_UNIT_PRICE:
                     mDetail.setUnitPrice(new BigDecimal(value));
                     //      addPrice(mDetail.getDecimalQuantity() != null);
-                break;
+                    break;
 
                 case KEY_NUMBER:
                     value = value.replace(".", "");
@@ -294,6 +306,7 @@ public class EntryFragmentTwo extends BaseTwoFragment {
 
         }
     }
+
     @Override
     void clearEditFocus() {
         quantityEt.clearFocus();
@@ -308,7 +321,7 @@ public class EntryFragmentTwo extends BaseTwoFragment {
 
     @Override
     void clearViewContent() {
-       productNameTv.setText("请选择品名");
+        productNameTv.setText("请选择品名");
         pluCodeTv.setText("请选择PLU");
         unitTv.setText("");
         quantityEt.setText("");
@@ -351,11 +364,11 @@ public class EntryFragmentTwo extends BaseTwoFragment {
         mDetail.setPluCode(pluCode);
         mDetail.setUnit(unitType);
         mDetail.setParentsItemName(partentName);
-        for (int i = 0; i <unitDataList.size() ; i++) {
-             if (unitType.equals(unitDataList.get(i))){
-                 unitSpinner.setSelection(i,true);
-                 break;
-             }
+        for (int i = 0; i < unitDataList.size(); i++) {
+            if (unitType.equals(unitDataList.get(i))) {
+                unitSpinner.setSelection(i, true);
+                break;
+            }
         }
     }
 

@@ -13,6 +13,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +22,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.camera.simplewebcam.CameraPreview;
+import com.seray.cache.ScanGunKeyEventHelper;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -29,7 +32,9 @@ import com.seray.entity.OperationLog;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
@@ -41,16 +46,18 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 成品12号库
  */
-public class FinishProductActivity extends BaseActivity {
-    private TextView tareWeightTv, weightTv,nameTv,standardTv,numberTv;
+public class FinishProductActivity extends BaseActivity implements ScanGunKeyEventHelper.OnScanSuccessListener {
+    private TextView tareWeightTv, weightTv, nameTv, standardTv, numberTv;
     private TextView mMaxUnitView, mTimeView;
     private EditText numberEt, codeEt;
     private Button intoBt, outBt;
@@ -64,14 +71,17 @@ public class FinishProductActivity extends BaseActivity {
     private JNIScale mScale;
     private boolean flag = true;
     private FinishProductHandler mFinishProductHandler = new FinishProductHandler(new WeakReference<>(this));
-    private String comeLibraryId;
-    private String comeLibrary;
-    private String goLibrary;
-    private String goLibraryId;
-    private String codeData, weightData, numberData,name,standard,plu="";
+    private String comeLibraryId, comeLibrary, goLibrary, goLibraryId;
+    private String codeData, weightData, numberData, name, standard, plu = "";
     LibraryUtil libraryUtil = new LibraryUtil(this);
     OperationLogManager logManager = OperationLogManager.getInstance();
     LoadingDialog loadingDialog;
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
+    ScanGunKeyEventHelper scanGunKeyEventHelper = null;
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
         initLibrary();
@@ -87,7 +97,7 @@ public class FinishProductActivity extends BaseActivity {
         initListener();
         initLibrary();
         register();
-     //   timer();
+        //   timer();
     }
 
     private void initJNI() {
@@ -101,12 +111,9 @@ public class FinishProductActivity extends BaseActivity {
         numberTv = (TextView) findViewById(R.id.tv_finish_product_number);
         codeEt = (EditText) findViewById(R.id.et_finish_product_code);
         codeEt.setInputType(InputType.TYPE_NULL);
-     //   codeEt.setCursorVisible(false);
         tareWeightTv = (TextView) findViewById(R.id.tv_finish_product_tare_weight);
         weightTv = (TextView) findViewById(R.id.tv_finish_product_weight);
         numberEt = (EditText) findViewById(R.id.et_finish_product_number);
-//        numberEt.setInputType(InputType.TYPE_NULL);
-//        numberEt.setCursorVisible(false);
         intoBt = (Button) findViewById(R.id.bt_finish_product_into);
         outBt = (Button) findViewById(R.id.bt_finish_product_out);
         comeSpinner = (Spinner) findViewById(R.id.spinner_finish_come);
@@ -120,8 +127,8 @@ public class FinishProductActivity extends BaseActivity {
     private void initLibrary() {
         come_data.clear();
         go_data.clear();
-        List<LibraryList> libraryList = libraryUtil.libraryJson("InventoryTwo");
-        if (libraryList.size()==0)
+        List<LibraryList> libraryList = libraryUtil.libraryJson("InventoryThree");
+        if (libraryList.size() == 0)
             return;
         comeLibraryList = libraryList.get(0).getLibraryList();
         goLibraryList = libraryList.get(1).getLibraryList();
@@ -142,6 +149,7 @@ public class FinishProductActivity extends BaseActivity {
     private void initListener() {
         intoBt.setOnClickListener(this);
         outBt.setOnClickListener(this);
+        scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
 
         comeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -153,6 +161,7 @@ public class FinishProductActivity extends BaseActivity {
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 comeLibrary = comeLibraryList.get(position).getLibraryName();
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -168,28 +177,10 @@ public class FinishProductActivity extends BaseActivity {
                 goLibraryId = goLibraryList.get(position).getLibraryId();
                 goLibrary = goLibraryList.get(position).getLibraryName();
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
-        codeEt.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        codeData = codeEt.getText().toString();
-                        if (!TextUtils.isEmpty(codeData))
-                            getBarCode();
-                        return true;
-                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
-                        codeEt.setText("");
-                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
-                        clearEvent();
-                        return true;
-                    }
-                }
-                return false;
             }
         });
 //        codeEt.setOnKeyListener(new View.OnKeyListener() {
@@ -224,37 +215,59 @@ public class FinishProductActivity extends BaseActivity {
 //        });
     }
 
-    private void timer() {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (flag) {
-                    mFinishProductHandler.sendEmptyMessage(1);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
                     }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
                 }
+                camerIsEnable = true;
             }
-        }.start();
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
     }
 
     @Override
     public void onClick(View view) {
-    //    weightData = weightTv.getText().toString();
-    //    numberData = numberEt.getText().toString();
+        //    weightData = weightTv.getText().toString();
+        //    numberData = numberEt.getText().toString();
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_finish_product_into:
-                 //&& !TextUtils.isEmpty(numberData)
+                //&& !TextUtils.isEmpty(numberData)
+                camera();
                 if (!TextUtils.isEmpty(codeData)) {
-              //      if (comeLibrary.equals("分拣区")||comeLibrary.equals("采购")||comeLibrary.equals("速冻库")||comeLibrary.equals("成品1号库")||){
-                        showNormalDialog("序号："+codeData+"\n品名："+name+"\n规格："+standard+"\n确定？");
-               //     }else {
-                      //  submitOutLibrary();  出库
-               //     }
+                    //      if (comeLibrary.equals("分拣区")||comeLibrary.equals("采购")||comeLibrary.equals("速冻库")||comeLibrary.equals("成品1号库")||){
+                    showNormalDialog("序号：" + codeData + "\n品名：" + name + "\n规格：" + standard + "\n确定？");
+                    //     }else {
+                    //  submitOutLibrary();  出库
+                    //     }
                 } else {
                     showMessage("信息不完整");
                 }
@@ -271,31 +284,35 @@ public class FinishProductActivity extends BaseActivity {
 //                } else {
 //                    showMessage("信息不完整");
 //                }
-             //   break;
+            //   break;
         }
     }
+
     private void submitIntoLibrary() {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary);
+                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary, getCameraPic() == null ? "" : getCameraPic());
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFinishProductHandler.sendEmptyMessage(3);
                     sqlInsert(1);
                     loadingDialog.dismissDialog();
-                }else {
+                } else {
                     sqlInsert(2);
                     loadingDialog.dismissDialog();
                 }
             }
         });
     }
+
+
     private void sqlInsert(int state) {
         //state 1 已回收 2 未回收
-        OperationLog log = new OperationLog(comeLibraryId, comeLibrary,goLibraryId, name, plu,new BigDecimal(weightData),  numberData.equals("")?0:Integer.valueOf(numberData), standard, NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, name, plu, new BigDecimal(weightData), numberData.equals("") ? 0 : Integer.valueOf(numberData), standard, NumFormatUtil.getDateDetail(), getCameraPic(), state);
         logManager.insertOperationLog(log);
     }
+
     private String submitData() {
         JSONObject object = new JSONObject();
         String Division = "";
@@ -308,7 +325,6 @@ public class FinishProductActivity extends BaseActivity {
         }
         return Division;
     }
-
 
 //    private void submitOutLibrary() {
 //        httpQueryThread.submit(new Runnable() {
@@ -324,30 +340,31 @@ public class FinishProductActivity extends BaseActivity {
 //    }
 
 
-private void getBarCode() {
-    httpQueryThread.submit(new Runnable() {
-        @Override
-        public void run() {
-            ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
-            if (api.Result) {
-                showMessage(api.ResultMessage);
-                JSONObject obj ;
-                try {
-                    obj = new JSONObject(api.ResultJsonStr);
-                    JSONObject object = obj.getJSONObject("Result");
-                    name = object.getString("ItemName");
-                    standard = object.getString("Weight");//需要一份对应品名的规格表
-                    weightData =  object.getString("Weight");
-                    numberData =  object.getString("Number");
-                    plu =  object.getString("PLU");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+    private void getBarCode() {
+        httpQueryThread.submit(new Runnable() {
+            @Override
+            public void run() {
+                ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
+                if (api.Result) {
+                    showMessage(api.ResultMessage);
+                    JSONObject obj;
+                    try {
+                        obj = new JSONObject(api.ResultJsonStr);
+                        JSONObject object = obj.getJSONObject("Result");
+                        name = object.getString("ItemName");
+                        standard = object.getString("Weight");//需要一份对应品名的规格表
+                        weightData = object.getString("Weight");
+                        numberData = object.getString("Number");
+                        plu = object.getString("PLU");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    mFinishProductHandler.sendEmptyMessage(2);
                 }
-                mFinishProductHandler.sendEmptyMessage(2);
             }
-        }
-    });
-}
+        });
+    }
+
     public void register() {
         IntentFilter timeFilter = new IntentFilter();
         timeFilter.addAction(Intent.ACTION_TIME_TICK);
@@ -366,6 +383,7 @@ private void getBarCode() {
             }
         }
     };
+
     @Override
     protected void onResume() {
         mMaxUnitView.setText(String.valueOf(mScale.getMainUnitFull()) + "kg");
@@ -397,6 +415,25 @@ private void getBarCode() {
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int code = event.getKeyCode();
+        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
+            return super.dispatchKeyEvent(event);
+        } else {
+            scanGunKeyEventHelper.analysisKeyEvent(event);
+        }
+        return true;
+    }
+
+    @Override
+    public void onScanSuccess(String barcode) {
+        codeData = barcode;
+        LogUtil.e("codeEt", codeData);
+        codeEt.setText(codeData);
+        if (!TextUtils.isEmpty(codeData))
+            getBarCode();
+    }
 
     private static class FinishProductHandler extends Handler {
 
@@ -426,12 +463,14 @@ private void getBarCode() {
             }
         }
     }
+
     /**
      * 判断秤稳定
      */
     private boolean isStable() {
         return mScale.getStabFlag();
     }
+
     private Boolean isOL() {
         return mScale.getStringNet().contains("OL");
     }
@@ -461,11 +500,13 @@ private void getBarCode() {
             findViewById(R.id.zeroflag).setVisibility(View.INVISIBLE);
         }
     }
+
     private void setViewData() {
         nameTv.setText(name);
         standardTv.setText(standard);
         numberTv.setText(numberData);
     }
+
     private void clearEvent() {
         nameTv.setText("");
         standardTv.setText("");
@@ -473,6 +514,7 @@ private void getBarCode() {
         codeEt.setText("");
         numberEt.setText("");
     }
+
     /*
       *  信息确认提示
       */
@@ -481,12 +523,12 @@ private void getBarCode() {
         new PromptDialog(this, R.style.Dialog, weightContent, new PromptDialog.OnCloseListener() {
             @Override
             public void onClick(Dialog dialog, boolean confirm) {
-                if(confirm){
+                if (confirm) {
                     loadingDialog.showDialog();
                     mMisc.beep();
                     submitIntoLibrary();
                     dialog.dismiss();
-                }else {
+                } else {
                     mMisc.beep();
                 }
 
@@ -494,6 +536,7 @@ private void getBarCode() {
             }
         }).setTitle("提示").show();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -501,5 +544,6 @@ private void getBarCode() {
         EventBus.getDefault().unregister(this);
         flag = false;
         mFinishProductHandler.removeCallbacksAndMessages(null);
+        scanGunKeyEventHelper.onDestroy();
     }
 }

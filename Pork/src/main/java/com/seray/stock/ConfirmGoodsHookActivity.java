@@ -159,11 +159,13 @@ public class ConfirmGoodsHookActivity extends BaseActivity {
                 int actualNumber = data.getIntExtra("actualNumber", 0);
                 int position = data.getIntExtra("position", 0);
                 if (actualWeight.compareTo(new BigDecimal(0)) <= 0 && actualNumber == 0) {
+                    if (state != 1)
                     return;
                 }
                 BigDecimal weight = detailList.get(position).getDecimalActualWeight();
 
                 if (weight.compareTo(actualWeight) == 0 && actualNumber == detailList.get(position).getActualNumber()) {
+                    if (state != 1)
                     return;
                 }
                 for (int i = 0; i < detailList.size(); i++) {

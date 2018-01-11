@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     >
     <include
         layout="@layout/interfacepage"
@@ -20,9 +20,10 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/shapetwo"
+            android:background="@drawable/bg_text"
             android:orientation="vertical"
-            android:padding="@dimen/dp_10">
+            android:layout_margin="@dimen/dp_5"
+            android:padding="@dimen/dp_5">
 
             <TextView
                 android:id="@+id/tv_sort_weight_type"
@@ -30,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:text="重量     kg"
                 android:textColor="@color/white"
-                android:textSize="@dimen/configTextSize" />
+                android:textSize="@dimen/pluTextSize" />
 
             <TextView
                 android:layout_marginTop="@dimen/dp_4"
@@ -38,15 +39,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/yellow"
-                android:textSize="@dimen/numPluTextSize" />
-
+                android:textSize="@dimen/baseWeight" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line"
+                android:background="@color/black"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginRight="@dimen/dp_16"
+                />
             <TextView
                 android:layout_marginTop="@dimen/dp_4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="皮重     kg"
                 android:textColor="@color/white"
-                android:textSize="@dimen/configTextSize" />
+                android:textSize="@dimen/pluTextSize" />
 
             <TextView
                 android:layout_marginTop="@dimen/dp_4"
@@ -55,7 +62,14 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/yellow"
                 android:text="@string/base_weight"
-                android:textSize="@dimen/numPluTextSize" />
+                android:textSize="@dimen/baseWeight" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line"
+                android:background="@color/black"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginRight="@dimen/dp_16"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -63,14 +77,14 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/configTextSize"
                 android:layout_marginLeft="@dimen/dp_10"
-                android:layout_marginTop="@dimen/dp_25"
+                android:layout_marginTop="@dimen/dp_10"
                 />
             <Spinner
                 android:id="@+id/spinner_sort_come"
                 android:layout_width="130dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="@dimen/dp_8"
-                android:background="@drawable/radio_selected"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_choose_library"
                 android:layout_gravity="center"
                 android:textColor="@color/white"
                 android:spinnerMode="dialog"
@@ -88,8 +102,8 @@
                 android:id="@+id/spinner_sort_leave"
                 android:layout_width="130dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="@dimen/dp_8"
-                android:background="@drawable/radio_selected"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_choose_library"
                 android:layout_gravity="center"
                 android:textColor="@color/white"
                 android:spinnerMode="dialog"/>
@@ -106,8 +120,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@drawable/shapetwo"
+                android:background="@drawable/bg_text"
                 android:orientation="horizontal"
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_marginBottom="@dimen/dp_5"
                 android:padding="@dimen/dp_10">
 
                 <TextView
@@ -122,7 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:textColor="@color/red"
+                    android:textColor="@color/stock_back"
                     android:textSize="@dimen/managerTipTextSize" />
 
             </LinearLayout>
@@ -135,8 +151,9 @@
                     android:horizontalSpacing="5dp"
                     android:numColumns="4"
                     android:verticalSpacing="5dp"
-                    android:padding="@dimen/dp_8"
-                    android:background="@drawable/shapetwo"
+                    android:padding="@dimen/dp_5"
+                    android:layout_marginBottom="@dimen/dp_5"
+                    android:background="@drawable/bg_text"
                     />
 
         </LinearLayout>
@@ -145,8 +162,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/shapetwo"
-            android:padding="@dimen/dp_4"
+            android:layout_margin="@dimen/dp_5"
             >
 
             <ListView
@@ -154,14 +170,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/bt_sort_ok"
+                android:background="@drawable/bg_text"
+                android:divider="@color/transparence"
                 android:layout_alignParentTop="true"
                 />
 
             <Button
                 android:id="@+id/bt_sort_ok"
-                android:layout_width="140dp"
+                android:layout_width="match_parent"
                 android:layout_height="70dp"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_button_ok"
                 android:text="确定"
                 android:textColor="@color/white"
                 android:textSize="@dimen/managerTipTextSize"

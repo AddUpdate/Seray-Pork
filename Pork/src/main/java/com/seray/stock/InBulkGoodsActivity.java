@@ -87,6 +87,7 @@ public class InBulkGoodsActivity extends BaseActivity {
                     if (detailList.size() > 0) {
                         InBulkGoodsHandler.sendEmptyMessage(1);
                     } else {
+                        InBulkGoodsHandler.sendEmptyMessage(1);
                         showMessage("暂无数据");
                     }
                     loadingDialog.dismissDialog();

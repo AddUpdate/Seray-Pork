@@ -4,14 +4,17 @@
     <dimen name="managerTipTextSize">30sp</dimen>
     <dimen name="pluTextSize">30sp</dimen>
     <dimen name="numPluTextSize">40sp</dimen>
+    <dimen name="baseWeight">45sp</dimen>
     <dimen name="configTextSize">25sp</dimen>
 
     <dimen name="TitleTextSize">40sp</dimen>
     <dimen name="payResultTextSize">35sp</dimen>
     <dimen name="sp_16">16sp</dimen>
 
+    <dimen name="line">0.5dp</dimen>
     <dimen name="def_height">52dp</dimen>
     <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_5">5dp</dimen>
     <dimen name="dp_8">8dp</dimen>
     <dimen name="dp_10">10dp</dimen>
     <dimen name="dp_12">12dp</dimen>

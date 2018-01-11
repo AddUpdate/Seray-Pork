@@ -117,19 +117,20 @@
             android:layout_height="match_parent"
             android:layout_above="@+id/confirm_goods_detail_ok"
             android:layout_alignParentTop="true"
-            android:layout_marginBottom="@dimen/dp_16"
-            />
+            android:layout_marginBottom="@dimen/dp_16" />
+
         <TextView
             android:id="@+id/confirm_goods_detail_weight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/dp_8"
-            android:layout_marginRight="@dimen/dp_100"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="250dp"
             android:layout_toLeftOf="@+id/confirm_goods_detail_continue"
-            android:textColor="@color/yellow"
             android:text="0.000"
-            android:textSize="@dimen/pluTextSize" />
+            android:textColor="@color/yellow"
+            android:textSize="@dimen/numPluTextSize" />
+
         <Button
             android:id="@+id/confirm_goods_detail_continue"
             android:layout_width="100dp"
@@ -141,6 +142,7 @@
             android:background="@drawable/radio_selected"
             android:text="确定"
             android:textSize="@dimen/configTextSize" />
+
         <Button
             android:id="@+id/confirm_goods_detail_ok"
             android:layout_width="100dp"

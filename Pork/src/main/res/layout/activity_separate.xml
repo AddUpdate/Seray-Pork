@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     >
 
     <include
@@ -22,9 +22,13 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@drawable/shapetwo"
+        android:background="@drawable/bg_text"
         android:orientation="vertical"
-        android:padding="@dimen/dp_10">
+        android:layout_margin="@dimen/dp_5"
+        android:paddingLeft="@dimen/dp_5"
+        android:paddingRight="@dimen/dp_5"
+        android:paddingTop="3dp"
+        >
 
         <TextView
             android:layout_width="wrap_content"
@@ -39,7 +43,14 @@
             android:layout_height="wrap_content"
             android:textColor="@color/yellow"
             android:singleLine="true"
-            android:textSize="@dimen/numPluTextSize" />
+            android:textSize="@dimen/baseWeight" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line"
+            android:background="@color/black"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_16"
+            />
 
         <TextView
             android:layout_width="wrap_content"
@@ -55,7 +66,14 @@
             android:textColor="@color/yellow"
             android:text="@string/base_weight"
             android:singleLine="true"
-            android:textSize="@dimen/numPluTextSize" />
+            android:textSize="@dimen/baseWeight" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line"
+            android:background="@color/black"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_16"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,14 +81,14 @@
             android:textColor="@color/white"
             android:textSize="@dimen/configTextSize"
             android:layout_marginLeft="@dimen/dp_10"
-            android:layout_marginTop="@dimen/dp_8"
+            android:layout_marginTop="@dimen/dp_5"
             />
         <Spinner
             android:id="@+id/spinner_separate_come"
             android:layout_width="130dp"
             android:layout_height="50dp"
             android:layout_marginTop="@dimen/dp_4"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:layout_gravity="center"
             android:textColor="@color/white"
             android:spinnerMode="dialog"
@@ -82,14 +100,14 @@
             android:textColor="@color/white"
             android:textSize="@dimen/configTextSize"
             android:layout_marginLeft="@dimen/dp_10"
-            android:layout_marginTop="@dimen/dp_8"
+            android:layout_marginTop="@dimen/dp_5"
             />
         <Spinner
             android:id="@+id/spinner_separate_leave"
             android:layout_width="130dp"
             android:layout_height="50dp"
             android:layout_marginTop="@dimen/dp_4"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:layout_gravity="center"
             android:textColor="@color/white"
             android:spinnerMode="dialog"/>
@@ -99,7 +117,7 @@
             android:layout_width="130dp"
             android:layout_height="50dp"
             android:layout_marginTop="@dimen/dp_8"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_tare"
             android:text="扣重"
             android:layout_gravity="center"
             android:textColor="@color/white"
@@ -117,23 +135,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@drawable/shapetwo"
+                android:background="@drawable/bg_text"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_10">
+                android:layout_marginTop="@dimen/dp_5"
+                android:layout_marginBottom="@dimen/dp_5"
+                android:padding="@dimen/dp_5">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="品名"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/configTextSize" />
+                    android:textSize="@dimen/managerTipTextSize" />
 
                 <TextView
                     android:id="@+id/tv_separate_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:textColor="@color/red"
+                    android:textColor="@color/stock_back"
                     android:textSize="@dimen/managerTipTextSize" />
 
             </LinearLayout>
@@ -146,16 +166,16 @@
             android:horizontalSpacing="5dp"
             android:numColumns="4"
             android:verticalSpacing="5dp"
-            android:background="@drawable/shapetwo"
-            android:padding="@dimen/dp_8"
+            android:background="@drawable/bg_text"
+            android:padding="@dimen/dp_5"
+            android:layout_marginBottom="@dimen/dp_5"
             />
         </LinearLayout>
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@drawable/shapetwo"
-        android:padding="@dimen/dp_4"
+        android:layout_margin="@dimen/dp_5"
       >
 
       <ListView
@@ -164,19 +184,21 @@
           android:layout_height="wrap_content"
           android:layout_above="@+id/bt_separate_ok"
           android:layout_alignParentTop="true"
+          android:divider="@color/transparence"
+          android:background="@drawable/bg_text"
           />
 
         <Button
             android:id="@+id/bt_separate_ok"
-            android:layout_width="140dp"
+            android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_button_ok"
             android:text="确定"
             android:textColor="@color/white"
             android:textSize="@dimen/managerTipTextSize"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_margin="@dimen/dp_4"
+            android:layout_marginTop="@dimen/dp_10"
             />
 
     </RelativeLayout>

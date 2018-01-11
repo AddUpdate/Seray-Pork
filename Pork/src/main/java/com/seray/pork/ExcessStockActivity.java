@@ -59,7 +59,7 @@ import java.util.List;
  * 鲜品库（余料）
  */
 public class ExcessStockActivity extends BaseActivity {
-    private TextView TvName, TvWeight, TvTareWeight,TvWeightType;
+    private TextView TvName, TvWeight, TvTareWeight, TvWeightType;
     private TextView mMaxUnitView, mTimeView;
     private Spinner spinnerCome, spinnerLeave;
     private List<String> come_data = new ArrayList<>();
@@ -69,7 +69,7 @@ public class ExcessStockActivity extends BaseActivity {
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
 
-    private Button submitIntoBt, submiitOutBt;
+    private Button submitIntoBt;
     private GridView mGridViewPlu;
     private ListView groupListView;
 
@@ -84,9 +84,9 @@ public class ExcessStockActivity extends BaseActivity {
     SeparateAdapter separateAdapter;
     SeparateProductsAdapter productsAdapter;
 
-    private String name, plu="", unit, price,weight;
+    private String name, plu = "", unit, price, weight;
     private int number;
-    private String source,comeLibraryId,goLibraryId, goLibrary;
+    private String source, comeLibraryId, goLibraryId, goLibrary;
 
     OperationLogManager logManager = OperationLogManager.getInstance();
     private NumFormatUtil mNumUtil = null;
@@ -127,7 +127,6 @@ public class ExcessStockActivity extends BaseActivity {
         TvTareWeight = (TextView) findViewById(R.id.tv_excess_stock_tare_weight);
         TvWeightType = (TextView) findViewById(R.id.tv_excess_stock_weight_type);
         submitIntoBt = (Button) findViewById(R.id.bt_excess_stock_into);
-        submiitOutBt = (Button) findViewById(R.id.bt_excess_stock_out);
 
         mGridViewPlu = (GridView) findViewById(R.id.gv_excess_stock_plu);
         groupListView = (ListView) findViewById(R.id.lv_excess_stock_group);
@@ -167,14 +166,13 @@ public class ExcessStockActivity extends BaseActivity {
     private void initListener() {
 
         submitIntoBt.setOnClickListener(this);
-        submiitOutBt.setOnClickListener(this);
 
         mGridViewPlu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mMisc.beep();
                 TvName.setText(productList.get(position).getProductName());
-                plu= productList.get(position).getProductName();
+                plu = productList.get(position).getProductName();
                 price = String.valueOf(productList.get(position).getUnitPrice());
                 int num = productList.get(position).getMeasurementMethod();
                 switch (num) {
@@ -213,6 +211,7 @@ public class ExcessStockActivity extends BaseActivity {
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 source = come_data.get(position);
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -235,6 +234,7 @@ public class ExcessStockActivity extends BaseActivity {
             }
         });
     }
+
     private void initData() {
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
@@ -247,11 +247,13 @@ public class ExcessStockActivity extends BaseActivity {
             categoryList.add(productsCategory);
         }
     }
+
     public void setPieceNum(final TextView testview) {
         testview.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!isByWeight) {
@@ -261,11 +263,13 @@ public class ExcessStockActivity extends BaseActivity {
                     }
                 }
             }
+
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
     }
+
     private void initAdapter() {
         separateAdapter = new SeparateAdapter(this, categoryList);
         groupListView.setAdapter(separateAdapter);
@@ -282,7 +286,7 @@ public class ExcessStockActivity extends BaseActivity {
         come_data.clear();
         go_data.clear();
         List<LibraryList> libraryList = libraryUtil.libraryJson("Inventory");
-        if (libraryList.size()==0)
+        if (libraryList.size() == 0)
             return;
         comeLibraryList = libraryList.get(0).getLibraryList();
         goLibraryList = libraryList.get(1).getLibraryList();
@@ -398,7 +402,7 @@ public class ExcessStockActivity extends BaseActivity {
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_excess_stock_into:
-                weight= TvWeight.getText().toString();
+                weight = TvWeight.getText().toString();
                 name = TvName.getText().toString();
                 float weightFt = Float.parseFloat(weight);
                 if (TextUtils.isEmpty(name)) {
@@ -414,32 +418,19 @@ public class ExcessStockActivity extends BaseActivity {
                     number = 0;
                     value = "\n重量： " + weight;
                 } else {
-                    weight = "0.000";
                     number = Integer.valueOf(weight);
+                    weight = "0.000";
                     value = "\n数量： " + number;
                 }
-                    if (!source.equals("鲜品库")&&goLibrary.equals("鲜品库")) {
-                        showNormalDialog("品名： " + name +  value+ "\n去向： 从 " + source + " 到 " + goLibrary, 1);
-                    }else if (source.equals("鲜品库")&&!goLibrary.equals("鲜品库")){
-                        showNormalDialog("品名： " + name + value+ "\n去向： 从 " + source + " 到 " + goLibrary, 2);
-                    } else {
-                        showMessage("选择正确的来源去向");
-                    }
+                if (!source.equals("鲜品库") && goLibrary.equals("鲜品库")) {
+                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
+                } else if (source.equals("鲜品库") && !goLibrary.equals("鲜品库")) {
+                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+                } else {
+                    showMessage("选择正确的来源去向");
+                }
 
                 break;
-//            case R.id.bt_excess_stock_out:
-//                name = TvName.getText().toString();
-//                weight = TvWeight.getText().toString();
-//                float weightFt2 = Float.parseFloat(weight);
-//                if (!TextUtils.isEmpty(name) && weightFt2 > 0) {
-//                    if (source.equals("鲜品库")&&!goLibrary.equals("鲜品库")) {
-//                        loadingDialog.showDialog();
-//                         submitOut();
-//                    } else
-//                        showMessage("选择正确的出库名");
-//                } else
-//                    showMessage("品名不能为空、重量需大于零");
-//                break;
         }
     }
 
@@ -449,7 +440,7 @@ public class ExcessStockActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveInventory(submitData(), comeLibraryId, goLibraryId, goLibrary);
                 if (api.Result) {
-                 //   sqlInsert(1);
+                    //   sqlInsert(1);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -465,7 +456,7 @@ public class ExcessStockActivity extends BaseActivity {
         sqlQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getOutInventory(comeLibraryId, source, goLibraryId, name, weight);
+                ApiResult api = UploadDataHttp.getOutInventory(comeLibraryId, source, goLibraryId, name, weight,String.valueOf(number));
                 if (api.Result) {
                     sqlInsert(1);
                     loadingDialog.dismissDialog();
@@ -486,6 +477,7 @@ public class ExcessStockActivity extends BaseActivity {
             object.put("ItemName", name);
             object.put("Weight", weight);
             object.put("Source", source);
+            object.put("Number", number);
             object.put("PLU", plu);
             object.put("WeightCompany", unit);
             object.put("UnitPrice", price);
@@ -497,11 +489,13 @@ public class ExcessStockActivity extends BaseActivity {
         }
         return Division;
     }
+
     private void sqlInsert(int state) {
         //state 1 已回收 2 未回收
-        OperationLog log = new OperationLog(comeLibraryId, source,goLibraryId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goLibraryId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "", state);
         logManager.insertOperationLog(log);
     }
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode != KeyEvent.KEYCODE_BACK) {
             mMisc.beep();
@@ -573,6 +567,7 @@ public class ExcessStockActivity extends BaseActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
     private void unitValu(String num) {
         String iszero = TvWeight.getText().toString().trim();
         boolean wzero = iszero.equals("0");
@@ -584,6 +579,7 @@ public class ExcessStockActivity extends BaseActivity {
             TvWeight.setText(iszero + num);
         }
     }
+
     /**
      * 计件与计重判断
      */
@@ -600,6 +596,7 @@ public class ExcessStockActivity extends BaseActivity {
             TvWeightType.setTextColor(Color.WHITE);
         }
     }
+
     private void clearProductInfo() {
         TvName.setText("");
         cleanTareFloat();
@@ -607,6 +604,7 @@ public class ExcessStockActivity extends BaseActivity {
         TvWeightType.setText("计重   KG");
         isByWeight = true;
     }
+
     private void clearEvent() {
         if (!isByWeight)
             TvWeight.setText("0");

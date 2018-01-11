@@ -11,10 +11,11 @@
     <string name="to_library">去往↓</string>
 
     <string name="operation_check">校正</string>
-    <string name="operation_max_weight_1">300.0</string>
+    <string name="operation_max_weight_1">3000.0</string>
     <string name="operation_max_weight_2">30.0</string>
     <string name="operation_demarcate_msg">更换秤类型后，为保证正常称量，请：\r\n1、重新标定秤系统\r\n2、重新启动应用程序</string>
     <string name="operation_back">返回</string>
     <string name="manager_reboot">重启</string>
-
+    <string name="operation_usercode">操作口令</string>
+    <string name="operation_usercode_wrong">操作口令错误</string>
 </resources>

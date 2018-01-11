@@ -138,7 +138,7 @@ public class OperationActivity extends BaseActivity {
         // 获取当前秤的最大量程 默认是0.0f
         float curMainUnit = mScale.getMainUnitFull();
         if (curMainUnit == 0.0f) {
-            curMainUnit = AppConfig.isT200() ? 300.0f : 30.0f;
+            curMainUnit = AppConfig.isT200() ? 3000.0f : 30.0f;
         }
         String unitStr = String.valueOf(curMainUnit);
         et_maxUnit.setText(unitStr);
@@ -374,9 +374,9 @@ public class OperationActivity extends BaseActivity {
             et_maxUnit.setText("");
         } else {
             inputMaxUnit = Float.parseFloat(maxUnit);// 输入的最大量程
-            if (inputMaxUnit > 300) {
-                showMessage("最大量程大于300，请重新输入");
-                Toast.makeText(OperationActivity.this,"最大量程大于300，请重新输入",Toast.LENGTH_SHORT).show();
+            if (inputMaxUnit > 3000) {
+                showMessage("最大量程大于3000，请重新输入");
+                Toast.makeText(OperationActivity.this,"最大量程大于3000，请重新输入",Toast.LENGTH_SHORT).show();
             } else if (inputMaxUnit > 0) {
                 mScale.setMainUnitFull(inputMaxUnit);// 设置主单位称重量程
                 float midUnit = inputMaxUnit / 2;

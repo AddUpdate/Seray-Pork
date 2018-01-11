@@ -129,6 +129,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_frag_two_quantity"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:orientation="horizontal">
@@ -182,6 +183,7 @@
 
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/ll_frag_two_number"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:orientation="horizontal">
@@ -189,7 +191,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="计重数量 *"
+                    android:text="计件数量 *"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/managerTipTextSize" />
                 <EditText
@@ -253,7 +255,7 @@
                         android:textSize="@dimen/managerTipTextSize" />
                     <EditText
                         android:id="@+id/entry_frag_two_unit_piece"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:hint="输入单价"
@@ -293,8 +295,6 @@
                             android:textColor="@android:color/holo_red_light" />
                     </RelativeLayout>
                 </LinearLayout>
-
-
             </LinearLayout>
         </LinearLayout>
 

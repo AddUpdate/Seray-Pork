@@ -246,7 +246,7 @@ public class SetTareDialog extends Dialog implements View.OnClickListener {
         DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
         int height = dm.heightPixels;
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) layout.getLayoutParams();
-        if (type.equals("设置配货浮动率")) {
+        if (type.equals("配货浮动率设置")) {
             mData.add(new TareItem(4, "浮动率(0~1)", configManager.query("floatRange")));
             params.height=height/2;
         } else {
@@ -271,23 +271,6 @@ public class SetTareDialog extends Dialog implements View.OnClickListener {
                         boolean isUse = date.getNetStr() == null;
                         if (isUse)
                             mData.remove(i);
-//                        Config config = new Config();
-//                        switch (date.getType()) {
-//                            case 0:
-//                                config.setKey("tareCar");
-//                                break;
-//                            case 1:
-//                                config.setKey("tareSmall");
-//                                break;
-//                            case 2:
-//                                config.setKey("tareMedium");
-//                                break;
-//                            case 3:
-//                                config.setKey("tareBig");
-//                                break;
-//                        }
-//                        config.setValue(date.getNetStr());
-//                        list.add(config);
                     }
                     positiveClickListener.onPositiveClick(mDialog, mData);
                 }

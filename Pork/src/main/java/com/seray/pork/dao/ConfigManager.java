@@ -51,14 +51,19 @@ public class ConfigManager {
         ConfigDao configDao = mManager.getDaoSession().getConfigDao();
         Config mConfig;
         try {
-            mConfig = configDao.queryBuilder().where(ConfigDao.Properties.Key.eq(config.getKey())).uniqueOrThrow();
+            mConfig = configDao.queryBuilder().where(ConfigDao.Properties.Key.eq(config.getKey())).unique();
+            if (mConfig != null) {
                 mConfig.setValue(config.getValue());
                 configDao.update(mConfig);
                 LogUtil.e("config1", config.toString());
+            } else {
+                flag = configDao.insert(config) != -1;
+                LogUtil.i(TAG, "insert Config :" + flag + "--====>" + config.toString());
+            }
         } catch (Exception e) {
             LogUtil.e(e.getMessage());
-            flag = configDao.insert(config) == -1 ? false : true;
-            Log.i(TAG, "insert Config :" + flag + "--====>" + config.toString());
+//            flag = configDao.insert(config) != -1;
+//            LogUtil.i(TAG, "insert Config :" + flag + "--====>" + config.toString());
         }
         return flag;
     }
@@ -116,7 +121,7 @@ public class ConfigManager {
         } finally {
             db.endTransaction();
         }
-        return mConfig != null ?  mConfig.getValue():"";
+        return mConfig != null ? mConfig.getValue() : "";
     }
 
 

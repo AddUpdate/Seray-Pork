@@ -8,6 +8,8 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 
+import com.seray.utils.NumFormatUtil;
+
 public class ManageActivity extends BaseActivity {
     private Button operationBtn,backBtn, rebootBtn,managementBtn;
     private AlertDialog rebootDialog;
@@ -43,7 +45,7 @@ public class ManageActivity extends BaseActivity {
         super.onClick(v);
         switch (v.getId()){
             case R.id.bt_manage_operation:
-                startActivity(OperationActivity.class);
+                openManageKey(NumFormatUtil.PASSWORD_TO_OPERATION);
                 break;
             case R.id.back_to_main:
                 finish();
@@ -52,7 +54,7 @@ public class ManageActivity extends BaseActivity {
                 openRebootDialog();
                 break;
             case R.id.management:
-                startActivity(ManagementActivity.class);
+                openManageKey(NumFormatUtil.PASSWORD_TO_SETTING);
                 break;
         }
     }
@@ -91,8 +93,5 @@ public class ManageActivity extends BaseActivity {
                 rebootDialog.dismiss();
             rebootDialog = null;
         }
-
     }
-
-
 }

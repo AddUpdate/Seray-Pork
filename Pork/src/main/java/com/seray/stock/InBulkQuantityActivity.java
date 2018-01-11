@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.seray.entity.ApiResult;
@@ -44,6 +45,7 @@ public class InBulkQuantityActivity extends BaseActivity {
     private EditText numberEt;
     private Button minusPeelBt, confirmBt, finishBt, returnBt;
     private String batchNumber, productName, productId ,mode,weight;
+    private LinearLayout llWeight,llNumber;
     float weightFt ;
     int numberInt;
     private float tareFloat = -1.0F;
@@ -70,6 +72,9 @@ public class InBulkQuantityActivity extends BaseActivity {
 
     private void initView() {
         loadingDialog = new LoadingDialog(this);
+        llWeight = (LinearLayout) findViewById(R.id.ll_weight);
+        llNumber = (LinearLayout) findViewById(R.id.ll_number);
+
         modeTv = (TextView) findViewById(R.id.tv_in_bulk_quantity_mode);
         batchNumberTv = (TextView) findViewById(R.id.tv_in_bulk_batch_number);
         nameTv = (TextView) findViewById(R.id.tv_in_bulk_quantity_name);
@@ -131,7 +136,6 @@ public class InBulkQuantityActivity extends BaseActivity {
         mScale = JNIScale.getScale();
         Intent intent = getIntent();
         if (intent != null) {
-
             PurchaseDetail detail = (PurchaseDetail) getIntent().getSerializableExtra("PurchaseDetail");
             batchNumber = intent.getStringExtra("batchNumber");
             inputWeight = detail.getDecimalQuantity();
@@ -145,6 +149,13 @@ public class InBulkQuantityActivity extends BaseActivity {
             modeTv.setText(mode);
             batchNumberTv.setText(batchNumber);
             nameTv.setText(productName);
+            if ("KG".equals(mode)){
+                llWeight.setVisibility(View.VISIBLE);
+                llNumber.setVisibility(View.GONE);
+            }else {
+                llWeight.setVisibility(View.GONE);
+                llNumber.setVisibility(View.VISIBLE);
+            }
         } else {
             minusPeelBt.setBackground(getResources().getDrawable(R.drawable.radio_gray));
             confirmBt.setBackground(getResources().getDrawable(R.drawable.radio_gray));

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/fntopagebutton_white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_set_tare_dialog"
+        android:layout_width="350dp"
+        android:layout_height="270dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_set_ip_dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/dp_8"
+            android:paddingLeft="@dimen/dp_10"
+            android:textColor="@color/black"
+            android:textSize="@dimen/pluTextSize" />
+
+        <EditText
+            android:id="@+id/tv_set_ip_dialog_ip"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_margin="@dimen/dp_8"
+            android:inputType="text"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:background="@drawable/radio_unselected"
+            android:gravity="center_vertical"
+            android:hint="请输入ip"
+            android:cursorVisible="false"
+            android:paddingLeft="@dimen/dp_10"
+            android:textColor="@color/black"
+            android:textSize="@dimen/pluTextSize" />
+
+        <EditText
+            android:id="@+id/tv_set_ip_dialog_port"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_50"
+            android:layout_margin="@dimen/dp_8"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:background="@drawable/radio_unselected"
+            android:gravity="center_vertical"
+            android:cursorVisible="false"
+            android:hint="请输入端口"
+            android:paddingLeft="@dimen/dp_10"
+            android:textColor="@color/black"
+            android:textSize="@dimen/pluTextSize" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_72"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/bt_set_ip_dialog_negative"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/radio_gray"
+                android:text="@string/reprint_cancel"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/pluTextSize" />
+
+            <Button
+                android:id="@+id/bt_set_ip_dialog_positive"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/radio_selected"
+                android:text="@string/reprint_ok"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/pluTextSize" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

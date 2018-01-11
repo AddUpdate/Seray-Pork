@@ -34,7 +34,8 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
         public final static Property Number = new Property(7, int.class, "number", false, "NUMBER");
         public final static Property Unit = new Property(8, String.class, "unit", false, "UNIT");
         public final static Property Date = new Property(9, String.class, "date", false, "DATE");
-        public final static Property State = new Property(10, int.class, "state", false, "STATE");
+        public final static Property Picture = new Property(10, String.class, "picture", false, "PICTURE");
+        public final static Property State = new Property(11, int.class, "state", false, "STATE");
     }
 
 
@@ -60,7 +61,8 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
                 "\"NUMBER\" INTEGER NOT NULL ," + // 7: number
                 "\"UNIT\" TEXT," + // 8: unit
                 "\"DATE\" TEXT," + // 9: date
-                "\"STATE\" INTEGER NOT NULL );"); // 10: state
+                "\"PICTURE\" TEXT," + // 10: picture
+                "\"STATE\" INTEGER NOT NULL );"); // 11: state
     }
 
     /** Drops the underlying database table. */
@@ -114,7 +116,12 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
         if (date != null) {
             stmt.bindString(10, date);
         }
-        stmt.bindLong(11, entity.getState());
+ 
+        String picture = entity.getPicture();
+        if (picture != null) {
+            stmt.bindString(11, picture);
+        }
+        stmt.bindLong(12, entity.getState());
     }
 
     @Override
@@ -162,7 +169,12 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
         if (date != null) {
             stmt.bindString(10, date);
         }
-        stmt.bindLong(11, entity.getState());
+ 
+        String picture = entity.getPicture();
+        if (picture != null) {
+            stmt.bindString(11, picture);
+        }
+        stmt.bindLong(12, entity.getState());
     }
 
     @Override
@@ -183,7 +195,8 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
             cursor.getInt(offset + 7), // number
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // unit
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // date
-            cursor.getInt(offset + 10) // state
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // picture
+            cursor.getInt(offset + 11) // state
         );
         return entity;
     }
@@ -200,7 +213,8 @@ public class OperationLogDao extends AbstractDao<OperationLog, Long> {
         entity.setNumber(cursor.getInt(offset + 7));
         entity.setUnit(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setDate(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setState(cursor.getInt(offset + 10));
+        entity.setPicture(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setState(cursor.getInt(offset + 11));
      }
     
     @Override

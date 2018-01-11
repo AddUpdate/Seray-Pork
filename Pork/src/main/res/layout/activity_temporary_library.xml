@@ -2,14 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical">
 
     <include
         layout="@layout/interfacepage"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        />
+        android:layout_height="30dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,10 +19,11 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_margin="5dp"
             android:layout_weight="1"
-            android:background="@drawable/shapetwo"
+            android:background="@drawable/bg_text"
             android:orientation="vertical"
-            android:padding="@dimen/dp_10">
+            android:padding="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -37,56 +37,71 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/yellow"
-                android:textSize="@dimen/numPluTextSize" />
-
+                android:textSize="@dimen/baseWeight" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line"
+                android:background="@color/black"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginRight="@dimen/dp_16"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="皮重     kg"
                 android:textColor="@color/white"
-                android:textSize="@dimen/configTextSize" />
+                android:textSize="@dimen/managerTipTextSize" />
 
             <TextView
                 android:id="@+id/tv_temporary_tare_weight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/yellow"
                 android:text="@string/base_weight"
-                android:textSize="@dimen/numPluTextSize" />
+                android:textColor="@color/yellow"
+                android:textSize="@dimen/baseWeight" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line"
+                android:background="@color/black"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginRight="@dimen/dp_16"
+                />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_5"
                 android:text="@string/source_library"
                 android:textColor="@color/white"
-                android:textSize="@dimen/configTextSize"
-                android:layout_marginLeft="@dimen/dp_10"
-                android:layout_marginTop="@dimen/dp_25"
-                />
+                android:textSize="@dimen/configTextSize" />
+
             <Spinner
                 android:id="@+id/spinner_temporary_come"
                 android:layout_width="130dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/dp_8"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_choose_library"
                 android:spinnerMode="dialog"
                 android:textColor="@color/white" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_10"
                 android:text="@string/to_library"
                 android:textColor="@color/white"
-                android:layout_marginLeft="@dimen/dp_10"
-                android:textSize="@dimen/configTextSize"
-                android:layout_marginTop="@dimen/dp_10"
-                />
+                android:textSize="@dimen/configTextSize" />
+
             <Spinner
                 android:id="@+id/spinner_temporary_leave"
                 android:layout_width="130dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/dp_10"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_choose_library"
                 android:spinnerMode="dialog"
                 android:text="去哪"
                 android:textColor="@color/white" />
@@ -103,85 +118,78 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/shapetwo"
+                android:background="@drawable/bg_text"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_10">
+                android:padding="5dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="品名"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/configTextSize" />
+                    android:textSize="@dimen/managerTipTextSize" />
 
                 <TextView
                     android:id="@+id/tv_temporary_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:textColor="@color/red"
+                    android:textColor="@color/stock_back"
                     android:textSize="@dimen/managerTipTextSize" />
 
             </LinearLayout>
 
-                <GridView
-                    android:id="@+id/gv_temporary_plu"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="3"
-                    android:horizontalSpacing="5dp"
-                    android:numColumns="4"
-                    android:verticalSpacing="5dp"
-                    android:padding="@dimen/dp_8"
-                    android:background="@drawable/shapetwo"
-                    />
+            <GridView
+                android:id="@+id/gv_temporary_plu"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="3"
+                android:background="@drawable/bg_text"
+                android:horizontalSpacing="5dp"
+                android:numColumns="4"
+                android:padding="@dimen/dp_5"
+                android:verticalSpacing="5dp" />
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/shapetwo"
-            android:padding="@dimen/dp_4"
-        >
+            android:layout_margin="5dp"
+            android:layout_weight="1">
+
             <ListView
                 android:id="@+id/lv_temporary_group"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@+id/temporary_linear"
                 android:layout_alignParentTop="true"
-                />
+                android:divider="@color/transparence"
+                android:background="@drawable/bg_text" />
+
             <LinearLayout
                 android:id="@+id/temporary_linear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
                 android:layout_margin="@dimen/dp_4"
-                >
-            <Button
-                android:id="@+id/bt_temporary_into_libraries"
-                android:layout_width="130dp"
-                android:layout_height="@dimen/dp_60"
-                android:background="@drawable/radio_selected"
-                android:text="确定"
-                android:textColor="@color/white"
-                android:textSize="@dimen/managerTipTextSize"
-                />
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <Button
-                android:visibility="gone"
-                android:id="@+id/bt_temporary_out_libraries"
-                android:layout_width="130dp"
-                android:layout_height="@dimen/dp_60"
-                android:background="@drawable/radio_selected"
-                android:text="出库"
-                android:textColor="@color/white"
-                android:layout_marginTop="@dimen/dp_4"
-                android:textSize="@dimen/managerTipTextSize" />
+                <Button
+                    android:id="@+id/bt_temporary_into_libraries"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dp_60"
+                    android:background="@drawable/bg_button_ok"
+                    android:text="确定"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:textSize="@dimen/managerTipTextSize" />
+                />
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

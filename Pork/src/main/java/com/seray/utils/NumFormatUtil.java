@@ -121,9 +121,7 @@ public class NumFormatUtil {
     public static String getRandomPassword(int flag) {
         String pwd = "";
         switch (flag) {
-            case PASSWORD_TO_UNIT:
-                pwd = "8";
-                break;
+
             case PASSWORD_TO_SETTING:
                 Calendar cal = Calendar.getInstance();
                 cal.add(Calendar.DATE, -1);
@@ -133,9 +131,9 @@ public class NumFormatUtil {
             case PASSWORD_TO_OPERATION:
                 pwd = "015";
                 break;
-            case PASSWORD_TO_REPORT:
-                pwd = "658138";
-                break;
+//            case PASSWORD_TO_REPORT:
+//                pwd = "658138";
+//                break;
         }
         return pwd;
     }

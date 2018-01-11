@@ -428,21 +428,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         }
     }
 
-    /**
-     * 设置订单详情展示数据
-     */
-    private void setPopViewContent() {
-//        if (mOrder == null)
-//            return;
-        TvNamePopup.setText("白条");
-        TvNumberPopup.setText("20171120");
-        TvUnitPopup.setText("18片");
-        TvInputWeightPopup.setText("1000Kg");
-        TvWeightPopup.setText("998Kg");
-        TvResultsPopup.setText("实际重量少2kg");
-
-    }
-
     private void closePopWindow() {
         if (mPopupWindow != null && mPopupWindow.isShowing()) {
             mPopupWindow.dismiss();
@@ -481,8 +466,10 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     mMisc.beep();
                     updateWeight();
                     dialog.dismiss();
-                } else
+                } else {
+                    state = 2;
                     mMisc.beep();
+                }
 
             }
         }).setTitle("提示").show();

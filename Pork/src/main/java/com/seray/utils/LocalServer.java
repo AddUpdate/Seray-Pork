@@ -39,7 +39,7 @@ public class LocalServer extends NanoHTTPD {
     private Map<String, String> fields;
 
     public LocalServer() {
-        super(8081);
+        super(8082);
     }
 
     public Response serve(IHTTPSession session) {

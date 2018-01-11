@@ -1,69 +1,101 @@
 package com.seray.pork;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.provider.Settings;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 
 import com.lidroid.xutils.view.annotation.event.OnClick;
+import com.seray.adapter.ManagementAdapter;
 import com.seray.entity.Config;
 import com.seray.entity.TareItem;
+import com.seray.http.API;
 import com.seray.pork.dao.ConfigManager;
 import com.seray.utils.LogUtil;
 import com.seray.view.PromptDialog;
+import com.seray.view.SetIpDialog;
 import com.seray.view.SetTareDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 管理中心
+ */
+
 public class ManagementActivity extends BaseActivity {
-    private Button outBt, returnBt, tareBt, floatRangeBt;
     ConfigManager configManager = ConfigManager.getInstance();
+    private GridView mGridViewBtn;
+    private ManagementAdapter adapter;
+    private List<String> name = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_management);
         initView();
+        initData();
+        initListener();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        return super.onKeyDown(keyCode, event);
     }
 
     private void initView() {
-        outBt = (Button) findViewById(R.id.btn_out);
-        returnBt = (Button) findViewById(R.id.btn_return);
-        tareBt = (Button) findViewById(R.id.btn_management_tare);
-        floatRangeBt = (Button) findViewById(R.id.btn_management_float_range);
-        outBt.setOnClickListener(this);
-        returnBt.setOnClickListener(this);
-        tareBt.setOnClickListener(this);
-        floatRangeBt.setOnClickListener(this);
+        mGridViewBtn = (GridView) findViewById(R.id.gv_management_button);
     }
 
+    private void initData() {
+        name.add("扣重设置");
+        name.add("浮动率设置");
+        name.add("IP端口设置");
+        name.add("退出应用");
+        name.add("返回");
+        adapter = new ManagementAdapter(this, name);
+        mGridViewBtn.setAdapter(adapter);
+    }
 
-    @Override
-    public void onClick(View v) {
-        super.onClick(v);
-        switch (v.getId()) {
-            case R.id.btn_management_tare:
-                setTareDialog("设置扣重");
-                break;
-            case R.id.btn_management_float_range:
-                setTareDialog("设置配货浮动率");
-                break;
-            case R.id.btn_out:
-                showNormalDialog();
-                break;
-            case R.id.btn_return:
-                finish();
-                break;
-        }
+    private void initListener() {
+
+        mGridViewBtn.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mMisc.beep();
+                String mName = name.get(position);
+                switch (mName) {
+                    case "扣重设置":
+                        setTareDialog("扣重设置");
+                        break;
+                    case "浮动率设置":
+                        setTareDialog("配货浮动率设置");
+                        break;
+                    case "退出应用":
+                        showNormalDialog();
+                        break;
+                    case "IP端口设置":
+                        setIpDialog("IP端口设置");
+                        break;
+                    case "返回":
+                        finish();
+                        break;
+                }
+            }
+        });
     }
 
     /*
-   *  信息确认提示
-   */
+     *  信息确认提示
+     */
     private void showNormalDialog() {
 
         new PromptDialog(this, R.style.Dialog, "确定退出应用", new PromptDialog.OnCloseListener() {
@@ -126,5 +158,30 @@ public class ManagementActivity extends BaseActivity {
                 dialog.dismiss();
             }
         });
+    }
+
+    private void setIpDialog(String title) {
+        SetIpDialog setIpDialog = new SetIpDialog(this);
+        setIpDialog.setCanceledOnTouchOutside(false);
+        setIpDialog.show();
+        setIpDialog.setTitle(title);
+        setIpDialog.setOnPositiveClickListener(R.string.reprint_ok, new SetIpDialog.OnPositiveClickListener() {
+            @Override
+            public void onPositiveClick(SetIpDialog dialog, String Ip) {
+                Config config = new Config();
+                config.setKey("ip");
+                config.setValue(Ip);
+                configManager.insertConfig(config);
+                API.reset();
+                dialog.dismiss();
+            }
+        });
+        setIpDialog.setOnNegativeClickListener(R.string.reprint_cancel, new SetIpDialog.OnNegativeClickListener() {
+            @Override
+            public void onNegativeClick(SetIpDialog dialog) {
+                dialog.dismiss();
+            }
+        });
+
     }
 }

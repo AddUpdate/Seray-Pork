@@ -29,7 +29,7 @@ public class FileHelp {
     public static final String DATABASE_DIR = Environment.getExternalStorageDirectory() +
             "/seray/database/";
     /**
-     * 用于储存静默拍照的图片
+     * 用于储存静默拍照（库进出）的图片
      */
     public static final String DATA_PIC_DIR = Environment.getExternalStorageDirectory() +
             "/seray/picture/";
@@ -87,13 +87,22 @@ public class FileHelp {
             "/seray/reprint/reprint.txt";
 
     /**
-     * 订单图片的转码
+     * 厂内库 进出静默拍照 图片的转码
      */
-    public static String encodeOrderImg(String imgName) {
+    public static String encodeLibraryImg(String imgName) {
         if (imgName == null || imgName.isEmpty() || imgName.equals("null"))
             return "";
         return encodeImage(DATA_PIC_DIR, imgName);
     }
+    /**
+     * 进货图片的转码
+     */
+    public static String encodePurchaseImg(String imgName) {
+        if (imgName == null || imgName.isEmpty() || imgName.equals("null"))
+            return "";
+        return encodeImage(STOCK_DIR, imgName);
+    }
+
 
     private static String encodeImage(String dirFile, String imgName) {
         File file = new File(dirFile + imgName);
@@ -131,16 +140,7 @@ public class FileHelp {
     }
 
     /**
-     * 进货图片的转码
-     */
-    public static String encodePurchaseImg(String imgName) {
-        if (imgName == null || imgName.isEmpty() || imgName.equals("null"))
-            return "";
-        return encodeImage(STOCK_DIR, imgName);
-    }
-
-    /**
-     * 获取本地交易图片路径
+     * 获取本地交易(库进出)图片路径
      */
     public static String getImgDir() {
         String dir = DATA_PIC_DIR;
@@ -563,7 +563,6 @@ public class FileHelp {
     /**
      * 删除规定年份月份下文件内的图片
      */
-
     public static boolean deleteDir(int year, int month) {
         String dirPath = DATA_PIC_DIR + Integer.toString(year) + "/" + Integer.toString(month) + "/";
         return deleteDir(dirPath);

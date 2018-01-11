@@ -6,7 +6,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@drawable/fntopagebutton_white"
+        android:background="@drawable/products_selector"
         >
         <TextView
             android:id="@+id/separate_item_gv_plu"
@@ -14,7 +14,8 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:textColor="@color/black"
+            android:textColor="@drawable/products_color_selector"
+            android:duplicateParentState="true"
             android:textSize="@dimen/managerCategoryTextSize" />
     </RelativeLayout>
 

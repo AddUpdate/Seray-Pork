@@ -10,6 +10,7 @@ import com.seray.entity.OrderPick;
 import com.seray.entity.PurchaseDetail;
 import com.seray.entity.PurchaseSearch;
 import com.seray.entity.PurchaseSubtotal;
+import com.seray.pork.dao.ConfigManager;
 import com.seray.utils.HttpUtils;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
@@ -28,10 +29,68 @@ import java.util.Map;
 
 
 public class UploadDataHttp {
+
     /*
      *   返回值  1成功  2失败
      */
     private static final String BATCH_NUMBER_TAG = "UploadBatchNumberPostTag";
+
+    /**
+     * 登录
+     */
+
+    public static ApiResult LoginPost(String phone, String password) {
+        Map<String, String> params = new HashMap<>();
+        params.put("PhoneNumber", phone);
+        params.put("PassWord", password);
+        ApiResult api = new ApiResult();
+        int code = -99;
+        String msg = null;
+        String jsonStr = null;
+        boolean isSuccess = false;
+        String[] sourceDetail = new String[0];
+        try {
+            Response response = HttpUtils.syncResponsePost(API.LOGIN_URL,
+                    BATCH_NUMBER_TAG, params);
+            if (response.isSuccessful()) {
+                code = response.code();
+                jsonStr = response.body().string();
+                JSONObject obj = new JSONObject(jsonStr);
+                isSuccess = obj.getString("ResultCode").equals("1");
+                msg = obj.getString("ResultMessage");
+                String result = obj.getString("Result");
+                if (!TextUtils.isEmpty(result)) {
+                    String[] sourceStrArray = result.split(",");
+                    for (int i = 0; i < sourceStrArray.length; i++) {
+                        LogUtil.d("sourceStrArray", sourceStrArray[i]);
+                    }
+                    sourceDetail = sourceStrArray;
+                    LogUtil.d("jsonStr", jsonStr);
+                }
+            } else {
+                code = response.code();
+                msg = "访问服务器失败";
+                LogUtil.d("message", "访问服务器失败");
+            }
+        } catch (JSONException e) {
+            msg = "解析错误";
+            LogUtil.d("message", "解析错误");
+        } catch (IOException e) {
+            msg = "访问服务器失败";
+            LogUtil.d("message", "访问服务器失败");
+        } finally {
+            api.Result = isSuccess;
+            api.ResultMessage = msg;
+            api.ResultJsonStr = jsonStr;
+            api.ResultCode = code;
+            api.sourceDetail = sourceDetail;
+        }
+        return api;
+    }
+
+    /**
+     * 提交采购单
+     */
 
     public static ApiResult uploadDataPost(String purchase) {
         Map<String, String> params = new HashMap<>();
@@ -51,25 +110,28 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                if (!isSuccess) {
-                    String result = obj.getString("Result");
+
+                String result = obj.getString("Result");
+                if (!TextUtils.isEmpty(result)) {
                     String[] sourceStrArray = result.split(",");
                     for (int i = 0; i < sourceStrArray.length; i++) {
-                        LogUtil.e("sourceStrArray", sourceStrArray[i]);
+                        LogUtil.d("sourceStrArray", sourceStrArray[i]);
                     }
                     sourceDetail = sourceStrArray;
+
+                    LogUtil.d("jsonStr", jsonStr);
                 }
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -109,18 +171,18 @@ public class UploadDataHttp {
                     subtotal.setRemark(jsonObject.getString("State"));
                     subtotalList.add(subtotal);
                 }
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败" + API.GET_BATCH_NO_URL);
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败" + API.GET_BATCH_NO_URL);
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -149,6 +211,7 @@ public class UploadDataHttp {
         try {
             Response response = HttpUtils.syncResponsePost(API.GET_PURCHASE_DETAIL_URL,
                     BATCH_NUMBER_TAG, params);
+            LogUtil.d("------2-------------", API.GET_BATCH_NO_URL);
             if (response.isSuccessful()) {
                 code = response.code();
                 jsonStr = response.body().string();
@@ -169,18 +232,18 @@ public class UploadDataHttp {
                     detail.setActualWeight(new BigDecimal(jsonObject.getString("ActualWeight")));
                     detailList.add(detail);
                 }
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -218,18 +281,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStrWeight", jsonStr);
+                LogUtil.d("jsonStrWeight", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -262,18 +325,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -308,18 +371,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -351,18 +414,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -394,18 +457,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -439,18 +502,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -484,18 +547,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -529,18 +592,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -553,7 +616,7 @@ public class UploadDataHttp {
     /*
      * 出分拣
      */
-    public static ApiResult getTakeSortingArea(String name, String weight,String number, String AlibraryName,
+    public static ApiResult getTakeSortingArea(String name, String weight, String number, String AlibraryName,
                                                String comelibraryId, String golibraryId) {
         Map<String, String> params = new HashMap<>();
         params.put("ItemName", name);
@@ -577,18 +640,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
                 jsonStr = obj.getString("Result");
-                Log.e("jsonStrSort", jsonStr);
+                LogUtil.d("jsonStrSort", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -601,15 +664,15 @@ public class UploadDataHttp {
     /*
      *入速冻库 成品1 2 号库
      */
-    public static ApiResult getSaveFreeze(String barCode, String comelibraryId, String alibraryName, String golibraryId, String goAlibraryName) {
+    public static ApiResult getSaveFreeze(String barCode, String comelibraryId, String alibraryName, String golibraryId, String goAlibraryName, String picture) {
         Map<String, String> params = new HashMap<>();
-        //   params.put("Inventory", Inventory);
         params.put("BarCode", barCode);
         params.put("GolibraryId", golibraryId);
         params.put("ComelibraryId", comelibraryId);
         params.put("GoAlibraryName", goAlibraryName);
         params.put("AlibraryName", alibraryName);
-
+        params.put("Picture", picture);
+        LogUtil.d("picture-----", picture);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -624,18 +687,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -666,18 +729,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -711,18 +774,18 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
 
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -735,13 +798,14 @@ public class UploadDataHttp {
     /*
     * 出鲜品库
     */
-    public static ApiResult getOutInventory(String comelibraryId, String comebraryName, String golibraryId, String name, String weight) {
+    public static ApiResult getOutInventory(String comelibraryId, String comebraryName, String golibraryId, String name, String weight,String number) {
         Map<String, String> params = new HashMap<>();
         params.put("ComelibraryId", comelibraryId);
         params.put("AlibraryName", comebraryName);
         params.put("GolibraryId", golibraryId);
         params.put("ItemName", name);
         params.put("Weight", weight);
+        params.put("Number", number);
 
         ApiResult api = new ApiResult();
         int code = -99;
@@ -757,18 +821,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -823,18 +887,18 @@ public class UploadDataHttp {
                     PurchaseSearch search = new PurchaseSearch(purchaseDate, name, purchaseNumber, productName, weight, actualWeight, state);
                     searchList.add(search);
                 }
-                Log.e("jsonStrSeach", jsonStr);
+                LogUtil.d("jsonStrSeach", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -855,7 +919,7 @@ public class UploadDataHttp {
         String msg = null;
         String jsonStr = null;
         boolean isSuccess = false;
-        SparseArray<List<OrderPick>> mSparseArray=new SparseArray<>();
+        SparseArray<List<OrderPick>> mSparseArray = new SparseArray<>();
         List<OrderPick> orderPickList = new ArrayList<>();
         List<OrderPick> orderPickList2 = new ArrayList<>();
         try {
@@ -900,32 +964,32 @@ public class UploadDataHttp {
                         orderDetail.setAmount(mNumUtil.getDecimalPrice(detailObject.getDouble("Amount")));
                         orderDetail.setBarCode(detailObject.getString("BarCode"));
                         orderDetail.setWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("Weight")));
-                        orderDetail.setState(detailObject.getString("State").equals("已完成")?1:2);
+                        orderDetail.setState(detailObject.getString("State").equals("已完成") ? 1 : 2);
                         orderDetailList.add(orderDetail);
 
                     }
 
                     orderPick.setDetailList(orderDetailList);
-                    if (orderPick.getState().equals("配送中")||orderPick.getState().equals("已完成")) {
+                    if (orderPick.getState().equals("配送中") || orderPick.getState().equals("已完成")) {
                         orderPickList2.add(orderPick);
-                    }else {
+                    } else {
                         orderPickList.add(orderPick);
                     }
                 }
-                mSparseArray.put(1,orderPickList);
-                mSparseArray.put(2,orderPickList2);
-                Log.e("jsonStr", jsonStr);
+                mSparseArray.put(1, orderPickList);
+                mSparseArray.put(2, orderPickList2);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
@@ -959,18 +1023,18 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                Log.e("jsonStr", jsonStr);
+                LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
-                Log.e("message", "访问服务器失败");
+                LogUtil.d("message", "访问服务器失败");
             }
         } catch (JSONException e) {
             msg = "解析错误";
-            Log.e("message", "解析错误");
+            LogUtil.d("message", "解析错误");
         } catch (IOException e) {
             msg = "访问服务器失败";
-            Log.e("message", "访问服务器失败");
+            LogUtil.d("message", "访问服务器失败");
         } finally {
             api.Result = isSuccess;
             api.ResultMessage = msg;
