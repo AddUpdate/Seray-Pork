@@ -29,7 +29,7 @@ import java.util.List;
 public class InBulkGoodsActivity extends BaseActivity {
 
     private ListView mListView;
-    private Button mReturn;
+    private Button mReturn,mUpdata;
     InBulkGoodsAdapter adapter = null;
     private List<PurchaseSubtotal> detailList;// 测试
 
@@ -50,6 +50,7 @@ public class InBulkGoodsActivity extends BaseActivity {
     private void initView() {
         mListView = (ListView) findViewById(R.id.lv_in_bulk_goods);
         mReturn = (Button) findViewById(R.id.in_bulk_goods_return);
+        mUpdata = (Button) findViewById(R.id.in_bulk_goods_updata);
         loadingDialog = new LoadingDialog(this);
     }
 
@@ -71,6 +72,13 @@ public class InBulkGoodsActivity extends BaseActivity {
             public void onClick(View v) {
                 mMisc.beep();
                 finish();
+            }
+        });
+        mUpdata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                initData();
             }
         });
     }

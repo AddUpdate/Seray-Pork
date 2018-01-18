@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/stock_back"
+        android:background="@drawable/bg_top"
         android:orientation="horizontal">
 
         <TextView
@@ -121,7 +121,7 @@
             android:paddingLeft="@dimen/dp_10">
 
             <LinearLayout
-                android:id="@+id/ll_weight"
+                android:id="@+id/ll_in_bulk_weight"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
@@ -162,31 +162,27 @@
                     android:textSize="@dimen/configTextSize" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/ll_number"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
                 <TextView
+                    android:id="@+id/tv_in_bulk_quantity_number"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
                     android:text="计件(数量)"
                     android:textColor="@color/white"
                     android:textSize="@dimen/managerTipTextSize" />
 
                 <EditText
                     android:id="@+id/et_in_bulk_quantity_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginLeft="@dimen/dp_8"
+                    android:minWidth="150dp"
                     android:gravity="center"
                     android:inputType="number"
                     android:maxLength="7"
                     android:scrollHorizontally="true"
                     android:textColor="@color/yellow"
                     android:textSize="@dimen/numPluTextSize" />
-            </LinearLayout>
 
         </LinearLayout>
 
@@ -207,7 +203,7 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_marginTop="@dimen/dp_8"
                 android:layout_weight="1"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_tare"
                 android:text="扣重"
                 android:textColor="@color/white"
                 android:textSize="@dimen/managerTipTextSize" />
@@ -218,7 +214,7 @@
                 android:layout_height="70dp"
                 android:layout_margin="@dimen/dp_10"
                 android:layout_weight="1"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_button_ok"
                 android:text="确定"
                 android:textColor="@color/white"
                 android:textSize="@dimen/managerTipTextSize" />
@@ -230,7 +226,7 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_marginTop="@dimen/dp_10"
                 android:layout_weight="1"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_button_ok_1"
                 android:text="完成"
                 android:textColor="@color/white"
                 android:textSize="@dimen/managerTipTextSize" />
@@ -243,7 +239,7 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_marginTop="@dimen/dp_8"
                 android:layout_weight="1"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_btn_return"
                 android:text="返回"
                 android:textColor="@color/white"
                 android:textSize="@dimen/managerTipTextSize" />

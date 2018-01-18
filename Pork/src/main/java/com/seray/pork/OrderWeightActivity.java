@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,15 +32,19 @@ import com.gprinter.service.GpPrintService;
 import com.lzscale.scalelib.misclib.GpScalePrinter;
 import com.seray.cache.AppConfig;
 import com.seray.entity.ApiResult;
+import com.seray.entity.OperationLog;
 import com.seray.entity.OrderDetail;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.dao.ConfigManager;
+import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.OrderDetailManager;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
+
+import junit.framework.Test;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -63,11 +66,14 @@ public class OrderWeightActivity extends BaseActivity {
     private String weightStr = "", orderDetailId, barCode;
     private int number = 0, position, state;
     LoadingDialog loadingDialog;
+    OrderDetail detail;
     NumFormatUtil numUtil;
     OrderDetailManager orderManager = OrderDetailManager.getInstance();
-
+    OperationLogManager logManager = OperationLogManager.getInstance();
     OrderWeightHandler mOrderWeightHandler = new OrderWeightHandler(new WeakReference<>(this));
     ConfigManager configManager = ConfigManager.getInstance();
+
+    private int intFlag = 4003;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +111,7 @@ public class OrderWeightActivity extends BaseActivity {
         Intent intent = getIntent();
         if (intent != null) {
             position = intent.getIntExtra("position", 0);
-            OrderDetail detail = (OrderDetail) getIntent().getSerializableExtra("OrderDetail");
+            detail = (OrderDetail) getIntent().getSerializableExtra("OrderDetail");
             nameTv.setText(detail.getProductName() != null ? detail.getProductName() : "");
 
             TotalNumber = detail.getNumber();
@@ -123,7 +129,9 @@ public class OrderWeightActivity extends BaseActivity {
                 isByWeight = false;
             } else {
                 BigDecimal weight = detail.getBigDecimalWeight();
-                BigDecimal weightFloating = weight.multiply(new BigDecimal(configManager.query("floatRange"))).setScale(3, BigDecimal.ROUND_HALF_UP);
+                BigDecimal weightFloating = weight.multiply(
+                        new BigDecimal(configManager.query("floatRange")))
+                        .setScale(2, BigDecimal.ROUND_HALF_UP);
                 quantityTv.setText(String.valueOf(weight) + "KG");
                 actualQuantityTv.setText(String.valueOf(actualWeight));
                 floatingTv.setText("浮动范围：" + weight.subtract(weightFloating) + "~" + weight.add(weightFloating));
@@ -208,7 +216,7 @@ public class OrderWeightActivity extends BaseActivity {
                 if (tareFloat > 0) {
                     fW -= tare;
                 }
-                weightTv.setText(NumFormatUtil.df3.format(fW));
+                weightTv.setText(NumFormatUtil.df2.format(fW));
             }
         }
     }
@@ -343,13 +351,10 @@ public class OrderWeightActivity extends BaseActivity {
             }
         });
     }
-
     private void sqlInsert() {
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setOrderDetailId(orderDetailId);
+        OrderDetail orderDetail = new OrderDetail(detail.getOrderDetailId(), actualNumber,
+                state, detail.getOrderNumber(), detail.getProductName(), detail.getAlibraryName(), detail.getWeight(), detail.getNumber(), NumFormatUtil.getDateDetail(), detail.getBarCode(), detail.getPrice(), 0.0f, 0.0f);
         orderDetail.setActualWeight(actualWeight);
-        orderDetail.setActualNumber(actualNumber);
-        orderDetail.setState(state);
         orderManager.insertOrderDetail(orderDetail);
     }
 

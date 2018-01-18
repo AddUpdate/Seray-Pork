@@ -121,7 +121,7 @@ public class ConfigManager {
         } finally {
             db.endTransaction();
         }
-        return mConfig != null ? mConfig.getValue() : "";
+        return mConfig != null ? mConfig.getValue() : "0";
     }
 
 

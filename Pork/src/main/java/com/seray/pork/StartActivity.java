@@ -17,7 +17,7 @@ public class StartActivity extends BaseActivity {
     private Runnable r = new Runnable() {
         @Override
         public void run() {
-            Intent intent = new Intent(StartActivity.this, ChooseFunctionActivity.class);
+            Intent intent = new Intent(StartActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
@@ -26,7 +26,8 @@ public class StartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        setConfig();
+        handler.postDelayed(r,2000);
+    //    setConfig();
 
     }
     private void setConfig(){

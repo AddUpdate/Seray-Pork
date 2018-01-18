@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    android:sharedUserId="android.uid.system"
-    package="com.seray.pork">
+    package="com.seray.pork"
+    android:sharedUserId="android.uid.system">
 
-    <uses-feature android:name="android.hardware.usb.host"/>
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
-    <uses-feature android:name="android.hardware.camera.any"/>
-    <uses-permission android:name="android.permission.SHUTDOWN"/>
+    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera.any" />
+
+    <uses-permission android:name="android.permission.SHUTDOWN" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -19,10 +20,10 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -49,59 +50,50 @@
         </activity>
         <activity
             android:name=".OperationActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".BaseActivity"
-            android:screenOrientation="landscape"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".SupplierSelectActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.PurchaseActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.EntrySearchActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.StockActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".TemporaryLibraryActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ChooseFunctionActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".SeparateActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".SortActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            >
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
+
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
@@ -111,41 +103,48 @@
         </activity>
         <activity
             android:name="com.seray.stock.ConfirmGoodsActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.ConfirmGoodsDetailActivity"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name="com.seray.stock.ConfirmGoodsHookActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name="com.seray.stock.ConfirmInBulkActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name="com.seray.stock.InBulkQuantityActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name=".FrozenLibraryActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.seray.stock.ConfirmGoodsHookActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name="com.seray.stock.ConfirmInBulkActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name="com.seray.stock.InBulkQuantityActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".FrozenLibraryActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
 
-        <activity android:name=".FinishProductActivity"
+        <activity
+            android:name=".FinishProductActivity"
             android:configChanges="orientation|keyboard|keyboardHidden">
 
         </activity>
-        <activity android:name=".ProductsSelectActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            />
-        <activity android:name=".ExcessStockActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            />
-        <activity android:name=".ManageActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            />
-        <activity android:name=".OrderActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name=".OrderDetailActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name=".OrderWeightActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
+        <activity
+            android:name=".ProductsSelectActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".ExcessStockActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".ManageActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".OrderActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".OrderDetailActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name=".OrderWeightActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
 
         <receiver android:name="com.seray.receiver.ShutdownReceiver">
             <intent-filter>
@@ -163,18 +162,21 @@
             android:name="com.gprinter.service.GpPrintService"
             android:enabled="true"
             android:exported="true"
-            android:label="GpPrintService" >
+            android:label="GpPrintService">
             <intent-filter>
                 <action android:name="com.gprinter.aidl.GpPrintService" />
             </intent-filter>
         </service>
 
         <service android:name="com.gprinter.service.AllService" />
+        <service android:name="com.seray.service.BatteryService" />
 
-        <activity android:name=".ManagementActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"/>
-        <activity android:name="com.seray.stock.InBulkGoodsActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"></activity>
+        <activity
+            android:name=".ManagementActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity
+            android:name="com.seray.stock.InBulkGoodsActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden" />
     </application>
 
 </manifest>

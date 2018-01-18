@@ -1,5 +1,6 @@
 package com.seray.pork;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,10 +18,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.seray.cache.ScanGunKeyEventHelper;
+import com.seray.service.BatteryMsg;
+import com.seray.service.BatteryService;
 import com.seray.utils.FileHelp;
 import com.camera.simplewebcam.CameraPreview;
 import com.seray.entity.ApiResult;
@@ -52,6 +56,7 @@ import java.util.List;
  * 速冻库
  */
 public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEventHelper.OnScanSuccessListener{
+    private ImageView mBatteryIv;
     private TextView tareWeightTv, weightTv, nameTv, standardTv, numberTv;
     private TextView mMaxUnitView, mTimeView;
     private EditText numberEt, codeEt;
@@ -104,6 +109,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
 
     private void initView() {
         mCameraPreview = CameraPreview.getInstance();
+        mBatteryIv = (ImageView) findViewById(R.id.battery);
         loadingDialog = new LoadingDialog(this);
         nameTv = (TextView) findViewById(R.id.tv_frozen_library_name);
         standardTv = (TextView) findViewById(R.id.tv_frozen_library_standard);
@@ -126,6 +132,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     }
 
     private void initLibrary() {
+
         come_data.clear();
         go_data.clear();
         List<LibraryList> libraryList = libraryUtil.libraryJson("InventoryTwo");
@@ -149,6 +156,8 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     }
 
     private void initListener() {
+        Intent intent = new Intent(this, BatteryService.class);
+        startService(intent);
         scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
         intoBt.setOnClickListener(this);
         outBt.setOnClickListener(this);
@@ -271,12 +280,11 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                LogUtil.e("getPirture-----",getCameraPic());
                 ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary,getCameraPic()==null?"":getCameraPic());
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFrozenHandler.sendEmptyMessage(3);
-                    sqlInsert(1);
+                   // sqlInsert(1);
                     loadingDialog.dismissDialog();
                 } else {
                     sqlInsert(2);
@@ -346,7 +354,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
             case KeyEvent.KEYCODE_F1:// 去皮
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-                    tareWeightTv.setText(NumFormatUtil.df3.format(curTare));
+                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -435,7 +443,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
             if (isOL()) {
                 weightTv.setText(strNet);
             } else {
-                weightTv.setText(NumFormatUtil.df3.format(fW));
+                weightTv.setText(NumFormatUtil.df2.format(fW));
             }
         }
         if (isStable()) {
@@ -506,7 +514,36 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
             }
         }).setTitle("提示").show();
     }
+    //接收电量消息 每半小时一次
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveBattery(BatteryMsg msg) {
 
+        if (msg != null) {
+
+            int level = msg.getLevel();
+
+            switch (level) {
+                case 4:
+                    mBatteryIv.setImageResource(R.drawable.four_electric);
+                    break;
+                case 3:
+                    mBatteryIv.setImageResource(R.drawable.three_electric);
+                    break;
+                case 2:
+                    mBatteryIv.setImageResource(R.drawable.two_electric);
+                    break;
+                case 1:
+                    mBatteryIv.setImageResource(R.drawable.one_electric);
+                    break;
+                case 0:
+                    mBatteryIv.setImageResource(R.drawable.need_charge);
+                    new AlertDialog.Builder(FrozenLibraryActivity.this).setTitle(R.string.test_clear_title)
+                            .setMessage("电子秤电量即将耗完，请及时连接充电器！")
+                            .setPositiveButton(R.string.reprint_ok, null).show();
+                    break;
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -514,6 +551,8 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         unregisterReceiver(timeReceiver);
         EventBus.getDefault().unregister(this);
         mFrozenHandler.removeCallbacksAndMessages(null);
+        Intent intent = new Intent(this, BatteryService.class);
+        stopService(intent);
         scanGunKeyEventHelper.onDestroy();
     }
 }

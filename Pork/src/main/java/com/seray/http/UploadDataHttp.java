@@ -52,6 +52,7 @@ public class UploadDataHttp {
         try {
             Response response = HttpUtils.syncResponsePost(API.LOGIN_URL,
                     BATCH_NUMBER_TAG, params);
+            LogUtil.d("loginApi",API.LOGIN_URL);
             if (response.isSuccessful()) {
                 code = response.code();
                 jsonStr = response.body().string();
@@ -200,8 +201,6 @@ public class UploadDataHttp {
         Map<String, String> params = new HashMap<>();
         params.put("PurchaseNumber", number);
         params.put("ItemName", name);
-        //订单号必传 PurchaseNumber
-        //品名ItemName
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -211,7 +210,6 @@ public class UploadDataHttp {
         try {
             Response response = HttpUtils.syncResponsePost(API.GET_PURCHASE_DETAIL_URL,
                     BATCH_NUMBER_TAG, params);
-            LogUtil.d("------2-------------", API.GET_BATCH_NO_URL);
             if (response.isSuccessful()) {
                 code = response.code();
                 jsonStr = response.body().string();
@@ -266,7 +264,7 @@ public class UploadDataHttp {
         params.put("Number", String.valueOf(number));
         params.put("PurchaseNumber", batchNumber);
         params.put("State", String.valueOf(state));
-
+LogUtil.d("ActualWeight",id+"---"+weight+"---"+number+"---"+batchNumber+"---"+state);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -960,10 +958,12 @@ public class UploadDataHttp {
                         orderDetail.setProductName(detailObject.getString("CommodityName"));
                         orderDetail.setAlibraryName(detailObject.getString("AlibraryName"));
                         orderDetail.setNumber(detailObject.getInt("Number"));
+                        orderDetail.setActualNumber(detailObject.getInt("ActualNumber"));
                         orderDetail.setOrderDate(detailObject.getString("OrderDate"));
                         orderDetail.setAmount(mNumUtil.getDecimalPrice(detailObject.getDouble("Amount")));
                         orderDetail.setBarCode(detailObject.getString("BarCode"));
                         orderDetail.setWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("Weight")));
+                        orderDetail.setActualWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("ActualWeight")));
                         orderDetail.setState(detailObject.getString("State").equals("已完成") ? 1 : 2);
                         orderDetailList.add(orderDetail);
 

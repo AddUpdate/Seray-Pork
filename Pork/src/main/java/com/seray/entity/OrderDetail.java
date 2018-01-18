@@ -6,13 +6,14 @@ import org.greenrobot.greendao.annotation.Transient;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
 import org.greenrobot.greendao.annotation.Generated;
 
 /**
  * 订单明细
  */
 @Entity
-public class OrderDetail implements Serializable{
+public class OrderDetail implements Serializable {
     @Transient
     public static final long serialVersionUID = 1L;
     @Id(autoincrement = true)
@@ -33,14 +34,43 @@ public class OrderDetail implements Serializable{
 
     private float price;// 下单时价格
     private float discountPrice;// 折扣价
-
     private float amount;// 金额
 
+    public OrderDetail(String orderDetailId, int actualNumber, int state, String orderNumber, String productName,
+                       String alibraryName, float weight, int number,
+                       String orderDate, String barCode,
+                       float price, float discountPrice, float amount) {
+        this.orderDetailId = orderDetailId;
+        this.actualNumber = actualNumber;
+        this.state = state;
+        this.orderNumber = orderNumber;
+        this.productName = productName;
+        this.alibraryName = alibraryName;
+        this.weight = weight;
+        this.number = number;
+        this.orderDate = orderDate;
+        this.barCode = barCode;
+        this.price = price;
+        this.discountPrice = discountPrice;
+        this.amount = amount;
+    }
+
+
+
+
+
+    @Generated(hash = 268085433)
+    public OrderDetail() {
+    }
+
+
+
+
+
     @Generated(hash = 1321346533)
-    public OrderDetail(Long id, String orderDetailId, int actualNumber, float actualWeight,
-            int state, String orderNumber, String productName, String alibraryName,
-            float weight, int number, String orderDate, String barCode, float price,
-            float discountPrice, float amount) {
+    public OrderDetail(Long id, String orderDetailId, int actualNumber, float actualWeight, int state,
+            String orderNumber, String productName, String alibraryName, float weight, int number,
+            String orderDate, String barCode, float price, float discountPrice, float amount) {
         this.id = id;
         this.orderDetailId = orderDetailId;
         this.actualNumber = actualNumber;
@@ -58,9 +88,6 @@ public class OrderDetail implements Serializable{
         this.amount = amount;
     }
 
-    @Generated(hash = 268085433)
-    public OrderDetail() {
-    }
 
     private float getFloatValue(BigDecimal value) {
         return value.floatValue();
@@ -112,7 +139,7 @@ public class OrderDetail implements Serializable{
 
 
     public BigDecimal getBigDecimalActualWeight() {
-      return   getDecimalValue(actualWeight).setScale(3, BigDecimal.ROUND_HALF_UP);
+        return getDecimalValue(actualWeight).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
 
@@ -137,7 +164,7 @@ public class OrderDetail implements Serializable{
     }
 
     public void setActualWeight(float actualWeight) {
-        this.actualWeight = getRoundFloat(3,actualWeight);
+        this.actualWeight = getRoundFloat(2, actualWeight);
     }
 
     public void setPrice(float price) {
@@ -156,6 +183,7 @@ public class OrderDetail implements Serializable{
     public void setActualWeight(BigDecimal actualWeight) {
         this.actualWeight = getFloatValue(actualWeight);
     }
+
     public void setPrice(BigDecimal price) {
         this.price = getFloatValue(price);
     }
@@ -221,12 +249,12 @@ public class OrderDetail implements Serializable{
     }
 
     public BigDecimal getBigDecimalWeight() {
-        return getDecimalValue(weight).setScale(3, BigDecimal.ROUND_UNNECESSARY);
+        return getDecimalValue(weight).setScale(2, BigDecimal.ROUND_UNNECESSARY);
     }
 
 
     public void setWeight(float weight) {
-        this.weight =  getRoundFloat(3, weight);
+        this.weight = getRoundFloat(2, weight);
     }
 
 
@@ -241,4 +269,5 @@ public class OrderDetail implements Serializable{
     public void setId(Long id) {
         this.id = id;
     }
+
 }

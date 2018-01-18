@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical"
-    android:layout_margin="@dimen/dp_10"
+    android:padding="@dimen/dp_10"
     >
 
     <GridView
@@ -12,9 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3"
-        android:horizontalSpacing="5dp"
+        android:horizontalSpacing="8dp"
         android:numColumns="2"
-        android:verticalSpacing="5dp"
+        android:verticalSpacing="8dp"
         android:padding="@dimen/dp_8"
         />
 </LinearLayout>

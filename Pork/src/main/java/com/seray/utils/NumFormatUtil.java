@@ -139,7 +139,7 @@ public class NumFormatUtil {
     }
 
     public BigDecimal getDecimalNet(String w) {
-        return this.getDecimalNet(w, 3);
+        return this.getDecimalNet(w, 2);
     }
 
     public BigDecimal getDecimalPiece(String p) {
@@ -154,7 +154,7 @@ public class NumFormatUtil {
 
     public BigDecimal getDecimalNetWithOutHalfUp(double net) {
         String s = Double.toString(net);
-        return new BigDecimal(s).setScale(3, BigDecimal.ROUND_UNNECESSARY);
+        return new BigDecimal(s).setScale(2, BigDecimal.ROUND_UNNECESSARY);
     }
 
 

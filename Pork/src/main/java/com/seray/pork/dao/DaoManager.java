@@ -128,11 +128,15 @@ public class DaoManager {
                         return SQLiteDatabase.openOrCreateDatabase(getDatabasePath(name), null);
                     }
                 };
-                DaoMaster.OpenHelper helper = new DaoMaster.DevOpenHelper(wrapper, DB_NAME, null);
+              //  DaoMaster.OpenHelper helper = new DaoMaster.DevOpenHelper(wrapper, DB_NAME, null);
+                MyOpenHelper helper = new MyOpenHelper(wrapper,DB_NAME,null);
                 sDaoMaster = new DaoMaster(helper.getWritableDatabase()); //获取未加密的数据库
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+
         }
         return sDaoMaster;
     }

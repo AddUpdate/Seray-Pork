@@ -221,7 +221,7 @@
             android:layout_width="130dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:spinnerMode="dialog"
             android:layout_marginLeft="@dimen/dp_10"
             android:textColor="@color/white" />
@@ -240,7 +240,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_marginLeft="@dimen/dp_10"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:spinnerMode="dialog"
             android:textColor="@color/white" />
 
@@ -250,7 +250,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/dp_60"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_button_ok"
             android:gravity="center"
             android:text="确定"
             android:textColor="@color/white"

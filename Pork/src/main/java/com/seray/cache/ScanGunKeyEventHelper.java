@@ -78,6 +78,9 @@ public class ScanGunKeyEventHelper {
                 case KeyEvent.KEYCODE_MINUS:
                     aChar = mCaps ? '_' : '-';
                     break;
+                case KeyEvent.KEYCODE_NUMPAD_SUBTRACT:
+                    aChar = mCaps ? '_' : '-';
+                    break;
                 case KeyEvent.KEYCODE_SLASH:
                     aChar = mCaps ? '?' : '/';
                     break;

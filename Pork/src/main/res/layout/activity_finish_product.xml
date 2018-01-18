@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@drawable/bg_text"
     >
     <include
         layout="@layout/interfacepage"
@@ -57,6 +57,7 @@
             android:textColor="@color/red"
             android:textSize="@dimen/pluTextSize"
             android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_editview"
             android:maxWidth="520dp"
             android:layout_marginLeft="@dimen/dp_10"
             />
@@ -81,6 +82,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/red"
             android:textSize="@dimen/pluTextSize"
+            android:background="@drawable/bg_editview"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/dp_10"
             />
@@ -105,6 +107,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/red"
             android:textSize="@dimen/pluTextSize"
+            android:background="@drawable/bg_editview"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/dp_10"
             />
@@ -212,7 +215,7 @@
             android:layout_width="130dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:spinnerMode="dialog"
             android:layout_marginLeft="@dimen/dp_10"
             android:textColor="@color/white" />
@@ -228,7 +231,7 @@
             android:id="@+id/spinner_finish_leave"
             android:layout_width="130dp"
             android:layout_height="match_parent"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_choose_library"
             android:layout_gravity="center"
             android:textColor="@color/white"
             android:spinnerMode="dialog"
@@ -241,7 +244,7 @@
             android:layout_gravity="center_vertical"
             android:text="确定"
             android:gravity="center"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_button_ok_1"
             android:textColor="@color/white"
             android:layout_marginLeft="@dimen/dp_60"
             android:textSize="@dimen/configTextSize" />

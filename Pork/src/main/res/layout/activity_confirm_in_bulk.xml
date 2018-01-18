@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     >
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal"
-        android:background="@color/stock_back"
+        android:background="@drawable/bg_top"
         >
         <TextView
             android:id="@+id/confirm_in_bulk_batch_number"
@@ -126,7 +126,7 @@
             android:text="返回"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_btn_return"
             android:textSize="@dimen/configTextSize"
             android:layout_marginBottom="@dimen/dp_4"
             android:layout_marginRight="@dimen/dp_4"

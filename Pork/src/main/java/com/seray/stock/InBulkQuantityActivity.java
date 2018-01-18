@@ -26,7 +26,6 @@ import com.seray.pork.App;
 import com.seray.pork.BaseActivity;
 import com.seray.pork.R;
 import com.seray.pork.dao.PurchaseDetailManager;
-import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.DeductTareDialog;
 import com.seray.view.LoadingDialog;
@@ -41,12 +40,12 @@ import java.util.List;
  * 地磅重量确定
  */
 public class InBulkQuantityActivity extends BaseActivity {
-    private TextView batchNumberTv, nameTv, weightTv, tareWeightTv, modeTv;
+    private TextView batchNumberTv, nameTv, weightTv, tareWeightTv, modeTv, numberTv;
     private EditText numberEt;
     private Button minusPeelBt, confirmBt, finishBt, returnBt;
-    private String batchNumber, productName, productId ,mode,weight;
-    private LinearLayout llWeight,llNumber;
-    float weightFt ;
+    private String batchNumber, productName, productId, mode, weight;
+    private LinearLayout llWeight;
+    float weightFt;
     int numberInt;
     private float tareFloat = -1.0F;
     private JNIScale mScale;
@@ -55,9 +54,9 @@ public class InBulkQuantityActivity extends BaseActivity {
     private InBulkHandler mInBulkHandler = new InBulkHandler(new WeakReference<>(this));
     NumFormatUtil numUtil;
     LoadingDialog loadingDialog;
-    private BigDecimal actualWeight,inputWeight;
+    private BigDecimal actualWeight, inputWeight;
 
-    private int actualNumber,inputNumber;
+    private int actualNumber, inputNumber;
     private int position;
 
     @Override
@@ -72,9 +71,9 @@ public class InBulkQuantityActivity extends BaseActivity {
 
     private void initView() {
         loadingDialog = new LoadingDialog(this);
-        llWeight = (LinearLayout) findViewById(R.id.ll_weight);
-        llNumber = (LinearLayout) findViewById(R.id.ll_number);
+        llWeight = (LinearLayout) findViewById(R.id.ll_in_bulk_weight);
 
+        numberTv = (TextView) findViewById(R.id.tv_in_bulk_quantity_number);
         modeTv = (TextView) findViewById(R.id.tv_in_bulk_quantity_mode);
         batchNumberTv = (TextView) findViewById(R.id.tv_in_bulk_batch_number);
         nameTv = (TextView) findViewById(R.id.tv_in_bulk_quantity_name);
@@ -149,12 +148,14 @@ public class InBulkQuantityActivity extends BaseActivity {
             modeTv.setText(mode);
             batchNumberTv.setText(batchNumber);
             nameTv.setText(productName);
-            if ("KG".equals(mode)){
+            if ("KG".equals(mode)) {
                 llWeight.setVisibility(View.VISIBLE);
-                llNumber.setVisibility(View.GONE);
-            }else {
+                numberTv.setVisibility(View.GONE);
+                numberEt.setVisibility(View.GONE);
+            } else {
                 llWeight.setVisibility(View.GONE);
-                llNumber.setVisibility(View.VISIBLE);
+                numberTv.setVisibility(View.VISIBLE);
+                numberEt.setVisibility(View.VISIBLE);
             }
         } else {
             minusPeelBt.setBackground(getResources().getDrawable(R.drawable.radio_gray));
@@ -189,17 +190,18 @@ public class InBulkQuantityActivity extends BaseActivity {
 
     private void weightChangedCyclicity() {
 
-            String strNet = mScale.getStringNet().trim();
-            float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-            if (isOL()) {
-                weightTv.setText(strNet);
-            } else {
-                if (tareFloat > 0) {
-                    fW -= tareFloat;
-                    tareWeightTv.setText(NumFormatUtil.df3.format(tareFloat));
-                }
-                weightTv.setText(NumFormatUtil.df3.format(fW));
+        String strNet = mScale.getStringNet().trim();
+        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+        if (isOL()) {
+            weightTv.setText(strNet);
+        } else {
+            if (tareFloat > 0) {
+                fW -= tareFloat;
+                tareWeightTv.setText(NumFormatUtil.df2.format(tareFloat));
             }
+            weightTv.setText(NumFormatUtil.df2.format(fW));
+
+        }
 
     }
 
@@ -213,35 +215,37 @@ public class InBulkQuantityActivity extends BaseActivity {
             showMessage("超出秤量程");
             return;
         }
-         weightFt = Float.parseFloat(weight);
-         numberInt = Integer.parseInt(number);
-        if (weightFt < 0) {
-            showMessage("重量不能为小于0");
-            return;
+        weightFt = Float.parseFloat(weight);
+        numberInt = Integer.parseInt(number);
+        if (mode.equals("KG")) {
+            if (weightFt < 0) {
+                showMessage("重量不能为小于0");
+                return;
+            }
         }
         if (weightFt == 0 && numberInt < 1 && state == 2) {
             showMessage("确定时重量和计件不符合规范");
             return;
         }
-        if (state == 1){
+        if (state == 1) {
             weightFt = 0;
-            numberInt =0;
+            numberInt = 0;
             if (mode.equals("KG")) {
-                showNormalDialog("采购重量："+inputWeight + "KG！\n现已确认重量：" + actualWeight + mode+"!\n确定完成后不能再操作");
-            }else {
-                showNormalDialog("采购数量："+inputNumber + "KG！\n现已确认重量：" + actualNumber + mode+"！\n确定完成后不能再操作");
+                showNormalDialog("采购重量：" + inputWeight + mode + "！\n现已确认重量：" + actualWeight + mode + "!\n确定完成后不能再操作");
+            } else {
+                showNormalDialog("采购数量：" + inputNumber + mode + "！\n现已确认重量：" + actualNumber + mode + "！\n确定完成后不能再操作");
             }
-        }else {
+        } else {
             if (mode.equals("KG")) {
                 showNormalDialog("此次重量为:  " + weightFt + " KG");
-            }else {
-                showNormalDialog("此次数量为:  " + numberInt );
+            } else {
+                showNormalDialog("此次数量为:  " + numberInt);
             }
         }
         //   instance.queryByBatchNumber(batchNumber, productName);
     }
 
-    private void saveData(){
+    private void saveData() {
 
         httpQueryThread.submit(new Runnable() {
             @Override
@@ -255,7 +259,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                     if (state == 1) {
                         returnValue();
                         finish();
-                    }else {
+                    } else {
                         actualWeight = actualWeight.add(numUtil.getDecimalNet(weight));
                         actualNumber += numberInt;
                     }
@@ -331,9 +335,7 @@ public class InBulkQuantityActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode != KeyEvent.KEYCODE_F2) {
             mMisc.beep();
-        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
                 loadingDialog.dismissDialog();
@@ -351,7 +353,6 @@ public class InBulkQuantityActivity extends BaseActivity {
                 returnValue();
                 finish();
                 return true;
-
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -393,7 +394,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                     int count = item.getCount();
                     if (count == 0)
                         continue;
-                    float net =Float.parseFloat(item.getNetStr());
+                    float net = Float.parseFloat(item.getNetStr());
                     totalTare += (net * count);
                 }
                 setTareFloat(totalTare);
@@ -416,12 +417,12 @@ public class InBulkQuantityActivity extends BaseActivity {
         new PromptDialog(this, R.style.Dialog, weightContent, new PromptDialog.OnCloseListener() {
             @Override
             public void onClick(Dialog dialog, boolean confirm) {
-                if(confirm){
+                if (confirm) {
                     loadingDialog.showDialog();
                     mMisc.beep();
                     saveData();
                     dialog.dismiss();
-                }else {
+                } else {
                     mMisc.beep();
                     state = 2;
                 }

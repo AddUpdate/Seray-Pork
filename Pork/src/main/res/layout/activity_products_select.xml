@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_60"
-        android:background="@color/yellow"
+        android:background="@drawable/bg_top"
         android:gravity="center"
         android:text="品名选择"
         android:textColor="@color/white"

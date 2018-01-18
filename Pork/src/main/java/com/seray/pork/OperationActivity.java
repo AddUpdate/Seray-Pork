@@ -38,13 +38,14 @@ public class OperationActivity extends BaseActivity {
     private JNIScale mScale;
     private EditText et_calload, et_maxUnit;
     private TextView internelCount, weight;
-    private Spinner mSpFdn, mSpBigFdn, mSpZeroRange, mSpRangeMode, mSpZeroTrack, mSpType;
+    private Spinner mSpFdn, mSpBigFdn, mSpZeroRange, mSpRangeMode, mSpZeroTrack, mSpType,mUnitDeci;
     private Button demarcate, finishAll, maxUnitBtn, mZeroCodeBtn;
     private String[] arrDiv = {"1", "2", "5", "10", "20", "50", "100", "200", "500"};
     private String[] arrTrack = {"零点追踪范围0.0倍当前分度值", "零点追踪范围0.5倍当前分度值", "零点追踪范围1.0倍当前分度值",
             "零点追踪范围2.0倍当前分度值",
             "零点追踪范围4.0倍当前分度值"};
     private String[] types = {"T-200", "SR-200"};
+    private String [] unitDeci = {"1", "2","3"};
     private String[] rangeModes = {"量程模式：单精度", "量程模式：双精度", "量程模式：双量程"};
     private String[] zeroRangeTabs = {"置零范围：0%", "置零范围：2%", "置零范围：3%", "置零范围：4%", "置零范围：10%",
             "置零范围：20%",
@@ -56,6 +57,7 @@ public class OperationActivity extends BaseActivity {
     private boolean isDefaultBigFdn = true;
     private boolean isDefaultTrack = true;
     private boolean isDefaultType = true;
+    private boolean isUnitDeci = true;
     private boolean isDefaultRangeMode = true;
     private boolean isDefaultZeroRange = true;
     private int step = 0;
@@ -115,6 +117,7 @@ public class OperationActivity extends BaseActivity {
         mSpZeroTrack = (Spinner) findViewById(R.id.setting_sp_zerotrack);
         mSpRangeMode = (Spinner) findViewById(R.id.setting_sp_rangeMode);
         mSpType = (Spinner) findViewById(R.id.setting_sp_type);
+        mUnitDeci = (Spinner) findViewById(R.id.setting_sp_unitdeci);
         mSpZeroRange = (Spinner) findViewById(R.id.setting_sp_zeroRange);
         maxUnitBtn = (Button) findViewById(R.id.maxuint);
         et_maxUnit = (EditText) findViewById(R.id.et_maxuint);
@@ -134,6 +137,8 @@ public class OperationActivity extends BaseActivity {
                 .select_dialog_item, zeroRangeTabs));
         mSpType.setAdapter(new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
                 types));
+        mUnitDeci.setAdapter(new ArrayAdapter<>(this, android.R.layout.select_dialog_item,
+                unitDeci));
 
         // 获取当前秤的最大量程 默认是0.0f
         float curMainUnit = mScale.getMainUnitFull();
@@ -167,11 +172,13 @@ public class OperationActivity extends BaseActivity {
         mSpZeroTrack.setSelection(mScale.getZeroTrackPtr());
 
         // 设置默认选中的秤模式
-        if (AppConfig.isT200()) {
-            mSpType.setSelection(0);
-        } else if (AppConfig.isSR200()) {
+//        if (AppConfig.isT200()) {
+//            mSpType.setSelection(0);
+//        } else if (AppConfig.isSR200()) {
             mSpType.setSelection(1);
-        }
+       // }
+       ;
+        mUnitDeci.setSelection( 1);
     }
 
     private void initListener() {
@@ -254,6 +261,33 @@ public class OperationActivity extends BaseActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        mUnitDeci.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (isUnitDeci) {
+                    isUnitDeci = false;
+                    return;
+                }
+                boolean isOk = mScale.setMainUnitDeci(position+1);
+
+                if (!isOk) {
+                    Toast.makeText(OperationActivity.this,"保留小数点位数设置失败",Toast.LENGTH_SHORT).show();
+                    showMessage("保留小数点位数设置失败");
+//                    insertOperationLog(rangeModes[position] + "设置失败");
+                } else {
+                    Toast.makeText(OperationActivity.this,"保留小数点位数设置成功",Toast.LENGTH_SHORT).show();
+                    showMessage("保留小数点位数设置成功");
+//                    insertOperationLog(rangeModes[position] + "设置成功");
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 

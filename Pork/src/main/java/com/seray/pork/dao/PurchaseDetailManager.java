@@ -69,7 +69,7 @@ public class PurchaseDetailManager {
 
             beforeW += weight;
 
-            beforeW = DecimalFormat.getRoundFloat(3, beforeW);
+            beforeW = DecimalFormat.getRoundFloat(2, beforeW);
 
             LogUtil.d(TAG, "float = " + beforeW);
 

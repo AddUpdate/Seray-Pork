@@ -7,7 +7,7 @@
 <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="@dimen/dp_60"
-    android:background="@drawable/list_selector"
+    android:background="@drawable/products_selector"
     >
     <TextView
         android:id="@+id/separate_group_item_name"
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:textColor="@color/white"
+        android:textColor="@drawable/products_color_selector"
         android:textSize="@dimen/configTextSize" />
 </RelativeLayout>
     <View

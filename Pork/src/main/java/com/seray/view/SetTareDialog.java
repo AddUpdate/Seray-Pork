@@ -103,12 +103,12 @@ public class SetTareDialog extends Dialog implements View.OnClickListener {
                     if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent
                             .KEYCODE_NUMPAD_9) {
                         int i = txt.indexOf(".");
-                        if (i < 0 || (i > -1 && i > txt.length() - 4))
+                        if (i < 0 || (i > -1 && i > txt.length() - 3))
                             txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
                     } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent
                             .KEYCODE_9) {
                         int i = txt.indexOf(".");
-                        if (i < 0 || (i > -1 && i > txt.length() - 4))
+                        if (i < 0 || (i > -1 && i > txt.length() - 3))
                             txt += keyCode - KeyEvent.KEYCODE_0;
                     } else if (keyCode == KeyEvent.KEYCODE_E) {
                         if (!txt.contains("."))

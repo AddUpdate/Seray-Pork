@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     >
     <TextView
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:text="确定重量入库"
         android:textColor="@color/white"
         android:textSize="@dimen/pluTextSize"
-        android:background="@color/stock_back"
+        android:background="@drawable/bg_top"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -72,22 +72,44 @@
             android:id="@+id/lv_in_bulk_goods"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/in_bulk_goods_return"
+            android:layout_above="@+id/confirm_goods_rl"
             android:layout_alignParentTop="true"
             />
-        <Button
-            android:id="@+id/in_bulk_goods_return"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:text="返回"
-            android:background="@drawable/radio_selected"
-            android:gravity="center"
-            android:textSize="@dimen/configTextSize"
-            android:textColor="@color/white"
+
+        <RelativeLayout
+            android:id="@+id/confirm_goods_rl"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_60"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/dp_10"
             android:layout_marginBottom="@dimen/dp_10"
-            />
+            >
+            <Button
+                android:id="@+id/in_bulk_goods_updata"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:text="刷新"
+                android:background="@drawable/bg_button_ok"
+                android:gravity="center"
+                android:textSize="@dimen/configTextSize"
+                android:textColor="@color/white"
+                android:layout_toLeftOf="@+id/in_bulk_goods_return"
+                android:layout_marginRight="@dimen/dp_10"
+                />
+            <Button
+                android:id="@+id/in_bulk_goods_return"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:text="返回"
+                android:background="@drawable/bg_btn_return"
+                android:gravity="center"
+                android:textSize="@dimen/configTextSize"
+                android:textColor="@color/white"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+
     </RelativeLayout>
 </LinearLayout>

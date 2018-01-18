@@ -1,5 +1,6 @@
 package com.seray.pork;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,6 +40,8 @@ import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
+import com.seray.service.BatteryMsg;
+import com.seray.service.BatteryService;
 import com.seray.utils.LibraryUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
@@ -59,6 +63,7 @@ import java.util.List;
  * 鲜品库（余料）
  */
 public class ExcessStockActivity extends BaseActivity {
+    private ImageView mBatteryIv;
     private TextView TvName, TvWeight, TvTareWeight, TvWeightType;
     private TextView mMaxUnitView, mTimeView;
     private Spinner spinnerCome, spinnerLeave;
@@ -122,6 +127,7 @@ public class ExcessStockActivity extends BaseActivity {
 
     private void initView() {
         loadingDialog = new LoadingDialog(this);
+        mBatteryIv = (ImageView) findViewById(R.id.battery);
         TvName = (TextView) findViewById(R.id.tv_excess_stock_name);
         TvWeight = (TextView) findViewById(R.id.tv_excess_stock_weight);
         TvTareWeight = (TextView) findViewById(R.id.tv_excess_stock_tare_weight);
@@ -164,7 +170,8 @@ public class ExcessStockActivity extends BaseActivity {
     };
 
     private void initListener() {
-
+        Intent intent = new Intent(this, BatteryService.class);
+        startService(intent);
         submitIntoBt.setOnClickListener(this);
 
         mGridViewPlu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -344,7 +351,7 @@ public class ExcessStockActivity extends BaseActivity {
                 if (tareFloat > 0) {
                     fW -= tare;
                 }
-                TvWeight.setText(NumFormatUtil.df3.format(fW));
+                TvWeight.setText(NumFormatUtil.df2.format(fW));
             }
         }
         if (isStable()) {
@@ -419,7 +426,7 @@ public class ExcessStockActivity extends BaseActivity {
                     value = "\n重量： " + weight;
                 } else {
                     number = Integer.valueOf(weight);
-                    weight = "0.000";
+                    weight = "0.00";
                     value = "\n数量： " + number;
                 }
                 if (!source.equals("鲜品库") && goLibrary.equals("鲜品库")) {
@@ -458,7 +465,7 @@ public class ExcessStockActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getOutInventory(comeLibraryId, source, goLibraryId, name, weight,String.valueOf(number));
                 if (api.Result) {
-                    sqlInsert(1);
+                 //   sqlInsert(1);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -510,9 +517,7 @@ public class ExcessStockActivity extends BaseActivity {
 //                currWeight = 0.0F;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-//                    if (CacheHelper.isOpenJin)
-//                        curTare *= 2;
-                    TvTareWeight.setText(NumFormatUtil.df3.format(curTare));
+                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -642,12 +647,44 @@ public class ExcessStockActivity extends BaseActivity {
         }).setTitle("提示").show();
     }
 
+    //接收电量消息 每半小时一次
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveBattery(BatteryMsg msg) {
+
+        if (msg != null) {
+
+            int level = msg.getLevel();
+
+            switch (level) {
+                case 4:
+                    mBatteryIv.setImageResource(R.drawable.four_electric);
+                    break;
+                case 3:
+                    mBatteryIv.setImageResource(R.drawable.three_electric);
+                    break;
+                case 2:
+                    mBatteryIv.setImageResource(R.drawable.two_electric);
+                    break;
+                case 1:
+                    mBatteryIv.setImageResource(R.drawable.one_electric);
+                    break;
+                case 0:
+                    mBatteryIv.setImageResource(R.drawable.need_charge);
+                    new AlertDialog.Builder(ExcessStockActivity.this).setTitle(R.string.test_clear_title)
+                            .setMessage("电子秤电量即将耗完，请及时连接充电器！")
+                            .setPositiveButton(R.string.reprint_ok, null).show();
+                    break;
+            }
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         flag = false;
         unregisterReceiver(timeReceiver);
         EventBus.getDefault().unregister(this);
+        Intent intent = new Intent(this, BatteryService.class);
+        stopService(intent);
         mExcessStockHandler.removeCallbacksAndMessages(null);
     }
 }

@@ -20,8 +20,6 @@ import com.seray.entity.PurchaseDetail;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.BaseActivity;
 import com.seray.pork.R;
-import com.seray.utils.LogUtil;
-import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 
 import java.lang.ref.WeakReference;
@@ -30,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * 地磅 待入库列表
+ * 地磅 待入库列表明细
  */
 public class ConfirmInBulkActivity extends BaseActivity {
     private TextView TvBatchNumber;

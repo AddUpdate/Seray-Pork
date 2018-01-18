@@ -22,6 +22,7 @@ import java.util.List;
 
 public class OrderDetailActivity extends BaseActivity {
     private ListView listView;
+    private Button btReturn;
     private List<OrderDetail> detailList = new ArrayList<>();
     private OrderPick orderPicks;
     OrderDetailAdapter detailAdapter;
@@ -40,6 +41,7 @@ public class OrderDetailActivity extends BaseActivity {
     private void initView() {
         listView = (ListView) findViewById(R.id.lv_order_detail);
         detailAdapter = new OrderDetailAdapter(this, detailList);
+        btReturn = (Button) findViewById(R.id.bt_order_detail_return);
         listView.setAdapter(detailAdapter);
     }
 
@@ -69,6 +71,13 @@ public class OrderDetailActivity extends BaseActivity {
                 intent.putExtras(bundle);
                 intent.putExtra("position", position);
                 startActivityForResult(intent, REQUESTCODE);
+            }
+        });
+        btReturn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                finish();
             }
         });
     }
@@ -161,11 +170,13 @@ public class OrderDetailActivity extends BaseActivity {
             mHolder.nameTv.setText(itemDate.getProductName());
             if (itemDate.getNumber() > 0) {
                 mHolder.quantityTv.setText(String.valueOf(itemDate.getNumber()));
+                mHolder.actualQuantityTv.setText(String.valueOf(itemDate.getActualNumber()));
+
             } else {
                 mHolder.quantityTv.setText(String.valueOf(itemDate.getBigDecimalWeight()));
+                mHolder.actualQuantityTv.setText(String.valueOf(itemDate.getBigDecimalActualWeight()));
             }
-            mHolder.actualQuantityTv.setText(String.valueOf(itemDate.getBigDecimalActualWeight()));
-            if (itemDate.getState() == 1) {
+             if (itemDate.getState() == 1) {
                 mHolder.state.setText("已完成");
                 mHolder.state.setTextColor(getResources().getColor(R.color.white));
             } else {

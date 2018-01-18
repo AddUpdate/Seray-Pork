@@ -128,19 +128,19 @@ public class PurchaseDetail implements Serializable {
     }
 
     public BigDecimal getDecimalActualWeight() {
-        return getDecimalValue(ActualWeight).setScale(3, BigDecimal.ROUND_HALF_UP);
+        return getDecimalValue(ActualWeight).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public BigDecimal getDecimalQuantity() {
-        return getDecimalValue(quantity).setScale(3, BigDecimal.ROUND_HALF_UP);
+        return getDecimalValue(quantity).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public BigDecimal getDecimalUnitPrice() {
-        return getDecimalValue(unitPrice).setScale(3, BigDecimal.ROUND_UNNECESSARY);
+        return getDecimalValue(unitPrice).setScale(2, BigDecimal.ROUND_UNNECESSARY);
     }
 
     public BigDecimal getDecimalSellQuantity() {
-        return getDecimalValue(sellQuantity).setScale(3, BigDecimal.ROUND_HALF_UP);
+        return getDecimalValue(sellQuantity).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public void setActualWeight(BigDecimal actualWeight) {
@@ -249,7 +249,7 @@ public class PurchaseDetail implements Serializable {
     }
 
     public void setQuantity(float quantity) {
-        this.quantity = getRoundFloat(3, quantity);
+        this.quantity = getRoundFloat(2, quantity);
     }
 
     public void setUnitPrice(float unitPrice) {
@@ -257,11 +257,11 @@ public class PurchaseDetail implements Serializable {
     }
 
     public void setActualWeight(float ActualWeight) {
-        this.ActualWeight = getRoundFloat(3, ActualWeight);
+        this.ActualWeight = getRoundFloat(2, ActualWeight);
     }
 
     public void setSellQuantity(float sellQuantity) {
-        this.sellQuantity = getRoundFloat(3, sellQuantity);
+        this.sellQuantity = getRoundFloat(2, sellQuantity);
     }
 
     public long getOwnerId() {

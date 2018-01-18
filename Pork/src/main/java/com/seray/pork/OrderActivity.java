@@ -8,6 +8,7 @@ import android.os.Message;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.seray.adapter.OrderAdapter;
@@ -21,8 +22,9 @@ import java.util.List;
 
 public class OrderActivity extends BaseActivity {
     private int mType = 1;// 1 待配货   2 已配货
+    private Button mReturn,mUptata;
     private TextView lastSelected = null;
-    private TextView waitConfigureTv, finishConfigureTv;
+    private TextView waitConfigureTv,productsConfigureTv, finishConfigureTv;
     private ListView listView;
     private SparseArray<List<OrderPick>> mSparseArray = new SparseArray<>();
     private List<OrderPick> tableOrderList = new ArrayList<>();
@@ -40,7 +42,10 @@ public class OrderActivity extends BaseActivity {
 
     private void initView() {
         loadingDialog = new LoadingDialog(this);
-        waitConfigureTv = (TextView) findViewById(R.id.tv_order_wait);
+        waitConfigureTv = (TextView) findViewById(R.id.tv_order_wait_customer);
+        productsConfigureTv = (TextView) findViewById(R.id.tv_order_wait_products);
+        mReturn = (Button) findViewById(R.id.bt_order_return);
+        mUptata = (Button) findViewById(R.id.bt_order_updata);
         lastSelected = waitConfigureTv;
         finishConfigureTv = (TextView) findViewById(R.id.tv_order_finish);
         listView = (ListView) findViewById(R.id.lv_order);
@@ -54,6 +59,7 @@ public class OrderActivity extends BaseActivity {
 
     private void initListener() {
         waitConfigureTv.setOnClickListener(this);
+        productsConfigureTv.setOnClickListener(this);
         finishConfigureTv.setOnClickListener(this);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -64,6 +70,20 @@ public class OrderActivity extends BaseActivity {
                 intent.putExtra("OrderPick", orderPick);
                 intent.putExtra("Type",mType);
                 startActivity(intent);
+            }
+        });
+        mReturn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                finish();
+            }
+        });
+        mUptata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                getOrderList();
             }
         });
     }
@@ -113,11 +133,15 @@ public class OrderActivity extends BaseActivity {
     public void onClick(View v) {
         super.onClick(v);
         switch (v.getId()) {
-            case R.id.tv_order_wait:
+            case R.id.tv_order_wait_customer:
                 changedSelectedView(v);
                 mType = 1;
                 updateTableList();
                 break;
+            case R.id.tv_order_wait_products:
+                changedSelectedView(v);
+                mType = 3;
+                updateTableList();
             case R.id.tv_order_finish:
                 changedSelectedView(v);
                 mType = 2;

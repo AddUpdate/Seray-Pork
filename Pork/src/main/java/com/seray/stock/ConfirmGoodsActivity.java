@@ -32,7 +32,7 @@ import java.util.List;
 
 public class ConfirmGoodsActivity extends BaseActivity {
     private ListView mListView;
-    private Button mReturn;
+    private Button mReturn,mUptata;
     ConfirmGoodsAdapter adapter = null;
     private List<PurchaseSubtotal> detailList;// 测试
 
@@ -54,6 +54,7 @@ public class ConfirmGoodsActivity extends BaseActivity {
     private void initView() {
         mListView = (ListView) findViewById(R.id.lv_confirm_goods);
         mReturn = (Button) findViewById(R.id.confirm_goods_return);
+        mUptata = (Button) findViewById(R.id.confirm_goods_updata);
         loadingDialog = new LoadingDialog(ConfirmGoodsActivity.this);
     }
 
@@ -69,24 +70,19 @@ public class ConfirmGoodsActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
-//        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                mMisc.beep();
-//                String number = detailList.get(position).getBatchNumber();
-//                Intent intent = new Intent(ConfirmGoodsActivity.this, ConfirmInBulkActivity.class);
-//                intent.putExtra("number", number);
-//                startActivity(intent);
-//
-//                return true;
-//            }
-//        });
 
         mReturn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mMisc.beep();
                 finish();
+            }
+        });
+        mUptata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                initData();
             }
         });
     }

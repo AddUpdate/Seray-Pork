@@ -304,37 +304,6 @@ public class EntrySearchActivity extends BaseActivity {
         }
     }
 
-    private void query(int queryType) {
-        switch (queryType) {
-            case 0:
-                sqlQueryThread.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        //    result = mPurchaseManager.queryByMarketName("1111"); //供应商查询
-
-//                        String beginDate = getStringFormatDate(START_DATE);
-//                        String endDate = getStringFormatDate(END_DATE);
-//                        result = mPurchaseManager.queryByMarketNameAndDate(beginDate,endDate,"1111");//供应商和日期查询
-
-//                      List<PurchaseDetail> detailList = new ArrayList<>();
-//                        detailList = mPurchaseManager.queryByProductName("123");//商品名查询
-
-                        //   result = mPurchaseManager.queryByMarketNameAndProductName("1111","4444");// 商品名 和 供应商
-//
-                        //     result = mPurchaseManager.queryByMarketNameAndProductNameDate("2017-10-01","2017-11-16","1111","4444");//日期 和 供应商 商品名
-                        //    result = mPurchaseManager.queryByDate("2017-10-01","2017-11-16");//时间查询
-                        for (int i = 0; i < result.size(); i++) {
-                            LogUtil.e("searySubtotal===one", result.get(i).getPurchaseSubtotal().toString());
-                            for (int j = 0; j < result.get(i).getPurchaseDetails().size(); j++) {
-                                LogUtil.e("detailList===two", result.get(i).getPurchaseDetails().get(j).toString());
-                            }
-                        }
-                        //    mEntrySearchHandler.sendEmptyMessage(1);
-                    }
-                });
-                break;
-        }
-    }
 
     private String getStringFormatDate(int key) {
         Date date = mDateMap.get(key);
@@ -455,6 +424,11 @@ public class EntrySearchActivity extends BaseActivity {
             holder.mWeight.setText(dItem.getQuantity());
             holder.mActualWeight.setText(dItem.getActualQuantity());
             holder.mState.setText(dItem.getState());
+            if (dItem.getState().equals("否")){
+                holder.mState.setTextColor(mContext.getResources().getColor(R.color.red));
+            }else {
+                holder.mState.setTextColor(mContext.getResources().getColor(R.color.white));
+            }
             return convertView;
         }
 

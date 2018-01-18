@@ -43,7 +43,6 @@ public class PurchaseActivity extends BaseActivity {
                 startActivity(ConfirmGoodsActivity.class);
                 break;
             case R.id.pur_qr:
-            //    showMessage("此功能暂未开放");
                 startActivity(InBulkGoodsActivity.class);
                 break;
         }

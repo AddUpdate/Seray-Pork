@@ -20,10 +20,10 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="5dp"
-            android:layout_weight="1"
+            android:layout_weight="1.1"
             android:background="@drawable/bg_text"
             android:orientation="vertical"
-            android:padding="8dp">
+            android:padding="3dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -159,7 +159,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="5dp"
-            android:layout_weight="1">
+            android:layout_weight="0.9">
 
             <ListView
                 android:id="@+id/lv_temporary_group"

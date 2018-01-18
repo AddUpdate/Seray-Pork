@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -111,7 +111,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="2"
                     android:gravity="center"
-                    android:text="计价单位  *"
+                    android:text="计算单位  *"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/managerTipTextSize" />
 
@@ -120,7 +120,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1.5"
-                    android:background="@drawable/radio_selected"
+                    android:background="@drawable/bg_choose_library"
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/dp_4"
                     android:textColor="@color/black"
@@ -355,7 +355,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_gravity="right"
                 android:layout_margin="5dp"
-                android:background="@drawable/radio_selected"
+                android:background="@drawable/bg_button_ok"
                 android:text="保存"
                 android:textColor="@color/white"
                 android:textSize="@dimen/configTextSize" />

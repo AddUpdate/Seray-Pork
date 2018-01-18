@@ -1,5 +1,6 @@
 package com.seray.pork;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -35,6 +37,8 @@ import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
+import com.seray.service.BatteryMsg;
+import com.seray.service.BatteryService;
 import com.seray.utils.LibraryUtil;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
@@ -62,7 +66,7 @@ import java.util.Locale;
  */
 
 public class TemporaryLibraryActivity extends BaseActivity {
-
+    private ImageView mBatteryIv;
     private JNIScale mScale;
     private TextView tvWeight, tvName, TvTareWeight;
     private TextView mMaxUnitView, mTimeView;
@@ -84,10 +88,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private String comeLibraryId;
     private String goLibraryId;
     private String goLibrary;
-    private String name = "";
-    private String plu = "";
-    private String weight = "";
-    private String source;
+    private String name = "", plu = "",weight = "", source,unit,unitPrice;
     private boolean flag = true;
     private TemporaryHandler mTemporaryHandler = new TemporaryHandler(new WeakReference<>(this));
 
@@ -140,6 +141,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
         groupListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
         mGridViewPlu.setItemChecked(1, true);
         mGridViewPlu.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mBatteryIv = (ImageView) findViewById(R.id.battery);
 
         spinnerCome = (Spinner) findViewById(R.id.spinner_temporary_come);
         spinnerCome.setGravity(Gravity.CENTER);
@@ -153,6 +155,8 @@ public class TemporaryLibraryActivity extends BaseActivity {
     }
 
     private void initData() {
+        Intent intent = new Intent(this, BatteryService.class);
+        startService(intent);
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
         ProductsManager productsManager = ProductsManager.getInstance();
@@ -160,7 +164,6 @@ public class TemporaryLibraryActivity extends BaseActivity {
         for (int i = 0; i < mCategoryList.size(); i++) {
             List<Products> list = productsManager.queryProductsByQueryBuilder(mCategoryList.get(i).getCategoryId());
             ProductsCategory productsCategory = new ProductsCategory(mCategoryList.get(i).getCategoryId(), mCategoryList.get(i).getCategoryName());
-            LogUtil.e("productsCategory",productsCategory.toString());
             productsCategory.setProductsList(list);
             categoryList.add(productsCategory);
         }
@@ -211,6 +214,22 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 mMisc.beep();
                 tvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
+                unitPrice = String.valueOf(productList.get(position).getUnitPrice());
+                int num = productList.get(position).getMeasurementMethod();
+                switch (num) {
+                    case 1:
+                        unit = "KG";
+                        break;
+                    case 2:
+                        unit = "袋";
+                        break;
+                    case 3:
+                        unit = "箱";
+                        break;
+                    default:
+                        unit = "";
+                        break;
+                }
             }
         });
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -311,15 +330,15 @@ public class TemporaryLibraryActivity extends BaseActivity {
     }
 
     private void weightChangedCyclicity() {
-        if (true) {
+
             String strNet = mScale.getStringNet().trim();
             float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
             if (isOL()) {
                 tvWeight.setText(strNet);
             } else {
-                tvWeight.setText(NumFormatUtil.df3.format(fW));
+                tvWeight.setText(NumFormatUtil.df2.format(fW));
             }
-        }
+
         if (isStable()) {
             //   backDisplay.showIsStable(true);
             findViewById(R.id.stableflag).setVisibility(View.VISIBLE);
@@ -413,7 +432,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveLoulibrary(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                    sqlInsert(1, goLibraryId);
+                  //  sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -434,7 +453,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveDivision(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                    sqlInsert(1, goLibraryId);
+                 //   sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -455,7 +474,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getOutLoulibrary(source, comeLibraryId, goLibraryId, weight, name);
                 if (api.Result) {
-                    sqlInsert(1, goLibraryId);
+               //     sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -476,7 +495,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getTakeLoulibrary(comeLibraryId, weight, name);
                 if (api.Result) {
-                    sqlInsert(1, "");
+              //      sqlInsert(1, "");
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -496,8 +515,8 @@ public class TemporaryLibraryActivity extends BaseActivity {
             object.put("Weight", weight);
             object.put("Source", source);
             object.put("PLU", plu);
-            object.put("WeightCompany", "KG");
-            object.put("UnitPrice", "0");
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", unitPrice);
             object.put("Remarks", "");
 
             Division = object.toString();
@@ -529,7 +548,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             case KeyEvent.KEYCODE_F1:// 去皮
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-                    TvTareWeight.setText(NumFormatUtil.df3.format(curTare));
+                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -581,12 +600,45 @@ public class TemporaryLibraryActivity extends BaseActivity {
         }).setTitle("提示").show();
     }
 
+    //接收电量消息 每半小时一次
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveBattery(BatteryMsg msg) {
+
+        if (msg != null) {
+
+            int level = msg.getLevel();
+
+            switch (level) {
+                case 4:
+                    mBatteryIv.setImageResource(R.drawable.four_electric);
+                    break;
+                case 3:
+                    mBatteryIv.setImageResource(R.drawable.three_electric);
+                    break;
+                case 2:
+                    mBatteryIv.setImageResource(R.drawable.two_electric);
+                    break;
+                case 1:
+                    mBatteryIv.setImageResource(R.drawable.one_electric);
+                    break;
+                case 0:
+                    mBatteryIv.setImageResource(R.drawable.need_charge);
+                    new AlertDialog.Builder(TemporaryLibraryActivity.this).setTitle(R.string.test_clear_title)
+                            .setMessage("电子秤电量即将耗完，请及时连接充电器！")
+                            .setPositiveButton(R.string.reprint_ok, null).show();
+                    break;
+            }
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         unregisterReceiver(timeReceiver);
         mTemporaryHandler.removeCallbacksAndMessages(null);
+        Intent intent = new Intent(this, BatteryService.class);
+        stopService(intent);
         flag = false;
     }
 }

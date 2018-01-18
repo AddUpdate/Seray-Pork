@@ -2,9 +2,11 @@ package com.seray.pork.dao;
 
 import android.content.Context;
 import android.util.Log;
+
 import com.seray.entity.OrderDetail;
 import com.seray.pork.App;
 import com.seray.utils.LogUtil;
+
 import java.util.List;
 
 /**
@@ -35,18 +37,19 @@ public class OrderDetailManager {
 
     /**
      * 插入或替换
+     *
      * @param orderDetail
      */
-    public void insertOrderDetail(OrderDetail orderDetail){
+    public void insertOrderDetail(OrderDetail orderDetail) {
         try {
 
-            OrderDetailDao detailDao=   mManager.getDaoSession().getOrderDetailDao();
+            OrderDetailDao detailDao = mManager.getDaoSession().getOrderDetailDao();
             OrderDetail detail = detailDao.queryBuilder()
                     .where(OrderDetailDao.Properties.OrderDetailId.eq(orderDetail.getOrderDetailId())).unique();
 
-            if (detail == null){
+            if (detail == null) {
                 detailDao.insert(orderDetail);
-            }else {
+            } else {
 
                 detail.setActualWeight(orderDetail.getActualWeight());
 
@@ -61,11 +64,13 @@ public class OrderDetailManager {
         }
         Log.i(TAG, "insert orderDetail -->" + orderDetail.toString());
     }
+
     /**
      * 查询所有记录
+     *
      * @return
      */
-    public List<OrderDetail> queryAllProducts(){
+    public List<OrderDetail> queryAllProducts() {
         return mManager.getDaoSession().loadAll(OrderDetail.class);
     }
 }

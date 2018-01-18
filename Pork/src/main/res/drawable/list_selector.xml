@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:drawable="@drawable/transparence_bg" android:state_activated="false"/>
-    <item android:drawable="@drawable/bg_products_category" android:state_pressed="true"/>
-    <item android:drawable="@drawable/bg_products_category" android:state_activated="true"/>
+    <item android:drawable="@drawable/bg_products_item" android:state_pressed="true"/>
+    <item android:drawable="@drawable/bg_products_item" android:state_activated="true"/>
 
 </selector>

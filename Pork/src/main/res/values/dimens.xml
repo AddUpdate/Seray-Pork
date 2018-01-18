@@ -10,6 +10,10 @@
     <dimen name="TitleTextSize">40sp</dimen>
     <dimen name="payResultTextSize">35sp</dimen>
     <dimen name="sp_16">16sp</dimen>
+    <dimen name="sp_35">35sp</dimen>
+    <dimen name="sp_40">40sp</dimen>
+    <dimen name="sp_50">50sp</dimen>
+    <dimen name="sp_60">60sp</dimen>
 
     <dimen name="line">0.5dp</dimen>
     <dimen name="def_height">52dp</dimen>

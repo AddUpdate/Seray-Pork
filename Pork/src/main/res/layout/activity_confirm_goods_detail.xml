@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/bg_back"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/stock_back"
+        android:background="@drawable/bg_top"
         android:orientation="horizontal">
 
         <TextView
@@ -118,18 +118,47 @@
             android:layout_above="@+id/confirm_goods_detail_ok"
             android:layout_alignParentTop="true"
             android:layout_marginBottom="@dimen/dp_16" />
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="6dp"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_tare_weight"
+            android:text="皮重："
+            android:textColor="@color/white"
+            android:textSize="@dimen/pluTextSize" />
+        <TextView
+            android:id="@+id/confirm_goods_detail_tare_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="15dp"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_weight_tv"
+            android:text="0.00"
+            android:textColor="@color/yellow"
+            android:textSize="@dimen/baseWeight" />
+        <TextView
+            android:id="@+id/confirm_goods_detail_weight_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_weight"
+            android:text="重量："
+            android:layout_marginBottom="6dp"
+            android:textColor="@color/white"
+            android:textSize="@dimen/pluTextSize" />
         <TextView
             android:id="@+id/confirm_goods_detail_weight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="250dp"
+            android:layout_marginRight="50dp"
             android:layout_toLeftOf="@+id/confirm_goods_detail_continue"
-            android:text="0.000"
+            android:text="0.00"
             android:textColor="@color/yellow"
-            android:textSize="@dimen/numPluTextSize" />
+            android:textSize="@dimen/baseWeight" />
 
         <Button
             android:id="@+id/confirm_goods_detail_continue"
@@ -139,7 +168,7 @@
             android:layout_marginBottom="@dimen/dp_4"
             android:layout_marginRight="@dimen/dp_4"
             android:layout_toLeftOf="@+id/confirm_goods_detail_ok"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_button_ok"
             android:text="确定"
             android:textSize="@dimen/configTextSize" />
 
@@ -151,7 +180,7 @@
             android:layout_marginBottom="@dimen/dp_4"
             android:layout_marginRight="@dimen/dp_4"
             android:layout_toLeftOf="@+id/confirm_goods_detail_return"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_button_ok_1"
             android:text="完成"
             android:textSize="@dimen/configTextSize" />
 
@@ -163,7 +192,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginBottom="@dimen/dp_4"
             android:layout_marginRight="@dimen/dp_4"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/bg_btn_return"
             android:text="返回"
             android:textSize="@dimen/configTextSize" />
     </RelativeLayout>

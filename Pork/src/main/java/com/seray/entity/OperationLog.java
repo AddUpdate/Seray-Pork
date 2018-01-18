@@ -25,6 +25,7 @@ public class OperationLog {
     private String picture;
     private int state;  //1 已回收  2未回收
 
+
     public OperationLog(String comeLibraryId, String comeLibraryName,
                         String goLibraryId, String productName, String plu, BigDecimal weight,
                         int number, String unit, String date,String picture, int state){
@@ -40,6 +41,10 @@ public class OperationLog {
         this.picture = picture;
         this.state = state;
 
+    }
+
+    @Generated(hash = 2033303483)
+    public OperationLog() {
     }
 
     @Generated(hash = 1786373372)
@@ -60,16 +65,13 @@ public class OperationLog {
         this.state = state;
     }
 
-    @Generated(hash = 2033303483)
-    public OperationLog() {
-    }
     private float getFloatValue(BigDecimal value) {
         return value.floatValue();
     }
     private BigDecimal getDecimalValue(float value){
         String val = Float.toString(value);
         BigDecimal decimal = new BigDecimal(val);
-        decimal.setScale(3, BigDecimal.ROUND_HALF_UP);
+        decimal.setScale(2, BigDecimal.ROUND_HALF_UP);
         return decimal;
     }
     private float getRoundFloat(int scale, float value) {
@@ -98,7 +100,7 @@ public class OperationLog {
     }
 
     public void setWeight(float weight) {
-        this.weight = getRoundFloat(3,weight);
+        this.weight = getRoundFloat(2,weight);
     }
 
     public String getComeLibraryId() {
@@ -174,4 +176,5 @@ public class OperationLog {
     public void setPicture(String picture) {
         this.picture = picture;
     }
+    
 }

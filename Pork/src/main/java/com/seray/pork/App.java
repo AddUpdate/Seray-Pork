@@ -11,6 +11,8 @@ import android.os.PowerManager;
 import android.provider.Settings;
 
 import com.seray.cache.CacheHelper;
+import com.seray.pork.dao.DaoManager;
+import com.seray.pork.dao.DaoSession;
 import com.seray.utils.LogUtil;
 
 import java.util.LinkedList;
@@ -39,6 +41,11 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         myApplication = this;
+
+        DaoManager mManager = DaoManager.getInstance();
+        mManager.init(this);
+        DaoSession daoSession = mManager.getDaoSession();
+
         VersionName = getVersionName();
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP

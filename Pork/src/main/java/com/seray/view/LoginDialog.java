@@ -37,6 +37,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         super(context, R.style.Dialog);
         this.mContext = context;
         this.mMisc = Misc.newInstance();
+        mDialog = this;
         setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
@@ -49,7 +50,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
                     if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
                         mMisc.beep();
                         if (positiveClickListener != null) {
-                            positiveClickListener.onPositiveClick(mDialog, "","");
+                            positiveClickListener.onPositiveClick("","");
                         }
                         return true;
                     }
@@ -168,7 +169,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
                         Toast.makeText(mContext, "手机号和密码不能为空！", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    positiveClickListener.onPositiveClick(mDialog, tel,password);
+                    positiveClickListener.onPositiveClick(tel,password);
                 }
                 break;
 
@@ -189,7 +190,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
 
     public interface OnPositiveClickListener {
 
-        void onPositiveClick(LoginDialog dialog, String tel,String password);
+        void onPositiveClick( String tel,String password);
     }
 
     private String getString(@StringRes int id) {

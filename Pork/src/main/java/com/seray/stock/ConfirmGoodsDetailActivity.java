@@ -1,15 +1,12 @@
 package com.seray.stock;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +17,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.seray.entity.ApiResult;
-import com.seray.entity.ProductsCategory;
 import com.seray.entity.PurchaseDetail;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.BaseActivity;
@@ -49,7 +44,7 @@ import static java.lang.Thread.sleep;
 
 public class ConfirmGoodsDetailActivity extends BaseActivity {
 
-    private TextView TvBatchNumber, TvName, TvWeight;
+    private TextView TvBatchNumber, TvName, TvWeight, TvTareWeight;
     private TextView TvNamePopup, TvNumberPopup, TvUnitPopup, TvInputWeightPopup, TvWeightPopup, TvResultsPopup;
     private Button BtSubmitPopup, BtContinuePopup;
     private Button BtContinue, BtSubmit, BtReturn;
@@ -68,7 +63,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private boolean timeflag = true;
     private boolean weightFlag = false;
     private JNIScale mScale;
-    private ConfirmGoodsDetailHandler ConfirmGoodsDetailHandler = new ConfirmGoodsDetailHandler(new
+    private ConfirmGoodsDetailHandler mHandler = new ConfirmGoodsDetailHandler(new
             WeakReference<>(this));
     NumFormatUtil numUtil;
 
@@ -86,6 +81,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
 
     private void initView() {
         TvWeight = (TextView) findViewById(R.id.confirm_goods_detail_weight);
+        TvTareWeight = (TextView) findViewById(R.id.confirm_goods_detail_tare_weight);
         TvBatchNumber = (TextView) findViewById(R.id.confirm_goods_detail_batch_number);
         TvName = (TextView) findViewById(R.id.confirm_goods_detail_batch_name);
         detailListView = (ListView) findViewById(R.id.lv_confirm_goods_detail);
@@ -126,7 +122,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         BtContinue.setOnClickListener(this);
         BtSubmit.setOnClickListener(this);
         BtReturn.setOnClickListener(this);
-
     }
 
     private Boolean isOL() {
@@ -149,7 +144,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             TvBatchNumber.setText("收据号:" + batchNumber);
             TvName.setText("采购重量:" + recordWeight);
         }
-        //    test();
     }
 
     private void initAdapter() {
@@ -173,7 +167,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             public void run() {
                 super.run();
                 while (timeflag) {
-                    ConfirmGoodsDetailHandler.sendEmptyMessage(1);
+                    mHandler.sendEmptyMessage(1);
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -195,7 +189,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 weightFlag = true;
                 break;
             case R.id.confirm_goods_detail_ok:
-                strWeight = "0.000";
+                strWeight = getString(R.string.base_weight);
                 state = 1;
                 showNormalDialog("采购重量：" + recordWeight + "KG！\n现已确认重量：" + actualWeight + "KG！\n确定完成后不能再操作");
                 break;
@@ -223,24 +217,21 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
 
     private void addNewWeight() {
         String strNet = mScale.getStringNet().trim();
-        TvWeight.setText(strNet);
-        BigDecimal minWeight = new BigDecimal(2.000);
-        BigDecimal weight = NumFormatUtil.isNumeric(strNet) ? new BigDecimal(strNet) : BigDecimal.ZERO;
-        if (weightFlag) {
-            if (weight.compareTo(minWeight) == 1) {
-                if (!isOL()) {
-                    if (isStable()) {
-                        strWeight = strNet;
-                        weightFlag = false;
-                        state = 2;
-                        showNormalDialog("此次重量为:  " + strWeight + " KG");
-                    }
-                } else {
-                    showMessage(strNet);
+        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+
+        if (isOL()) {
+            showMessage(strNet);
+        } else {
+            TvWeight.setText(NumFormatUtil.df2.format(fW));
+            if (weightFlag && isStable()) {
+                if (fW > 0.5f) {
+                    strWeight = strNet;
+                    weightFlag = false;
+                    state = 2;
+                    showNormalDialog("此次重量为:  " + strWeight + " KG");
                 }
             }
         }
-
     }
 
 
@@ -287,7 +278,9 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private void updateWeight() {
         loadingDialog.showDialog();
         //  String numberStr = String.valueOf(number);
+        LogUtil.d("strWeight", strWeight);
         final float weightFt = Float.parseFloat(strWeight);
+        LogUtil.d("weightFt", weightFt + "");
         //  final int n = Integer.parseInt(numberStr);
         if (weightFt < 0) {
             showMessage("重量不能为小于0");
@@ -311,7 +304,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                         returnValue();
                         finish();
                     } else {
-                        ConfirmGoodsDetailHandler.sendEmptyMessage(0);
+                        mHandler.sendEmptyMessage(0);
                     }
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
@@ -334,8 +327,20 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 loadingDialog.dismissDialog();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
-                if (!mScale.zero())
+                if (!mScale.zero()) {
                     showMessage("置零失败");
+                } else {
+                    TvTareWeight.setText(R.string.base_weight);
+                }
+                return true;
+            case KeyEvent.KEYCODE_F1:// 去皮
+                //    cleanTareFloat();
+                if (mScale.tare()) {
+                    float curTare = mScale.getFloatTare();
+                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
+                } else {
+                    showMessage("去皮失败");
+                }
                 return true;
             case KeyEvent.KEYCODE_BACK:
                 returnValue();
@@ -345,6 +350,11 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    /**
+     * 重置tareFloat
+     */
+
 
     private class ConfirmGoodsDetailAdapter extends BaseAdapter {
         private LayoutInflater mLayoutInflater;
@@ -412,7 +422,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                         mMisc.beep();
                         strWeight = String.valueOf(dItem.getDecimalQuantity());
                         state = 2;
-                        ConfirmGoodsDetailHandler.sendEmptyMessage(3);
+                        mHandler.sendEmptyMessage(3);
                     }
                 });
             }
@@ -449,9 +459,8 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ConfirmGoodsDetailHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
         timeflag = false;
-
     }
 
     /*
@@ -470,7 +479,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     state = 2;
                     mMisc.beep();
                 }
-
             }
         }).setTitle("提示").show();
     }

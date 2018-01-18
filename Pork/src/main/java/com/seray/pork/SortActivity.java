@@ -33,7 +33,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.camera.simplewebcam.CameraPreview;
 import com.gprinter.aidl.GpService;
 import com.gprinter.command.GpCom;
 import com.gprinter.io.GpDevice;
@@ -43,12 +42,9 @@ import com.lzscale.scalelib.misclib.GpScalePrinter;
 import com.seray.adapter.SeparateAdapter;
 import com.seray.adapter.SeparateProductsAdapter;
 import com.seray.cache.AppConfig;
-import com.seray.cache.CacheHelper;
 import com.seray.entity.ApiResult;
-import com.seray.entity.BatteryMsg;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
-import com.seray.entity.LocalFileTag;
 import com.seray.entity.MonitorLibraryMessage;
 import com.seray.entity.MonitorProdctsMessage;
 import com.seray.entity.OperationLog;
@@ -57,10 +53,11 @@ import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
 import com.seray.http.UploadDataHttp;
 import com.seray.inter.BackDisplayBase;
-import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
+import com.seray.service.BatteryMsg;
+import com.seray.service.BatteryService;
 import com.seray.utils.LibraryUtil;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
@@ -225,6 +222,7 @@ public class SortActivity extends BaseActivity {
                 mMisc.beep();
                 TvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
+
                 int num = productList.get(position).getMeasurementMethod();
                 switch (num) {
                     case 1:
@@ -289,6 +287,8 @@ public class SortActivity extends BaseActivity {
     }
 
     private void initData() {
+        Intent intent = new Intent(this, BatteryService.class);
+        startService(intent);
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
         ProductsManager productsManager = ProductsManager.getInstance();
@@ -380,7 +380,7 @@ public class SortActivity extends BaseActivity {
                 if (tareFloat > 0) {
                     fW -= tare;
                 }
-                TvWeight.setText(NumFormatUtil.df3.format(fW));
+                TvWeight.setText(NumFormatUtil.df2.format(fW));
             }
         }
         if (isStable()) {
@@ -396,37 +396,6 @@ public class SortActivity extends BaseActivity {
         } else {
             //    backDisplay.showIsZero(false);
             findViewById(R.id.zeroflag).setVisibility(View.INVISIBLE);
-        }
-    }
-
-    //接收电量消息 每半小时一次
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void receiveBattery(BatteryMsg msg) {
-
-        if (msg != null) {
-
-            int level = msg.getLevel();
-
-            switch (level) {
-                case 4:
-                    mBatteryIv.setImageResource(R.drawable.four_electric);
-                    break;
-                case 3:
-                    mBatteryIv.setImageResource(R.drawable.three_electric);
-                    break;
-                case 2:
-                    mBatteryIv.setImageResource(R.drawable.two_electric);
-                    break;
-                case 1:
-                    mBatteryIv.setImageResource(R.drawable.one_electric);
-                    break;
-                case 0:
-                    mBatteryIv.setImageResource(R.drawable.need_charge);
-                    new AlertDialog.Builder(SortActivity.this).setTitle(R.string.test_clear_title)
-                            .setMessage("电子秤电量即将耗完，请及时连接充电器！")
-                            .setPositiveButton(R.string.reprint_ok, null).show();
-                    break;
-            }
         }
     }
 
@@ -506,7 +475,7 @@ public class SortActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getTakeSortingArea(name, weight, String.valueOf(number), source, comeLibraryId, goLibraryId);
                 if (api.Result) {
-                    sqlInsert(1, "");
+                 //   sqlInsert(1, "");
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                     OrderDetail orderDetail = new OrderDetail();
@@ -533,7 +502,7 @@ public class SortActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveSortingArea(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                    sqlInsert(1, goLibraryId);
+                   // sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -566,7 +535,7 @@ public class SortActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, "", mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(),"",state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(),"",state);
         logManager.insertOperationLog(log);
     }
 
@@ -582,9 +551,7 @@ public class SortActivity extends BaseActivity {
                 cleanTareFloat();
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-//                    if (CacheHelper.isOpenJin)
-//                        curTare *= 2;
-                    TvTareWeight.setText(NumFormatUtil.df3.format(curTare));
+                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -715,7 +682,36 @@ public class SortActivity extends BaseActivity {
             }
         }).setTitle("提示").show();
     }
+    //接收电量消息 每半小时一次
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveBattery(BatteryMsg msg) {
 
+        if (msg != null) {
+
+            int level = msg.getLevel();
+
+            switch (level) {
+                case 4:
+                    mBatteryIv.setImageResource(R.drawable.four_electric);
+                    break;
+                case 3:
+                    mBatteryIv.setImageResource(R.drawable.three_electric);
+                    break;
+                case 2:
+                    mBatteryIv.setImageResource(R.drawable.two_electric);
+                    break;
+                case 1:
+                    mBatteryIv.setImageResource(R.drawable.one_electric);
+                    break;
+                case 0:
+                    mBatteryIv.setImageResource(R.drawable.need_charge);
+                    new AlertDialog.Builder(SortActivity.this).setTitle(R.string.test_clear_title)
+                            .setMessage("电子秤电量即将耗完，请及时连接充电器！")
+                            .setPositiveButton(R.string.reprint_ok, null).show();
+                    break;
+            }
+        }
+    }
 
     private GpService mGpService = null;
 
@@ -945,6 +941,8 @@ public class SortActivity extends BaseActivity {
                 LogUtil.e(e.getMessage());
             }
         }
+        Intent intent = new Intent(this, BatteryService.class);
+        stopService(intent);
 //        unregisterReceiver(mPrintReceiver);
         unregisterReceiver(PrinterStatusBroadcastReceiver);
         AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
