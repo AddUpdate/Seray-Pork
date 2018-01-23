@@ -32,10 +32,10 @@
             android:layout_marginLeft="@dimen/dp_25"
             android:layout_weight="1"
             android:text="待配货-品名"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="@dimen/pluTextSize"
             android:gravity="center"
-            android:background="@drawable/radio_selected"
+            android:background="@drawable/shapeone"
             />
         <TextView
             android:id="@+id/tv_order_finish"

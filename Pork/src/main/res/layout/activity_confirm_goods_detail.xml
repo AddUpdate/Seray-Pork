@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/dp_4"
             android:gravity="center"
-            android:text="收据号"
+            android:text="单号"
             android:textColor="@color/white"
             android:textSize="@dimen/configTextSize" />
 
@@ -122,10 +122,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginRight="5dp"
             android:layout_marginBottom="6dp"
             android:layout_toLeftOf="@+id/confirm_goods_detail_tare_weight"
-            android:text="皮重："
+            android:text="皮重:"
             android:textColor="@color/white"
             android:textSize="@dimen/pluTextSize" />
         <TextView
@@ -133,7 +132,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginRight="15dp"
+            android:layout_marginRight="10dp"
             android:layout_toLeftOf="@+id/confirm_goods_detail_weight_tv"
             android:text="0.00"
             android:textColor="@color/yellow"
@@ -143,9 +142,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginRight="5dp"
             android:layout_toLeftOf="@+id/confirm_goods_detail_weight"
-            android:text="重量："
+            android:text="重量:"
             android:layout_marginBottom="6dp"
             android:textColor="@color/white"
             android:textSize="@dimen/pluTextSize" />
@@ -154,15 +152,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginRight="50dp"
-            android:layout_toLeftOf="@+id/confirm_goods_detail_continue"
+            android:layout_marginRight="30dp"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_separate"
             android:text="0.00"
             android:textColor="@color/yellow"
             android:textSize="@dimen/baseWeight" />
-
+        <Button
+            android:id="@+id/confirm_goods_detail_separate"
+            android:layout_width="90dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:layout_marginRight="@dimen/dp_4"
+            android:layout_toLeftOf="@+id/confirm_goods_detail_continue"
+            android:background="@drawable/bg_button_ok"
+            android:text="分割"
+            android:textSize="@dimen/configTextSize" />
         <Button
             android:id="@+id/confirm_goods_detail_continue"
-            android:layout_width="100dp"
+            android:layout_width="90dp"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="@dimen/dp_4"
@@ -174,7 +182,7 @@
 
         <Button
             android:id="@+id/confirm_goods_detail_ok"
-            android:layout_width="100dp"
+            android:layout_width="90dp"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="@dimen/dp_4"
@@ -186,7 +194,7 @@
 
         <Button
             android:id="@+id/confirm_goods_detail_return"
-            android:layout_width="100dp"
+            android:layout_width="90dp"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"

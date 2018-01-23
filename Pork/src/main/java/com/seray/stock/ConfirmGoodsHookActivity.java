@@ -68,14 +68,16 @@ public class ConfirmGoodsHookActivity extends BaseActivity {
                 String productName = detailList.get(position).getProductName();
                 String actualWeight = String.valueOf(detailList.get(position).getDecimalActualWeight());
                 int actualNumber = detailList.get(position).getActualNumber();
+                String plu = detailList.get(position).getPluCode();
                 String weight = String.valueOf(detailList.get(position).getDecimalQuantity());
                 Intent intent = new Intent(ConfirmGoodsHookActivity.this, ConfirmGoodsDetailActivity.class);
                 intent.putExtra("batchNumber", batchNumber);
                 intent.putExtra("productId", productId);
                 intent.putExtra("productName", productName);
                 intent.putExtra("actualWeight", actualWeight);
-                intent.putExtra("Weight", weight);
+                intent.putExtra("weight", weight);
                 intent.putExtra("actualNumber", actualNumber);
+                intent.putExtra("plu", plu);
                 intent.putExtra("position", position);
                 startActivityForResult(intent, REQUESTCODE);
             }

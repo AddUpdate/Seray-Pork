@@ -1,39 +1,53 @@
 package com.seray.stock;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.camera.simplewebcam.CameraPreview;
 import com.seray.entity.ApiResult;
-import com.seray.entity.OrderDetail;
+import com.seray.entity.Library;
+import com.seray.entity.LibraryList;
+import com.seray.entity.MonitorLibraryMessage;
+import com.seray.entity.OperationLog;
 import com.seray.entity.PurchaseDetail;
 import com.seray.entity.TareItem;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.App;
 import com.seray.pork.BaseActivity;
 import com.seray.pork.R;
+import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.PurchaseDetailManager;
+import com.seray.utils.FileHelp;
+import com.seray.utils.LibraryUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.DeductTareDialog;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +57,7 @@ public class InBulkQuantityActivity extends BaseActivity {
     private TextView batchNumberTv, nameTv, weightTv, tareWeightTv, modeTv, numberTv;
     private EditText numberEt;
     private Button minusPeelBt, confirmBt, finishBt, returnBt;
-    private String batchNumber, productName, productId, mode, weight;
+    private String batchNumber, productName, productId, mode, weight,plu;
     private LinearLayout llWeight;
     float weightFt;
     int numberInt;
@@ -59,6 +73,25 @@ public class InBulkQuantityActivity extends BaseActivity {
     private int actualNumber, inputNumber;
     private int position;
 
+    private Spinner spinnerCome, spinnerLeave;
+    private List<String> come_data = new ArrayList<>();
+    private List<String> go_data = new ArrayList<>();
+    private ArrayAdapter<String> come_adapter;
+    private ArrayAdapter<String> go_adapter;
+    private List<Library> comeLibraryList = new ArrayList<>();
+    private List<Library> goLibraryList = new ArrayList<>();
+    LibraryUtil libraryUtil = new LibraryUtil(this);
+    private String comeLibraryId, comeLibrary, goLibraryId, goLibrary;
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
+    OperationLogManager logManager = OperationLogManager.getInstance();
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveLibrary(MonitorLibraryMessage msg) {
+        initLibrary();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +100,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         initListener();
         initData();
         timer();
+        initLibrary();
     }
 
     private void initView() {
@@ -86,13 +120,70 @@ public class InBulkQuantityActivity extends BaseActivity {
         confirmBt = (Button) findViewById(R.id.bt_in_bulk_quantity_confirm);
         finishBt = (Button) findViewById(R.id.bt_in_bulk_quantity_finish);
         returnBt = (Button) findViewById(R.id.bt_in_bulk_quantity_return);
+        spinnerCome = (Spinner) findViewById(R.id.spinner_in_bulk_come);
+        spinnerLeave = (Spinner) findViewById(R.id.spinner_in_bulk_leave);
     }
+    private void initLibrary() {
 
+        come_data.clear();
+        go_data.clear();
+        List<LibraryList> libraryList = libraryUtil.libraryJson("Loulibrary");// TODO: 2018/1/19 位置标识获取库名
+        if (libraryList.size() == 0)
+            return;
+        comeLibraryList = libraryList.get(0).getLibraryList();
+        goLibraryList = libraryList.get(1).getLibraryList();
+        for (int i = 0; i < comeLibraryList.size(); i++) {
+            come_data.add(comeLibraryList.get(i).getLibraryName());
+        }
+
+        for (int i = 0; i < goLibraryList.size(); i++) {
+            go_data.add(goLibraryList.get(i).getLibraryName());
+        }
+        come_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, come_data);
+        come_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerCome.setAdapter(come_adapter);
+        go_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, go_data);
+        go_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerLeave.setAdapter(go_adapter);
+    }
     private void initListener() {
         minusPeelBt.setOnClickListener(this);
         confirmBt.setOnClickListener(this);
         finishBt.setOnClickListener(this);
         returnBt.setOnClickListener(this);
+
+        spinnerCome.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.white));    //设置颜色
+                tv.setTextSize(25.0f);    //设置大小
+                tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
+                comeLibraryId = comeLibraryList.get(position).getLibraryId();
+                comeLibrary = comeLibraryList.get(position).getLibraryName();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerLeave.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.white));    //设置颜色
+                tv.setTextSize(25.0f);    //设置大小
+                tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
+                goLibraryId = goLibraryList.get(position).getLibraryId();
+                goLibrary = goLibraryList.get(position).getLibraryName();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         numberEt.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -131,6 +222,7 @@ public class InBulkQuantityActivity extends BaseActivity {
     }
 
     private void initData() {
+        mCameraPreview = CameraPreview.getInstance();
         numUtil = NumFormatUtil.getInstance();
         mScale = JNIScale.getScale();
         Intent intent = getIntent();
@@ -140,6 +232,7 @@ public class InBulkQuantityActivity extends BaseActivity {
             inputWeight = detail.getDecimalQuantity();
             productName = detail.getProductName();
             productId = detail.getProductId();
+            plu = detail.getPluCode();
             mode = detail.getUnit();
             actualWeight = detail.getDecimalActualWeight();
             inputNumber = detail.getNumber();
@@ -200,9 +293,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                 tareWeightTv.setText(NumFormatUtil.df2.format(tareFloat));
             }
             weightTv.setText(NumFormatUtil.df2.format(fW));
-
         }
-
     }
 
     private void updateWeight() {
@@ -267,15 +358,18 @@ public class InBulkQuantityActivity extends BaseActivity {
                     state = 2;
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, numberInt, state, 2);
+                    sqlInsert(state);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 }
             }
         });
-
-
     }
-
+    private void sqlInsert(int state) {
+        //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
+        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, productName, plu, numUtil.getDecimalNet(weight), numberInt, mode, NumFormatUtil.getDateDetail(),getCameraPic(),state);
+        logManager.insertOperationLog(log);
+    }
     @Override
     public void onClick(View view) {
         mMisc.beep();
@@ -310,7 +404,6 @@ public class InBulkQuantityActivity extends BaseActivity {
         setResult(3, intent);
     }
 
-
     private static class InBulkHandler extends Handler {
 
         WeakReference<InBulkQuantityActivity> mWeakReference;
@@ -332,6 +425,41 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         }
     }
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -349,6 +477,14 @@ public class InBulkQuantityActivity extends BaseActivity {
                     showMessage("置零失败");
                 }
                 return true;
+            case KeyEvent.KEYCODE_F1:// 去皮
+                if (mScale.tare()) {
+                    float curTare = mScale.getFloatTare();
+                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
+                } else {
+                    showMessage("去皮失败");
+                }
+                return true;
             case KeyEvent.KEYCODE_BACK:
                 returnValue();
                 finish();
@@ -361,7 +497,6 @@ public class InBulkQuantityActivity extends BaseActivity {
         tareWeightTv.setText(R.string.base_weight);
         //    setTareFloat();
     }
-
     /**
      * 重置tareFloat
      */
@@ -379,7 +514,6 @@ public class InBulkQuantityActivity extends BaseActivity {
             tareFloat = totalTare;
         }
     }
-
 
     private void deductTareDialog() {
         final DeductTareDialog dialog = new DeductTareDialog(InBulkQuantityActivity.this);
@@ -420,6 +554,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                 if (confirm) {
                     loadingDialog.showDialog();
                     mMisc.beep();
+                    camera();
                     saveData();
                     dialog.dismiss();
                 } else {

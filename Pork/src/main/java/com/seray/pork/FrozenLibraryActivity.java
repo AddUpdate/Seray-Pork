@@ -71,10 +71,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     private JNIScale mScale;
     private boolean flag = true;
     private FrozenHandler mFrozenHandler = new FrozenHandler(new WeakReference<>(this));
-    private String comeLibraryId;
-    private String comeLibrary;
-    private String goLibraryId;
-    private String goLibrary;
+    private String comeLibraryId, comeLibrary, goLibraryId, goLibrary;
     private String codeData, weightData, numberData = "", name, standard, plu = "",picture;
     LibraryUtil libraryUtil = new LibraryUtil(this);
     private CameraPreview mCameraPreview = null;
@@ -280,7 +277,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary,getCameraPic()==null?"":getCameraPic());
+                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary,getCameraPic());
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFrozenHandler.sendEmptyMessage(3);

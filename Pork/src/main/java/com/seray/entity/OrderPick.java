@@ -1,13 +1,8 @@
 package com.seray.entity;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Transient;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-import org.greenrobot.greendao.annotation.Generated;
 
 /**
  *订单小计

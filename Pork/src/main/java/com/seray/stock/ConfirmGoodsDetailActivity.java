@@ -19,18 +19,23 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 
+import com.camera.simplewebcam.CameraPreview;
 import com.seray.entity.ApiResult;
+import com.seray.entity.OperationLog;
 import com.seray.entity.PurchaseDetail;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.BaseActivity;
 import com.seray.pork.R;
+import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.PurchaseDetailManager;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -45,29 +50,32 @@ import static java.lang.Thread.sleep;
 public class ConfirmGoodsDetailActivity extends BaseActivity {
 
     private TextView TvBatchNumber, TvName, TvWeight, TvTareWeight;
-    private TextView TvNamePopup, TvNumberPopup, TvUnitPopup, TvInputWeightPopup, TvWeightPopup, TvResultsPopup;
-    private Button BtSubmitPopup, BtContinuePopup;
-    private Button BtContinue, BtSubmit, BtReturn;
+    private Button BtContinue, BtSeparate, BtSubmit, BtReturn;
     private ListView detailListView;
     ConfirmGoodsDetailAdapter adapter = null;
     //  private List<PurchaseDetail> returnList;// 接口返回值
     private List<PurchaseDetail> detailList = new ArrayList<>();
-    private PopupWindow mPopupWindow;
     private String batchNumber, productName, productId, recordWeight;
     private BigDecimal actualWeight;
-    private String strWeight;
+    private String strWeight = "80";
+    private String plu;
     private int state;
     private int actualNumber;
     private int position;
     LoadingDialog loadingDialog;
     private boolean timeflag = true;
     private boolean weightFlag = false;
+
     private JNIScale mScale;
+
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
     private ConfirmGoodsDetailHandler mHandler = new ConfirmGoodsDetailHandler(new
             WeakReference<>(this));
-    NumFormatUtil numUtil;
-
-
+    private NumFormatUtil numUtil;
+    OperationLogManager logManager = OperationLogManager.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,40 +94,15 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         TvName = (TextView) findViewById(R.id.confirm_goods_detail_batch_name);
         detailListView = (ListView) findViewById(R.id.lv_confirm_goods_detail);
         BtContinue = (Button) findViewById(R.id.confirm_goods_detail_continue);
+        BtSeparate = (Button) findViewById(R.id.confirm_goods_detail_separate);
         BtSubmit = (Button) findViewById(R.id.confirm_goods_detail_ok);
         BtReturn = (Button) findViewById(R.id.confirm_goods_detail_return);
-        View view = getLayoutInflater().inflate(R.layout.confirm_goods_detail_popup_layout, null);
-        view.setFocusableInTouchMode(true);
-        mPopupWindow = new PopupWindow(view, 480, 300, true);
-        mPopupWindow.setFocusable(true);
 
-        TvNamePopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_name);
-        TvNumberPopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_number);
-        TvUnitPopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_unit);
-        TvInputWeightPopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_input_weight);
-        TvWeightPopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_weight);
-        TvResultsPopup = (TextView) view.findViewById(R.id.confirm_goods_detail_popup_results);
-        BtSubmitPopup = (Button) view.findViewById(R.id.confirm_goods_detail_popup_submit);
-        BtContinuePopup = (Button) view.findViewById(R.id.confirm_goods_detail_popup_continue);
-
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    mMisc.beep();
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        closePopWindow();
-                    }
-                }
-                return true;
-            }
-        });
     }
 
     private void initListener() {
-        BtSubmitPopup.setOnClickListener(this);
-        BtContinuePopup.setOnClickListener(this);
         BtContinue.setOnClickListener(this);
+        BtSeparate.setOnClickListener(this);
         BtSubmit.setOnClickListener(this);
         BtReturn.setOnClickListener(this);
     }
@@ -129,6 +112,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     }
 
     private void initData() {
+        mCameraPreview = CameraPreview.getInstance();
         mScale = JNIScale.getScale();
         numUtil = NumFormatUtil.getInstance();
         loadingDialog = new LoadingDialog(this);
@@ -138,10 +122,11 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             productName = intent.getStringExtra("productName");
             productId = intent.getStringExtra("productId");
             actualWeight = numUtil.getDecimalNet(intent.getStringExtra("actualWeight"));
-            recordWeight = intent.getStringExtra("Weight");
+            recordWeight = intent.getStringExtra("weight");
             actualNumber = intent.getIntExtra("actualNumber", 0);
+            plu = intent.getStringExtra("plu");
             position = intent.getIntExtra("position", 0);
-            TvBatchNumber.setText("收据号:" + batchNumber);
+            TvBatchNumber.setText("单号:" + batchNumber);
             TvName.setText("采购重量:" + recordWeight);
         }
     }
@@ -188,6 +173,13 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 }
                 weightFlag = true;
                 break;
+            case R.id.confirm_goods_detail_separate:
+                if (weightFlag == true) {
+                    return;
+                }
+                // TODO: 2018/1/22 分割按钮和 确定按钮需要 有个参数区分 
+                weightFlag = true;
+                break;
             case R.id.confirm_goods_detail_ok:
                 strWeight = getString(R.string.base_weight);
                 state = 1;
@@ -196,14 +188,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             case R.id.confirm_goods_detail_return:
                 returnValue();
                 finish();
-                break;
-            case R.id.confirm_goods_detail_popup_submit:
-                showMessage("提交成功");
-                closePopWindow();
-                finish();
-                break;
-            case R.id.confirm_goods_detail_popup_continue:
-                closePopWindow();
                 break;
         }
     }
@@ -223,8 +207,9 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             showMessage(strNet);
         } else {
             TvWeight.setText(NumFormatUtil.df2.format(fW));
-            if (weightFlag && isStable()) {
-                if (fW > 0.5f) {
+            if (fW > 0.1f && isStable()) {
+                if (weightFlag) {
+                    camera();
                     strWeight = strNet;
                     weightFlag = false;
                     state = 2;
@@ -233,7 +218,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             }
         }
     }
-
 
     private static class ConfirmGoodsDetailHandler extends Handler {
 
@@ -278,7 +262,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private void updateWeight() {
         loadingDialog.showDialog();
         //  String numberStr = String.valueOf(number);
-        LogUtil.d("strWeight", strWeight);
         final float weightFt = Float.parseFloat(strWeight);
         LogUtil.d("weightFt", weightFt + "");
         //  final int n = Integer.parseInt(numberStr);
@@ -298,8 +281,8 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 ApiResult api = UploadDataHttp.setUpdateActualWeight(productId, weightFt, 0, batchNumber, state);
                 if (api.Result) {
                     actualWeight = actualWeight.add(numUtil.getDecimalNet(strWeight));
-                    PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
-                    instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, 0, state, 1);
+                    //  PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
+                    //  instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, 0, state, 1);
                     if (state == 1) {
                         returnValue();
                         finish();
@@ -312,13 +295,18 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     state = 2;
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, 0, state, 2);
+                    sqlInsert(state,"");
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 }
             }
         });
     }
-
+    private void sqlInsert(int state, String goId) {
+        //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
+        OperationLog log = new OperationLog("来向库ID", "来向库(采购和白条)", goId, productName, plu, numUtil.getDecimalNet(strWeight), 0, "KG", NumFormatUtil.getDateDetail(),getCameraPic(),state);
+        logManager.insertOperationLog(log);
+    }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         mMisc.beep();
@@ -334,7 +322,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 }
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
-                //    cleanTareFloat();
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -351,9 +338,44 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
     /**
-     * 重置tareFloat
+     * 获取拍照图片
      */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
 
 
     private class ConfirmGoodsDetailAdapter extends BaseAdapter {
@@ -436,24 +458,6 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
             TextView mWeight;
             TextView mConfirm;
         }
-    }
-
-    private void closePopWindow() {
-        if (mPopupWindow != null && mPopupWindow.isShowing()) {
-            mPopupWindow.dismiss();
-            backgroundAlpha(1f);
-        }
-    }
-
-    /**
-     * 设置添加屏幕的背景透明度
-     *
-     * @param bgAlpha
-     */
-    public void backgroundAlpha(float bgAlpha) {
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.alpha = bgAlpha; //0.0-1.0
-        getWindow().setAttributes(lp);
     }
 
     @Override

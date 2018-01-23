@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import org.greenrobot.greendao.annotation.Generated;
-
 /**
  * 订单明细
  */
@@ -55,18 +54,9 @@ public class OrderDetail implements Serializable {
         this.amount = amount;
     }
 
-
-
-
-
     @Generated(hash = 268085433)
     public OrderDetail() {
     }
-
-
-
-
-
     @Generated(hash = 1321346533)
     public OrderDetail(Long id, String orderDetailId, int actualNumber, float actualWeight, int state,
             String orderNumber, String productName, String alibraryName, float weight, int number,
@@ -87,7 +77,6 @@ public class OrderDetail implements Serializable {
         this.discountPrice = discountPrice;
         this.amount = amount;
     }
-
 
     private float getFloatValue(BigDecimal value) {
         return value.floatValue();

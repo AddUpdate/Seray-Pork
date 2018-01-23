@@ -66,7 +66,7 @@
             android:layout_marginEnd="2.5dp"
             android:layout_marginTop="@dimen/dp_4"
             android:layout_weight="0.7"
-            android:background="@drawable/fntopagebutton_bottom"
+            android:background="@drawable/bg_button_ok"
             android:text="查询"
             android:textColor="@color/white"
             android:textSize="@dimen/configTextSize" />
@@ -79,7 +79,7 @@
             android:layout_marginStart="2.5dp"
             android:layout_marginTop="@dimen/dp_4"
             android:layout_weight="0.7"
-            android:background="@drawable/fntopagebutton_bottom"
+            android:background="@drawable/bg_btn_return"
             android:text="重置"
             android:textColor="@color/white"
             android:textSize="@dimen/configTextSize" />
