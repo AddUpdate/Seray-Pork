@@ -22,6 +22,7 @@ import com.seray.stock.PurchaseActivity;
 import com.seray.utils.HttpUtils;
 import com.seray.utils.LocalServer;
 import com.seray.utils.LogUtil;
+import com.seray.view.LoadingDialog;
 import com.seray.view.LoginDialog;
 import com.seray.view.PromptDialog;
 
@@ -45,7 +46,7 @@ public class ChooseFunctionActivity extends BaseActivity {
             WeakReference<>(this));
     boolean loginFlag = false;
     LoginDialog dialog;
-
+    LoadingDialog mLoadingDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +67,7 @@ public class ChooseFunctionActivity extends BaseActivity {
     }
 
     private void initData() {
-
+        mLoadingDialog = new LoadingDialog(this);
         name.add("采购台账录入");
         name.add("白条库");
         name.add("分割房");
@@ -127,7 +128,7 @@ public class ChooseFunctionActivity extends BaseActivity {
             @Override
             public void run() {
                 ApiResult api = UploadDataHttp.LoginPost(phoneNumber, passWord);
-
+                mLoadingDialog.dismissDialog();
                 if (api.Result) {
                     loginFlag = true;
                     mPosition.clear();
@@ -140,6 +141,7 @@ public class ChooseFunctionActivity extends BaseActivity {
                     loginFlag = false;
                     showMessage(api.ResultMessage);
                 }
+
             }
         });
     }
@@ -209,6 +211,7 @@ public class ChooseFunctionActivity extends BaseActivity {
                 if (TextUtils.isEmpty(tel) || TextUtils.isEmpty(password)) {
                     return;
                 }
+                mLoadingDialog.showDialog();
                 phoneNumber = tel;
                 passWord = password;
                 submitLogin();

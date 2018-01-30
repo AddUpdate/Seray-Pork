@@ -17,6 +17,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
@@ -53,7 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class OrderWeightActivity extends BaseActivity {
-    private TextView nameTv, quantityTv, actualQuantityTv, weightTv, numberTv, floatingTv;
+    private TextView nameTv, quantityTv, actualQuantityTv, weightTv, numberTv, floatingTv, printerTv;
     private Button returnBt, confirmBt, finishBt;
     private int TotalNumber;//需配数量
     private int actualNumber;
@@ -65,6 +66,7 @@ public class OrderWeightActivity extends BaseActivity {
     private boolean isByWeight = true;
     private String weightStr = "", orderDetailId, barCode;
     private int number = 0, position, state;
+    private BigDecimal floating;
     LoadingDialog loadingDialog;
     OrderDetail detail;
     NumFormatUtil numUtil;
@@ -99,6 +101,8 @@ public class OrderWeightActivity extends BaseActivity {
         returnBt = (Button) findViewById(R.id.bt_order_weight_return);
         confirmBt = (Button) findViewById(R.id.bt_order_weight_confirm);
         finishBt = (Button) findViewById(R.id.bt_order_weight_finish);
+        printerTv = (TextView) findViewById(R.id.tv_order_weight_printer);
+        printerTv.setText("打印机未连接");
         setPieceNum(numberTv);
 
         returnBt.setOnClickListener(this);
@@ -123,30 +127,26 @@ public class OrderWeightActivity extends BaseActivity {
             if (TotalNumber > 0) {
                 quantityTv.setText(String.valueOf(TotalNumber));
                 actualQuantityTv.setText(String.valueOf(actualNumber));
-                linearWeight.setVisibility(View.GONE);
+                linearWeight.setVisibility(View.VISIBLE);
                 linearNumber.setVisibility(View.VISIBLE);
-                floatingTv.setVisibility(View.GONE);
+                floatingTv.setVisibility(View.VISIBLE);
                 isByWeight = false;
             } else {
                 BigDecimal weight = detail.getBigDecimalWeight();
                 BigDecimal weightFloating = weight.multiply(
                         new BigDecimal(configManager.query("floatRange")))
                         .setScale(2, BigDecimal.ROUND_HALF_UP);
+                floating = weight.subtract(weightFloating);
                 quantityTv.setText(String.valueOf(weight) + "KG");
                 actualQuantityTv.setText(String.valueOf(actualWeight));
-                floatingTv.setText("浮动范围：" + weight.subtract(weightFloating) + "~" + weight.add(weightFloating));
+                floatingTv.setText("浮动范围：" + floating + "~" + weight.add(weightFloating));
                 linearWeight.setVisibility(View.VISIBLE);
                 floatingTv.setVisibility(View.VISIBLE);
                 linearNumber.setVisibility(View.GONE);
                 isByWeight = true;
             }
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                connection();
-            }
-        }).start();
+        connection();
     }
 
     public void setPieceNum(final TextView testview) {
@@ -206,7 +206,7 @@ public class OrderWeightActivity extends BaseActivity {
     }
 
     private void weightChangedCyclicity() {
-        if (isByWeight) {
+        if (true) {
             String strNet = mScale.getStringNet().trim();
             float tare = tareFloat;
             float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
@@ -274,15 +274,16 @@ public class OrderWeightActivity extends BaseActivity {
     }
 
     private void setData() {
+        weightStr = weightTv.getText().toString();
         if (TotalNumber > 0) {
             if (state == 2) {
-                if (numberTv.getText().toString() == null) {
-                    number = 0;
+                if (TextUtils.isEmpty(numberTv.getText().toString())) {
+                    number = 1;
                 } else {
                     number = Integer.valueOf(numberTv.getText().toString());
                 }
                 if (number > 0) {
-                    showNormalDialog("数量：" + number);
+                    showNormalDialog("数量：" + number+"\t重量：" + weightStr);
                 } else {
                     showMessage("数量不能小于1");
                 }
@@ -293,11 +294,6 @@ public class OrderWeightActivity extends BaseActivity {
             }
         } else {
             if (state == 2) {
-                if (weightTv.getText().toString() == null) {
-                    weightStr = "0";
-                } else {
-                    weightStr = weightTv.getText().toString();
-                }
                 float weightFt = Float.parseFloat(weightStr);
                 if (weightFt <= 0) {
                     showMessage("重量需大于0");
@@ -307,7 +303,11 @@ public class OrderWeightActivity extends BaseActivity {
             } else {
                 number = 0;
                 weightStr = "0";
-                showNormalDialog("已配货总重量：" + actualWeight);
+                if (actualWeight.compareTo(floating) >= 0) {
+                    showNormalDialog("已配货总重量：" + actualWeight);
+                } else {
+                    showNormalDialog("已配货总重量：" + actualWeight + "\t请注意：此次低于最低限度重量！");
+                }
             }
         }
     }
@@ -351,6 +351,7 @@ public class OrderWeightActivity extends BaseActivity {
             }
         });
     }
+
     private void sqlInsert() {
         OrderDetail orderDetail = new OrderDetail(detail.getOrderDetailId(), actualNumber,
                 state, detail.getOrderNumber(), detail.getProductName(), detail.getAlibraryName(), detail.getWeight(), detail.getNumber(), NumFormatUtil.getDateDetail(), detail.getBarCode(), detail.getPrice(), 0.0f, 0.0f);
@@ -461,7 +462,6 @@ public class OrderWeightActivity extends BaseActivity {
         setResult(2, intent);
     }
 
-
     private GpService mGpService = null;
 
     private PrinterServiceConnection mPrintConnect = null;
@@ -494,10 +494,12 @@ public class OrderWeightActivity extends BaseActivity {
                 } else if (type == GpDevice.STATE_NONE) {
                     showMessage("打印机未连接");
                     mPortParam.setPortOpenState(false);
+                    printerTv.setText("打印机未连接");
                     AppConfig.isUseGpPrinter = false;
                 } else if (type == GpDevice.STATE_VALID_PRINTER) {
                     showMessage("打印机已连接");
                     mPortParam.setPortOpenState(true);
+                    printerTv.setText("打印机已连接");
                     AppConfig.isUseGpPrinter = true;
                 }
             }
@@ -606,7 +608,6 @@ public class OrderWeightActivity extends BaseActivity {
     private PendingIntent pi;
 
     public void register() {
-
 //        registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
         IntentFilter filter = new IntentFilter();
         filter.addAction(GpCom.ACTION_CONNECT_STATUS);

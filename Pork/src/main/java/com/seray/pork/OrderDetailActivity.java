@@ -62,7 +62,7 @@ public class OrderDetailActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mMisc.beep();
-                if (Type == 2)
+                if (Type == 3)
                     return;
                 OrderDetail orderDetail = detailList.get(position);
                 Intent intent = new Intent(OrderDetailActivity.this, OrderWeightActivity.class);

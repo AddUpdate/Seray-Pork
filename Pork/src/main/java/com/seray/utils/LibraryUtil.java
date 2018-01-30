@@ -33,7 +33,7 @@ public class LibraryUtil {
             return libraryList;
         }
         String data = library.get(0).getLibraryName();
-        LogUtil.e("LibraryData",data);
+        LogUtil.d("LibraryData",data);
         try {
             JSONArray jsonArray = new JSONArray(data);
             for (int i = 0; i < jsonArray.length(); i++) {

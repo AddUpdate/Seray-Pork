@@ -180,5 +180,16 @@
             android:background="@drawable/bg_button_ok"
             android:layout_marginRight="@dimen/dp_25"
             />
+        <TextView
+            android:id="@+id/tv_order_weight_printer"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_60"
+            android:layout_toLeftOf="@+id/bt_order_weight_confirm"
+            android:textSize="@dimen/configTextSize"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="150dp"
+            />
     </RelativeLayout>
 </LinearLayout>

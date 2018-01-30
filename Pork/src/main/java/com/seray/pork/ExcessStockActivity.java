@@ -594,10 +594,12 @@ public class ExcessStockActivity extends BaseActivity {
             isByWeight = false;
             TvWeightType.setText("计件");
             TvWeightType.setTextColor(Color.RED);
+            unit = "袋";
             TvWeight.setText("0");
         } else {
             isByWeight = true;
             TvWeightType.setText("重量   KG");
+            unit = "KG";
             TvWeightType.setTextColor(Color.WHITE);
         }
     }

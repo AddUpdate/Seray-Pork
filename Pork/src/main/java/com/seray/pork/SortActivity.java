@@ -85,8 +85,8 @@ import java.util.List;
 
 public class SortActivity extends BaseActivity {
     private TextView TvName, TvWeight, TvTareWeight, TvWeightType;
-    private TextView mTvOrderNumView, mMaxUnitView, mTimeView;
-    private ImageView mBatteryIv;
+    private TextView mMaxUnitView, mTimeView;
+    private ImageView mBatteryIv, mPrinterView;
 
     private Spinner spinnerCome, spinnerLeave;
     private List<String> come_data = new ArrayList<>();
@@ -111,9 +111,9 @@ public class SortActivity extends BaseActivity {
     SeparateAdapter separateAdapter;
     SeparateProductsAdapter productsAdapter;
 
-    private String name, weight, unit, plu = "";
+    private String name, weight, unit, plu = "",price;
     private int number;
-    private String source,goLibrary,comeLibraryId, goLibraryId;
+    private String source, goLibrary, comeLibraryId, goLibraryId;
 
     private boolean isByWeight = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
@@ -169,7 +169,7 @@ public class SortActivity extends BaseActivity {
         spinnerCome.setGravity(Gravity.CENTER);
         spinnerLeave = (Spinner) findViewById(R.id.spinner_sort_leave);
         spinnerLeave.setGravity(Gravity.CENTER);
-        mTvOrderNumView = (TextView) findViewById(R.id.server_order_count);
+        mPrinterView = (ImageView) findViewById(R.id.server_order_count);
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mBatteryIv = (ImageView) findViewById(R.id.battery);
         mTimeView = (TextView) findViewById(R.id.timer);
@@ -183,6 +183,7 @@ public class SortActivity extends BaseActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!isByWeight) {
@@ -192,12 +193,12 @@ public class SortActivity extends BaseActivity {
                     }
                 }
             }
+
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
     }
-
 
     /**
      * 时间刷新监听器 每分钟自动监听 注意：API要求必须动态注册
@@ -222,7 +223,7 @@ public class SortActivity extends BaseActivity {
                 mMisc.beep();
                 TvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
-
+                price = String.valueOf(productList.get(position).getUnitPrice());
                 int num = productList.get(position).getMeasurementMethod();
                 switch (num) {
                     case 1:
@@ -283,7 +284,6 @@ public class SortActivity extends BaseActivity {
 
             }
         });
-
     }
 
     private void initData() {
@@ -438,7 +438,7 @@ public class SortActivity extends BaseActivity {
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_sort_ok:
-                weight= TvWeight.getText().toString();
+                weight = TvWeight.getText().toString();
                 name = TvName.getText().toString();
                 float weightFt = Float.parseFloat(weight);
                 if (TextUtils.isEmpty(name)) {
@@ -475,7 +475,7 @@ public class SortActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getTakeSortingArea(name, weight, String.valueOf(number), source, comeLibraryId, goLibraryId);
                 if (api.Result) {
-                 //   sqlInsert(1, "");
+                    //   sqlInsert(1, "");
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                     OrderDetail orderDetail = new OrderDetail();
@@ -502,7 +502,7 @@ public class SortActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveSortingArea(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                   // sqlInsert(1, goLibraryId);
+                    // sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -524,7 +524,7 @@ public class SortActivity extends BaseActivity {
             object.put("PLU", plu);
             object.put("WeightCompany", unit);
             object.put("Number", number);
-            object.put("UnitPrice", "0");
+            object.put("UnitPrice", price);
             object.put("Remarks", "");
             Division = object.toString();
         } catch (JSONException e) {
@@ -535,7 +535,7 @@ public class SortActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(),"",state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "", state);
         logManager.insertOperationLog(log);
     }
 
@@ -628,11 +628,13 @@ public class SortActivity extends BaseActivity {
             cleanTareFloat();
             isByWeight = false;
             TvWeightType.setText("计件");
+            unit = "袋";
             TvWeightType.setTextColor(Color.RED);
             TvWeight.setText("0");
         } else {
             isByWeight = true;
             TvWeightType.setText("重量   KG");
+            unit = "KG";
             TvWeightType.setTextColor(Color.WHITE);
         }
     }
@@ -682,6 +684,7 @@ public class SortActivity extends BaseActivity {
             }
         }).setTitle("提示").show();
     }
+
     //接收电量消息 每半小时一次
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveBattery(BatteryMsg msg) {
@@ -783,16 +786,17 @@ public class SortActivity extends BaseActivity {
                 } else if (type == GpDevice.STATE_NONE) {
                     showMessage("打印机未连接");
                     mPortParam.setPortOpenState(false);
+                    mPrinterView.setVisibility(View.INVISIBLE);
                     AppConfig.isUseGpPrinter = false;
                 } else if (type == GpDevice.STATE_VALID_PRINTER) {
                     showMessage("打印机已连接");
                     mPortParam.setPortOpenState(true);
+                    mPrinterView.setVisibility(View.VISIBLE);
                     AppConfig.isUseGpPrinter = true;
                 }
             }
         }
     };
-
 
     private void initPortParam() {
         boolean state = getConnectState();
@@ -899,13 +903,13 @@ public class SortActivity extends BaseActivity {
         timeFilter.addAction(Intent.ACTION_TIME_TICK);
         registerReceiver(timeReceiver, timeFilter);
 
-//        registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
+        //  registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
         IntentFilter filter = new IntentFilter();
         filter.addAction(GpCom.ACTION_CONNECT_STATUS);
         registerReceiver(PrinterStatusBroadcastReceiver, filter);
         IntentFilter dateFilter = new IntentFilter();
         dateFilter.addAction("com.seray.scale.DATE_CHANGED");
-//        registerReceiver(dateReceiver, dateFilter);
+        // registerReceiver(dateReceiver, dateFilter);
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 23);
         c.set(Calendar.MINUTE, 59);
@@ -943,7 +947,7 @@ public class SortActivity extends BaseActivity {
         }
         Intent intent = new Intent(this, BatteryService.class);
         stopService(intent);
-//        unregisterReceiver(mPrintReceiver);
+        //   unregisterReceiver(mPrintReceiver);
         unregisterReceiver(PrinterStatusBroadcastReceiver);
         AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         am.cancel(pi);

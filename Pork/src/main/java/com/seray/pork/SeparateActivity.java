@@ -69,7 +69,7 @@ public class SeparateActivity extends BaseActivity {
     private Button peelBt, submitBt;
     private GridView mGridViewPlu;
     private ListView groupListView;
-    private String name, weight, source, plu = "",weightCompany;
+    private String name, weight, source, plu = "",weightCompany,unitPrice;
     private String comeLibraryId;
     private String goLibraryId;
     private String goLibrary;
@@ -160,6 +160,22 @@ public class SeparateActivity extends BaseActivity {
                 mMisc.beep();
                 TvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
+                unitPrice = String.valueOf(productList.get(position).getUnitPrice());
+                int num = productList.get(position).getMeasurementMethod();
+                switch (num) {
+                    case 1:
+                        weightCompany = "KG";
+                        break;
+                    case 2:
+                        weightCompany = "袋";
+                        break;
+                    case 3:
+                        weightCompany = "箱";
+                        break;
+                    default:
+                        weightCompany = "";
+                        break;
+                }
             }
         });
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -444,8 +460,8 @@ public class SeparateActivity extends BaseActivity {
             object.put("Weight", weight);
             object.put("Source", source);
             object.put("PLU", plu);
-            object.put("WeightCompany", "KG");
-            object.put("UnitPrice", "0");
+            object.put("WeightCompany", weightCompany);
+            object.put("UnitPrice", unitPrice);
             object.put("Remarks", "");
             Division = object.toString();
         } catch (JSONException e) {

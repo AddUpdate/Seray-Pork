@@ -26,6 +26,23 @@
         android:layout_weight="1"
         android:orientation="horizontal">
 
+
+
+        <Button
+            android:id="@+id/pur_insert"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_products_item"
+            android:gravity="center"
+            android:text="录入"
+            android:textColor="@color/white"
+            android:textSize="@dimen/functionButtonTextSize" />
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="@color/white" />
         <Button
             android:id="@+id/pur_search"
             android:layout_width="0dp"
@@ -44,17 +61,16 @@
             android:background="@color/white" />
 
         <Button
-            android:id="@+id/pur_insert"
+            android:id="@+id/pur_weighing"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:background="@drawable/bg_products_item"
             android:gravity="center"
-            android:text="录入"
+            android:text="其他过秤"
             android:textColor="@color/white"
             android:textSize="@dimen/functionButtonTextSize" />
-
 
     </LinearLayout>
 
@@ -67,9 +83,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
-
-
+        android:orientation="horizontal"
+        android:weightSum="3"
+        >
         <Button
             android:id="@+id/pur_upload"
             android:layout_width="0dp"

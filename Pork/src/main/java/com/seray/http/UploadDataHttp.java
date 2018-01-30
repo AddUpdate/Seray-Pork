@@ -62,9 +62,6 @@ public class UploadDataHttp {
                 String result = obj.getString("Result");
                 if (!TextUtils.isEmpty(result)) {
                     String[] sourceStrArray = result.split(",");
-                    for (int i = 0; i < sourceStrArray.length; i++) {
-                        LogUtil.d("sourceStrArray", sourceStrArray[i]);
-                    }
                     sourceDetail = sourceStrArray;
                     LogUtil.d("jsonStr", jsonStr);
                 }
@@ -264,7 +261,6 @@ public class UploadDataHttp {
         params.put("Number", String.valueOf(number));
         params.put("PurchaseNumber", batchNumber);
         params.put("State", String.valueOf(state));
-LogUtil.d("ActualWeight",id+"---"+weight+"---"+number+"---"+batchNumber+"---"+state);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -920,6 +916,7 @@ LogUtil.d("ActualWeight",id+"---"+weight+"---"+number+"---"+batchNumber+"---"+st
         SparseArray<List<OrderPick>> mSparseArray = new SparseArray<>();
         List<OrderPick> orderPickList = new ArrayList<>();
         List<OrderPick> orderPickList2 = new ArrayList<>();
+        List<OrderPick> orderPickList3 = new ArrayList<>();
         try {
             Response response = HttpUtils.syncResponsePost(API.GET_ORDERS_URL,
                     BATCH_NUMBER_TAG, params);
@@ -966,18 +963,19 @@ LogUtil.d("ActualWeight",id+"---"+weight+"---"+number+"---"+batchNumber+"---"+st
                         orderDetail.setActualWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("ActualWeight")));
                         orderDetail.setState(detailObject.getString("State").equals("已完成") ? 1 : 2);
                         orderDetailList.add(orderDetail);
-
                     }
-
                     orderPick.setDetailList(orderDetailList);
                     if (orderPick.getState().equals("配送中") || orderPick.getState().equals("已完成")) {
-                        orderPickList2.add(orderPick);
+                        orderPickList3.add(orderPick);
                     } else {
                         orderPickList.add(orderPick);
                     }
                 }
+                OrderPick orderPick2 = new OrderPick();
+                orderPickList2.add(orderPick2);
                 mSparseArray.put(1, orderPickList);
                 mSparseArray.put(2, orderPickList2);
+                mSparseArray.put(3, orderPickList3);
                 LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();

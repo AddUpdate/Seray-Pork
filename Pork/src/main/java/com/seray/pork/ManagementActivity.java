@@ -18,7 +18,10 @@ import com.seray.entity.Config;
 import com.seray.entity.TareItem;
 import com.seray.http.API;
 import com.seray.pork.dao.ConfigManager;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LogUtil;
+import com.seray.view.LoadingDialog;
+import com.seray.view.LoginDialog;
 import com.seray.view.PromptDialog;
 import com.seray.view.SetIpDialog;
 import com.seray.view.SetTareDialog;
@@ -35,7 +38,7 @@ public class ManagementActivity extends BaseActivity {
     private GridView mGridViewBtn;
     private ManagementAdapter adapter;
     private List<String> name = new ArrayList<>();
-
+     LoadingDialog mLoadingDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,10 +59,12 @@ public class ManagementActivity extends BaseActivity {
     }
 
     private void initData() {
+        mLoadingDialog = new LoadingDialog(this);
         name.add("扣重设置");
         name.add("浮动率设置");
         name.add("IP端口设置");
         name.add("退出应用");
+        name.add("清操作数据和图片");
         name.add("返回");
         adapter = new ManagementAdapter(this, name);
         mGridViewBtn.setAdapter(adapter);
@@ -80,10 +85,13 @@ public class ManagementActivity extends BaseActivity {
                         setTareDialog("配货浮动率设置");
                         break;
                     case "退出应用":
-                        showNormalDialog();
+                        showNormalDialog(1);
                         break;
                     case "IP端口设置":
                         setIpDialog("IP端口设置");
+                        break;
+                    case "清操作数据和图片":
+                        showNormalDialog(2);
                         break;
                     case "返回":
                         finish();
@@ -96,16 +104,36 @@ public class ManagementActivity extends BaseActivity {
     /*
      *  信息确认提示
      */
-    private void showNormalDialog() {
+    private void showNormalDialog(final int content) {
 
-        new PromptDialog(this, R.style.Dialog, "确定退出应用", new PromptDialog.OnCloseListener() {
+        new PromptDialog(this, R.style.Dialog, content == 1?"确定退出应用吗？":getString(R.string.test_clear_msg), new PromptDialog.OnCloseListener() {
             @Override
             public void onClick(Dialog dialog, boolean confirm) {
                 if (confirm) {
                     mMisc.beep();
-                    Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                    startActivity(intent);
-                    App.getApplication().exit();
+                    switch (content){
+                        case 1:
+                            Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                            startActivity(intent);
+                            App.getApplication().exit();
+                            break;
+                        case 2:
+                            sqlQueryThread.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mLoadingDialog.showDialog();
+                                    if (FileHelp.deleteDir(FileHelp.DATA_PIC_DIR)) {
+                                        showMessage(R.string.test_clear_show_msg_ok);
+                                    } else {
+                                        showMessage(R.string.test_clear_show_msg_failed);
+                                    }
+                                    FileHelp.deleteDir(FileHelp.STOCK_DIR);
+                                  //  mSettingHandler.sendEmptyMessage(6);
+                                    mLoadingDialog.dismissDialog();// TODO: 2018/1/24 待完善 
+                                }
+                            });
+                            break;
+                    }
                     dialog.dismiss();
                 } else {
                     mMisc.beep();

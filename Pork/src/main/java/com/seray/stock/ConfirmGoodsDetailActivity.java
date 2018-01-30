@@ -62,7 +62,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private int state;
     private int actualNumber;
     private int position;
-    LoadingDialog loadingDialog;
+    LoadingDialog mLoadingDialog;
     private boolean timeflag = true;
     private boolean weightFlag = false;
 
@@ -115,7 +115,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         mCameraPreview = CameraPreview.getInstance();
         mScale = JNIScale.getScale();
         numUtil = NumFormatUtil.getInstance();
-        loadingDialog = new LoadingDialog(this);
+        mLoadingDialog = new LoadingDialog(this);
         Intent intent = getIntent();
         if (intent != null) {
             batchNumber = intent.getStringExtra("batchNumber");
@@ -260,19 +260,19 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     }
 
     private void updateWeight() {
-        loadingDialog.showDialog();
+        mLoadingDialog.showDialog();
         //  String numberStr = String.valueOf(number);
         final float weightFt = Float.parseFloat(strWeight);
         LogUtil.d("weightFt", weightFt + "");
         //  final int n = Integer.parseInt(numberStr);
         if (weightFt < 0) {
             showMessage("重量不能为小于0");
-            loadingDialog.dismissDialog();
+            mLoadingDialog.dismissDialog();
             return;
         }
         if (weightFt == 0 && state == 2) {
             showMessage("重量不能为小于0");
-            loadingDialog.dismissDialog();
+            mLoadingDialog.dismissDialog();
             return;
         }
         httpQueryThread.submit(new Runnable() {
@@ -289,14 +289,14 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     } else {
                         mHandler.sendEmptyMessage(0);
                     }
-                    loadingDialog.dismissDialog();
+                    mLoadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
                     state = 2;
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, 0, state, 2);
                     sqlInsert(state,"");
-                    loadingDialog.dismissDialog();
+                    mLoadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -312,7 +312,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         mMisc.beep();
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                loadingDialog.dismissDialog();
+                mLoadingDialog.dismissDialog();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
                 if (!mScale.zero()) {

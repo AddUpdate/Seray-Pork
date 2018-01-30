@@ -15,13 +15,14 @@ import com.seray.adapter.OrderAdapter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.OrderPick;
 import com.seray.http.UploadDataHttp;
+import com.seray.utils.LogUtil;
 import com.seray.view.LoadingDialog;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderActivity extends BaseActivity {
-    private int mType = 1;// 1 待配货   2 已配货
+    private int mType = 1;// 1 待配货 2 按品名配货  3 已配货
     private Button mReturn,mUptata;
     private TextView lastSelected = null;
     private TextView waitConfigureTv,productsConfigureTv, finishConfigureTv;
@@ -140,11 +141,12 @@ public class OrderActivity extends BaseActivity {
                 break;
             case R.id.tv_order_wait_products:
                 changedSelectedView(v);
-                mType = 3;
+                mType = 2;
                 updateTableList();
+                break;
             case R.id.tv_order_finish:
                 changedSelectedView(v);
-                mType = 2;
+                mType = 3;
                 updateTableList();
                 break;
         }

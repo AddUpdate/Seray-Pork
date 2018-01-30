@@ -35,6 +35,7 @@ import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.PurchaseDetailManager;
 import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.DeductTareDialog;
 import com.seray.view.LoadingDialog;
@@ -57,7 +58,7 @@ public class InBulkQuantityActivity extends BaseActivity {
     private TextView batchNumberTv, nameTv, weightTv, tareWeightTv, modeTv, numberTv;
     private EditText numberEt;
     private Button minusPeelBt, confirmBt, finishBt, returnBt;
-    private String batchNumber, productName, productId, mode, weight,plu;
+    private String batchNumber, productName, productId, mode, weight, plu;
     private LinearLayout llWeight;
     float weightFt;
     int numberInt;
@@ -87,6 +88,7 @@ public class InBulkQuantityActivity extends BaseActivity {
     private String prevRecordImgName = null;
     private boolean camerIsEnable = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
         initLibrary();
@@ -123,11 +125,12 @@ public class InBulkQuantityActivity extends BaseActivity {
         spinnerCome = (Spinner) findViewById(R.id.spinner_in_bulk_come);
         spinnerLeave = (Spinner) findViewById(R.id.spinner_in_bulk_leave);
     }
+
     private void initLibrary() {
 
         come_data.clear();
         go_data.clear();
-        List<LibraryList> libraryList = libraryUtil.libraryJson("Loulibrary");// TODO: 2018/1/19 位置标识获取库名
+        List<LibraryList> libraryList = libraryUtil.libraryJson("Purchase");
         if (libraryList.size() == 0)
             return;
         comeLibraryList = libraryList.get(0).getLibraryList();
@@ -146,6 +149,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         go_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
         spinnerLeave.setAdapter(go_adapter);
     }
+
     private void initListener() {
         minusPeelBt.setOnClickListener(this);
         confirmBt.setOnClickListener(this);
@@ -365,11 +369,13 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         });
     }
+
     private void sqlInsert(int state) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, productName, plu, numUtil.getDecimalNet(weight), numberInt, mode, NumFormatUtil.getDateDetail(),getCameraPic(),state);
+        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, productName, plu, numUtil.getDecimalNet(weight), numberInt, mode, NumFormatUtil.getDateDetail(), getCameraPic(), state);
         logManager.insertOperationLog(log);
     }
+
     @Override
     public void onClick(View view) {
         mMisc.beep();
@@ -400,7 +406,6 @@ public class InBulkQuantityActivity extends BaseActivity {
         intent.putExtra("state", state); //将计算的值回传回去
         intent.putExtra("position", position);
         //通过intent对象返回结果，必须要调用一个setResult方法，
-
         setResult(3, intent);
     }
 
@@ -425,6 +430,7 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         }
     }
+
     private void camera() {
         //生成本地设置  是否开启拍照
         if (true) {
@@ -448,6 +454,7 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         }
     }
+
     /**
      * 获取拍照图片
      */
@@ -463,7 +470,7 @@ public class InBulkQuantityActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-            mMisc.beep();
+        mMisc.beep();
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
                 loadingDialog.dismissDialog();
@@ -497,6 +504,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         tareWeightTv.setText(R.string.base_weight);
         //    setTareFloat();
     }
+
     /**
      * 重置tareFloat
      */
