@@ -22,8 +22,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.seray.adapter.SeparateAdapter;
-import com.seray.adapter.SeparateProductsAdapter;
+import com.camera.simplewebcam.CameraPreview;
+import com.seray.adapter.CategoryAdapter;
+import com.seray.adapter.ProductsAdapter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -39,6 +40,7 @@ import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
 import com.seray.view.DeductTareDialog;
 import com.seray.utils.NumFormatUtil;
@@ -53,6 +55,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +72,7 @@ public class SeparateActivity extends BaseActivity {
     private Button peelBt, submitBt;
     private GridView mGridViewPlu;
     private ListView groupListView;
-    private String name, weight, source, plu = "",weightCompany,unitPrice;
+    private String name, weight, source, plu = "", weightCompany, unitPrice;
     private String comeLibraryId;
     private String goLibraryId;
     private String goLibrary;
@@ -80,6 +83,10 @@ public class SeparateActivity extends BaseActivity {
     private float tareFloat = -1.0F;
 
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private boolean flag = true;
     private SeparateHandler mSeparateHandler = new SeparateHandler(new WeakReference<>(this));
 
@@ -92,11 +99,15 @@ public class SeparateActivity extends BaseActivity {
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
 
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = "";
+    private boolean camerIsEnable = true;
 
     private List<ProductsCategory> categoryList = new ArrayList<>();
     private List<Products> productList;
-    SeparateAdapter separateAdapter;
-    SeparateProductsAdapter productsAdapter;
+    CategoryAdapter separateAdapter;
+    ProductsAdapter productsAdapter;
     OperationLogManager logManager = OperationLogManager.getInstance();
     private NumFormatUtil mNumUtil = null;
     LoadingDialog loadingDialog;
@@ -105,6 +116,13 @@ public class SeparateActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
         initLibrary();
+    }
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
     }
 
     @Override
@@ -223,6 +241,7 @@ public class SeparateActivity extends BaseActivity {
     private void initData() {
         Intent intent = new Intent(this, BatteryService.class);
         startService(intent);
+        mCameraPreview = CameraPreview.getInstance();
         mNumUtil = NumFormatUtil.getInstance();
         //  comeLibraryList = manager.queryAllLibrary();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
@@ -240,7 +259,7 @@ public class SeparateActivity extends BaseActivity {
         come_data.clear();
         go_data.clear();
         List<LibraryList> libraryList = libraryUtil.libraryJson("Division");
-        if (libraryList.size()==0)
+        if (libraryList.size() == 0)
             return;
         comeLibraryList = libraryList.get(0).getLibraryList();
         goLibraryList = libraryList.get(1).getLibraryList();
@@ -260,10 +279,10 @@ public class SeparateActivity extends BaseActivity {
 
     private void initAdapter() {
 
-        separateAdapter = new SeparateAdapter(this, categoryList);
+        separateAdapter = new CategoryAdapter(this, categoryList);
         groupListView.setAdapter(separateAdapter);
         groupListView.setItemChecked(0, true);
-        productsAdapter = new SeparateProductsAdapter(this, productList);
+        productsAdapter = new ProductsAdapter(this, productList);
         mGridViewPlu.setAdapter(productsAdapter);
         if (categoryList.size() > 0) {
             productList = categoryList.get(0).getProductsList();
@@ -279,6 +298,7 @@ public class SeparateActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     private void timer() {
@@ -288,6 +308,13 @@ public class SeparateActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mSeparateHandler.sendEmptyMessage(1);
+                    mSeparateHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -375,6 +402,9 @@ public class SeparateActivity extends BaseActivity {
 //                        activity.setTareFloat();
                         activity.weightChangedCyclicity();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -387,6 +417,44 @@ public class SeparateActivity extends BaseActivity {
         separateAdapter.setNewData(categoryList);
     }
 
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
+
     @Override
     public void onClick(View view) {
         super.onClick(view);
@@ -397,16 +465,21 @@ public class SeparateActivity extends BaseActivity {
             case R.id.bt_separate_ok:
                 weight = TvWeight.getText().toString();
                 name = TvName.getText().toString();
+                if (isOL()){
+                    showMessage("超出秤量程！");
+                    return;
+                }
                 float weightFt = Float.parseFloat(weight);
 
                 if (!TextUtils.isEmpty(name) && weightFt > 0)
-                    if (goLibrary.equals("分拣区")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
-                    } else if (goLibrary.equals("鲜品库")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
-                    } else {
-                        showMessage("选择正确的去向地");
-                    }
+                    showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
+//                    if (goLibrary.equals("分拣区")) {
+//                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
+//                    } else if (goLibrary.equals("鲜品库")) {
+//                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+//                    } else {
+//                        showMessage("选择正确的去向地");
+//                    }
                 else {
                     showMessage("品名不能为空、重量需大于零");
                 }
@@ -414,14 +487,14 @@ public class SeparateActivity extends BaseActivity {
         }
     }
 
-    //出分割到分拣
+    //出分割到分拣(通用)
     private void submitOut() {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getOutDivision(submitOutData(), source, comeLibraryId, goLibraryId);
+                ApiResult api = UploadDataHttp.getOutDivision(submitOutData(),submitOutDataHelper());
                 if (api.Result) {
-                //    sqlInsert(1, goLibraryId);
+                    //    sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -433,46 +506,58 @@ public class SeparateActivity extends BaseActivity {
         });
     }
 
-    //出分割到鲜品
-    private void submitOutToExcess() {
-        httpQueryThread.submit(new Runnable() {
-            @Override
-            public void run() {
-                ApiResult api = UploadDataHttp.getTakeDivision(comeLibraryId, name, weight);
-                if (api.Result) {
-               //     sqlInsert(1, "");
-                    loadingDialog.dismissDialog();
-                    showMessage(api.ResultMessage);
-                } else {
-                    sqlInsert(2, "");
-                    loadingDialog.dismissDialog();
-                    showMessage(api.ResultMessage);
-                }
-            }
-        });
-    }
+//    //出分割到鲜品
+//    private void submitOutToExcess() {
+//        httpQueryThread.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                ApiResult api = UploadDataHttp.getTakeDivision(comeLibraryId, name, weight);
+//                if (api.Result) {
+//                    //     sqlInsert(1, "");
+//                    loadingDialog.dismissDialog();
+//                    showMessage(api.ResultMessage);
+//                } else {
+//                    sqlInsert(2, "");
+//                    loadingDialog.dismissDialog();
+//                    showMessage(api.ResultMessage);
+//                }
+//            }
+//        });
+//    }
 
     private String submitOutData() {
         JSONObject object = new JSONObject();
         String Division = "";
         try {
-            object.put("ItemName", name);
-            object.put("Weight", weight);
-            object.put("Source", source);
             object.put("PLU", plu);
             object.put("WeightCompany", weightCompany);
             object.put("UnitPrice", unitPrice);
-            object.put("Remarks", "");
             Division = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return Division;
     }
-
+    private String submitOutDataHelper() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("ItemName", name);
+            object.put("Weight", weight);
+            object.put("ComeAlibraryName", source);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
+    }
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "",state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "", state);
         logManager.insertOperationLog(log);
     }
 
@@ -505,6 +590,8 @@ public class SeparateActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
                 cleanTareFloat();
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -515,6 +602,8 @@ public class SeparateActivity extends BaseActivity {
             case KeyEvent.KEYCODE_F2:// 置零
                 if (mScale.zero()) {
                     cleanTareFloat();
+                    lastWeight = 0.0f;
+                    currWeight = 0.0f;
                     TvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");
@@ -533,9 +622,9 @@ public class SeparateActivity extends BaseActivity {
         cleanTareFloat();
     }
 
-       /*
-        *  信息确认提示
-        */
+    /*
+     *  信息确认提示
+     */
     private void showNormalDialog(String weightContent, final int flag) {
         new PromptDialog(this, R.style.Dialog, weightContent, new PromptDialog.OnCloseListener() {
             @Override
@@ -548,7 +637,7 @@ public class SeparateActivity extends BaseActivity {
                             submitOut();
                             break;
                         case 2:
-                            submitOutToExcess();
+                        //    submitOutToExcess();
                             break;
                     }
                     dialog.dismiss();
@@ -572,7 +661,7 @@ public class SeparateActivity extends BaseActivity {
                     int count = item.getCount();
                     if (count == 0)
                         continue;
-                    float net =Float.parseFloat(item.getNetStr());
+                    float net = Float.parseFloat(item.getNetStr());
                     totalTare += (net * count);
                 }
                 setTareFloat(totalTare);

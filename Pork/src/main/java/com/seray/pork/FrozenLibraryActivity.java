@@ -384,7 +384,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     @Override
     public void onScanSuccess(String barcode) {
         codeData = barcode;
-        LogUtil.e("codeEt", codeData);
+        LogUtil.d("codeEt", codeData);
         codeEt.setText(codeData);
         if (!TextUtils.isEmpty(codeData))
             getBarCode();

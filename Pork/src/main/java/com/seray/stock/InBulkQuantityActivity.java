@@ -2,6 +2,7 @@ package com.seray.stock;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Picture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -44,6 +45,8 @@ import com.tscale.scalelib.jniscale.JNIScale;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -59,11 +62,16 @@ public class InBulkQuantityActivity extends BaseActivity {
     private EditText numberEt;
     private Button minusPeelBt, confirmBt, finishBt, returnBt;
     private String batchNumber, productName, productId, mode, weight, plu;
+
     private LinearLayout llWeight;
     float weightFt;
     int numberInt;
     private float tareFloat = -1.0F;
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private int state = 2; //1入库确定完成  2 未确定完
     private boolean timeflag = true;
     private InBulkHandler mInBulkHandler = new InBulkHandler(new WeakReference<>(this));
@@ -85,13 +93,20 @@ public class InBulkQuantityActivity extends BaseActivity {
     private String comeLibraryId, comeLibrary, goLibraryId, goLibrary;
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
         initLibrary();
+    }
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
     }
 
     @Override
@@ -226,9 +241,11 @@ public class InBulkQuantityActivity extends BaseActivity {
     }
 
     private void initData() {
+        mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
         mCameraPreview = CameraPreview.getInstance();
         numUtil = NumFormatUtil.getInstance();
-        mScale = JNIScale.getScale();
+
         Intent intent = getIntent();
         if (intent != null) {
             PurchaseDetail detail = (PurchaseDetail) getIntent().getSerializableExtra("PurchaseDetail");
@@ -271,6 +288,13 @@ public class InBulkQuantityActivity extends BaseActivity {
                 super.run();
                 while (timeflag) {
                     mInBulkHandler.sendEmptyMessage(1);
+                    mInBulkHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (mScale.getStabFlag()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -306,7 +330,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         if (TextUtils.isEmpty(number)) {
             number = "0";
         }
-        if (weight.equals("OL")) {
+        if (isOL()) {
             showMessage("超出秤量程");
             return;
         }
@@ -324,6 +348,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         }
         if (state == 1) {
             weightFt = 0;
+            weight = "0";
             numberInt = 0;
             if (mode.equals("KG")) {
                 showNormalDialog("采购重量：" + inputWeight + mode + "！\n现已确认重量：" + actualWeight + mode + "!\n确定完成后不能再操作");
@@ -334,6 +359,8 @@ public class InBulkQuantityActivity extends BaseActivity {
             if (mode.equals("KG")) {
                 showNormalDialog("此次重量为:  " + weightFt + " KG");
             } else {
+                weightFt = 0;
+                weight = "0";
                 showNormalDialog("此次数量为:  " + numberInt);
             }
         }
@@ -345,7 +372,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.setUpdateActualWeight(productId, weightFt, numberInt, batchNumber, state);
+                ApiResult api = UploadDataHttp.setUpdateActualWeight(productId, batchNumber, state,submitData());
                 if (api.Result) {
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, numberInt, state, 1);
@@ -374,6 +401,22 @@ public class InBulkQuantityActivity extends BaseActivity {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
         OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, productName, plu, numUtil.getDecimalNet(weight), numberInt, mode, NumFormatUtil.getDateDetail(), getCameraPic(), state);
         logManager.insertOperationLog(log);
+    }
+    private String submitData() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("Weight", weight);
+            object.put("Number", numberInt);
+            object.put("ComelibraryId", "8E42A7B1-BC5C-4C97-A504-314892734410");//采购
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
     }
 
     @Override
@@ -426,6 +469,9 @@ public class InBulkQuantityActivity extends BaseActivity {
                     case 1:
                         activity.weightChangedCyclicity();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -477,6 +523,8 @@ public class InBulkQuantityActivity extends BaseActivity {
                 clearZero();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.zero()) {
                     cleanTareFloat();
                     clearZero();
@@ -485,6 +533,8 @@ public class InBulkQuantityActivity extends BaseActivity {
                 }
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
@@ -573,7 +623,6 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         }).setTitle("提示").show();
     }
-
 
     @Override
     protected void onDestroy() {

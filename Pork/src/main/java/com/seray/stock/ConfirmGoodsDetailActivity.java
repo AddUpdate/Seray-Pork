@@ -24,6 +24,7 @@ import com.seray.entity.ApiResult;
 import com.seray.entity.OperationLog;
 import com.seray.entity.PurchaseDetail;
 import com.seray.http.UploadDataHttp;
+import com.seray.pork.App;
 import com.seray.pork.BaseActivity;
 import com.seray.pork.R;
 import com.seray.pork.dao.OperationLogManager;
@@ -34,6 +35,9 @@ import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -62,20 +66,33 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private int state;
     private int actualNumber;
     private int position;
+    private int goId = 1;//1 白条库  2 分割房
+    private String goLibraryId;
     LoadingDialog mLoadingDialog;
     private boolean timeflag = true;
     private boolean weightFlag = false;
 
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
 
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
     private ConfirmGoodsDetailHandler mHandler = new ConfirmGoodsDetailHandler(new
             WeakReference<>(this));
     private NumFormatUtil numUtil;
     OperationLogManager logManager = OperationLogManager.getInstance();
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,8 +129,10 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     }
 
     private void initData() {
-        mCameraPreview = CameraPreview.getInstance();
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
+
+        mCameraPreview = CameraPreview.getInstance();
         numUtil = NumFormatUtil.getInstance();
         mLoadingDialog = new LoadingDialog(this);
         Intent intent = getIntent();
@@ -153,6 +172,14 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 super.run();
                 while (timeflag) {
                     mHandler.sendEmptyMessage(1);
+                    mHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
+
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -168,16 +195,11 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         super.onClick(view);
         switch (view.getId()) {
             case R.id.confirm_goods_detail_continue:
-                if (weightFlag == true) {
-                    return;
-                }
+                goId = 1;
                 weightFlag = true;
                 break;
             case R.id.confirm_goods_detail_separate:
-                if (weightFlag == true) {
-                    return;
-                }
-                // TODO: 2018/1/22 分割按钮和 确定按钮需要 有个参数区分 
+                goId = 2;
                 weightFlag = true;
                 break;
             case R.id.confirm_goods_detail_ok:
@@ -213,7 +235,13 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     strWeight = strNet;
                     weightFlag = false;
                     state = 2;
-                    showNormalDialog("此次重量为:  " + strWeight + " KG");
+                    if (goId == 1) {
+                        goLibraryId = "";
+                        showNormalDialog("此次重量为:  " + strWeight + " KG" + "\t去向白条库");
+                    } else {
+                        goLibraryId = "77536151-E389-46EB-957A-BFB7B3BB8639";
+                        showNormalDialog("此次重量为:  " + strWeight + " KG" + "\t去向分割房");
+                    }
                 }
             }
         }
@@ -244,6 +272,9 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                         //    activity.number = 0;
                         activity.updateWeight();//提交失败后再次提交
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -262,8 +293,11 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private void updateWeight() {
         mLoadingDialog.showDialog();
         //  String numberStr = String.valueOf(number);
-        final float weightFt = Float.parseFloat(strWeight);
-        LogUtil.d("weightFt", weightFt + "");
+        if (isOL()){
+            showMessage("超出秤量程！");
+            return;
+        }
+         float weightFt = Float.parseFloat(strWeight);
         //  final int n = Integer.parseInt(numberStr);
         if (weightFt < 0) {
             showMessage("重量不能为小于0");
@@ -278,7 +312,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.setUpdateActualWeight(productId, weightFt, 0, batchNumber, state);
+                ApiResult api = UploadDataHttp.setUpdateActualWeight(productId, batchNumber, state, submitData());
                 if (api.Result) {
                     actualWeight = actualWeight.add(numUtil.getDecimalNet(strWeight));
                     //  PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
@@ -294,18 +328,34 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 } else {
                     state = 2;
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
-                    instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, 0, state, 2);
-                    sqlInsert(state,"");
+                    instance.updatePurchaseDetail(batchNumber, productName, productId, Float.parseFloat(strWeight), 0, state, 2);
+                    sqlInsert();
                     mLoadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 }
             }
         });
     }
-    private void sqlInsert(int state, String goId) {
+
+    private void sqlInsert() {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog("来向库ID", "来向库(采购和白条)", goId, productName, plu, numUtil.getDecimalNet(strWeight), 0, "KG", NumFormatUtil.getDateDetail(),getCameraPic(),state);
+        OperationLog log = new OperationLog("", "", goLibraryId, productName, plu, numUtil.getDecimalNet(strWeight), 0, "KG", NumFormatUtil.getDateDetail(), getCameraPic(), 2);
         logManager.insertOperationLog(log);
+    }
+    private String submitData() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("Weight", strWeight);
+            object.put("Number", "0");
+            object.put("ComelibraryId", "8E42A7B1-BC5C-4C97-A504-314892734410");//采购
+            object.put("GolibraryId", goLibraryId);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -315,6 +365,8 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 mLoadingDialog.dismissDialog();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (!mScale.zero()) {
                     showMessage("置零失败");
                 } else {
@@ -322,6 +374,8 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                 }
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));

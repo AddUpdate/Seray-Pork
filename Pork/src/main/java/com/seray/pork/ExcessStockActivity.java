@@ -25,8 +25,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.seray.adapter.SeparateAdapter;
-import com.seray.adapter.SeparateProductsAdapter;
+import com.camera.simplewebcam.CameraPreview;
+import com.seray.adapter.CategoryAdapter;
+import com.seray.adapter.ProductsAdapter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -36,12 +37,12 @@ import com.seray.entity.OperationLog;
 import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
 import com.seray.http.UploadDataHttp;
-import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
@@ -54,8 +55,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,17 +82,26 @@ public class ExcessStockActivity extends BaseActivity {
     private float tareFloat = -1.0F;
     private boolean isByWeight = true;
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private boolean flag = true;
     private ExcessStockHandler mExcessStockHandler = new ExcessStockHandler(new WeakReference<>(this));
 
     private List<ProductsCategory> categoryList = new ArrayList<>();
     private List<Products> productList;
-    SeparateAdapter separateAdapter;
-    SeparateProductsAdapter productsAdapter;
+    CategoryAdapter separateAdapter;
+    ProductsAdapter productsAdapter;
 
     private String name, plu = "", unit, price, weight;
     private int number;
     private String source, comeLibraryId, goLibraryId, goLibrary;
+
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
 
     OperationLogManager logManager = OperationLogManager.getInstance();
     private NumFormatUtil mNumUtil = null;
@@ -108,6 +118,12 @@ public class ExcessStockActivity extends BaseActivity {
         categoryList.clear();
         categoryList = msg.getList();
         separateAdapter.setNewData(categoryList);
+    }
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
     }
 
     @Override
@@ -243,6 +259,7 @@ public class ExcessStockActivity extends BaseActivity {
     }
 
     private void initData() {
+        mCameraPreview = CameraPreview.getInstance();
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
         ProductsManager productsManager = ProductsManager.getInstance();
@@ -278,10 +295,10 @@ public class ExcessStockActivity extends BaseActivity {
     }
 
     private void initAdapter() {
-        separateAdapter = new SeparateAdapter(this, categoryList);
+        separateAdapter = new CategoryAdapter(this, categoryList);
         groupListView.setAdapter(separateAdapter);
         groupListView.setItemChecked(0, true);
-        productsAdapter = new SeparateProductsAdapter(this, productList);
+        productsAdapter = new ProductsAdapter(this, productList);
         mGridViewPlu.setAdapter(productsAdapter);
         if (categoryList.size() > 0) {
             productList = categoryList.get(0).getProductsList();
@@ -313,6 +330,7 @@ public class ExcessStockActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     private void timer() {
@@ -322,7 +340,13 @@ public class ExcessStockActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mExcessStockHandler.sendEmptyMessage(1);
+                    mExcessStockHandler.sendEmptyMessage(5);
 
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -399,6 +423,8 @@ public class ExcessStockActivity extends BaseActivity {
                     case 1:
                         activity.weightChangedCyclicity();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
                 }
             }
         }
@@ -411,6 +437,10 @@ public class ExcessStockActivity extends BaseActivity {
             case R.id.bt_excess_stock_into:
                 weight = TvWeight.getText().toString();
                 name = TvName.getText().toString();
+                if (isOL()){
+                    showMessage("超出秤量程！");
+                    return;
+                }
                 float weightFt = Float.parseFloat(weight);
                 if (TextUtils.isEmpty(name)) {
                     showMessage("请选择品名");
@@ -503,6 +533,44 @@ public class ExcessStockActivity extends BaseActivity {
         logManager.insertOperationLog(log);
     }
 
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode != KeyEvent.KEYCODE_BACK) {
             mMisc.beep();
@@ -513,8 +581,8 @@ public class ExcessStockActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
                 cleanTareFloat();
-//                lastWeight = 0.0F;
-//                currWeight = 0.0F;
+                lastWeight = 0.0F;
+                currWeight = 0.0F;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -525,8 +593,8 @@ public class ExcessStockActivity extends BaseActivity {
             case KeyEvent.KEYCODE_F2:// 置零
                 if (mScale.zero()) {
                     cleanTareFloat();
-//                    lastWeight = 0.0F;
-//                    currWeight = 0.0F;
+                    lastWeight = 0.0F;
+                    currWeight = 0.0F;
                     TvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");

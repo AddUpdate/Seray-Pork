@@ -22,8 +22,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.seray.adapter.SeparateAdapter;
-import com.seray.adapter.SeparateProductsAdapter;
+import com.camera.simplewebcam.CameraPreview;
+import com.seray.adapter.CategoryAdapter;
+import com.seray.adapter.ProductsAdapter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -33,14 +34,13 @@ import com.seray.entity.OperationLog;
 import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
 import com.seray.http.UploadDataHttp;
-import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
-import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
@@ -52,14 +52,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * 白条库
@@ -68,6 +65,10 @@ import java.util.Locale;
 public class TemporaryLibraryActivity extends BaseActivity {
     private ImageView mBatteryIv;
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private TextView tvWeight, tvName, TvTareWeight;
     private TextView mMaxUnitView, mTimeView;
     private Button initLibraryBt;
@@ -85,15 +86,17 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private GridView mGridViewPlu;
     private ListView groupListView;
 
-    private String comeLibraryId;
-    private String goLibraryId;
-    private String goLibrary;
-    private String name = "", plu = "",weight = "", source,unit,unitPrice;
+    private String comeLibraryId, goLibraryId, goLibrary, name = "", plu = "", weight = "", source, unit, unitPrice;
     private boolean flag = true;
     private TemporaryHandler mTemporaryHandler = new TemporaryHandler(new WeakReference<>(this));
 
-    SeparateAdapter separateAdapter;
-    SeparateProductsAdapter productsAdapter;
+    CategoryAdapter separateAdapter;
+    ProductsAdapter productsAdapter;
+
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
 
     OperationLogManager logManager = OperationLogManager.getInstance();
     private NumFormatUtil mNumUtil = null;
@@ -112,6 +115,13 @@ public class TemporaryLibraryActivity extends BaseActivity {
         categoryList.clear();
         categoryList = msg.getList();
         separateAdapter.setNewData(categoryList);
+    }
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
     }
 
     @Override
@@ -157,6 +167,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private void initData() {
         Intent intent = new Intent(this, BatteryService.class);
         startService(intent);
+        mCameraPreview = CameraPreview.getInstance();
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
         ProductsManager productsManager = ProductsManager.getInstance();
@@ -171,10 +182,10 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void initAdapter() {
 
-        separateAdapter = new SeparateAdapter(this, categoryList);
+        separateAdapter = new CategoryAdapter(this, categoryList);
         groupListView.setAdapter(separateAdapter);
         groupListView.setItemChecked(0, true);
-        productsAdapter = new SeparateProductsAdapter(this, productList);
+        productsAdapter = new ProductsAdapter(this, productList);
         mGridViewPlu.setAdapter(productsAdapter);
         if (categoryList.size() > 0) {
             productList = categoryList.get(0).getProductsList();
@@ -187,7 +198,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
         come_data.clear();
         go_data.clear();
         List<LibraryList> libraryList = libraryUtil.libraryJson("Loulibrary");
-        if (libraryList.size()==0)
+        if (libraryList.size() == 0)
             return;
         comeLibraryList = libraryList.get(0).getLibraryList();
         goLibraryList = libraryList.get(1).getLibraryList();
@@ -276,6 +287,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     /**
@@ -293,6 +305,13 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mTemporaryHandler.sendEmptyMessage(1);
+                    mTemporaryHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -320,6 +339,9 @@ public class TemporaryLibraryActivity extends BaseActivity {
                     case 1:
                         activity.weightChangedCyclicity();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -331,13 +353,13 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void weightChangedCyclicity() {
 
-            String strNet = mScale.getStringNet().trim();
-            float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-            if (isOL()) {
-                tvWeight.setText(strNet);
-            } else {
-                tvWeight.setText(NumFormatUtil.df2.format(fW));
-            }
+        String strNet = mScale.getStringNet().trim();
+        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+        if (isOL()) {
+            tvWeight.setText(strNet);
+        } else {
+            tvWeight.setText(NumFormatUtil.df2.format(fW));
+        }
 
         if (isStable()) {
             //   backDisplay.showIsStable(true);
@@ -362,15 +384,19 @@ public class TemporaryLibraryActivity extends BaseActivity {
             case R.id.bt_temporary_into_libraries:
                 name = tvName.getText().toString();
                 weight = tvWeight.getText().toString();
+                if (isOL()){
+                    showMessage("超出秤量程！");
+                    return;
+                }
                 if (!TextUtils.isEmpty(name) && new BigDecimal(weight).compareTo(new BigDecimal(0)) > 0) {
                     if (source.equals("采购") && goLibrary.equals("分割房")) {
-                        showNormalDialog("品名： "+name+"\n重量： "+weight+"\n去向： 从 "+source+ " 到 "+goLibrary, 1);
+                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
                     } else if (source.equals("采购") && goLibrary.equals("白条库")) {
-                        showNormalDialog("品名： "+name+"\n重量： "+weight+"\n去向： 从 "+source+ " 到 "+goLibrary, 2);
+                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
                     } else if (source.equals("白条库") && goLibrary.equals("鲜品库")) {
-                        showNormalDialog("品名： "+name+"\n重量： "+weight+"\n去向： 从 "+source+ " 到 "+goLibrary, 3);
+                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 3);
                     } else if (source.equals("白条库") && goLibrary.equals("分割房")) {
-                        showNormalDialog("品名： "+name+"\n重量： "+weight+"\n去向： 从 "+source+ " 到 "+goLibrary, 4);
+                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 4);
                     } else {
                         showMessage("请选择正确的来源去向");
                     }
@@ -417,6 +443,44 @@ public class TemporaryLibraryActivity extends BaseActivity {
         }
     };
 
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
+
     @Override
     protected void onResume() {
         mMaxUnitView.setText(String.valueOf(mScale.getMainUnitFull()) + "kg");
@@ -432,7 +496,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveLoulibrary(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                  //  sqlInsert(1, goLibraryId);
+                    //  sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -453,7 +517,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getSaveDivision(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
-                 //   sqlInsert(1, goLibraryId);
+                    //   sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -474,7 +538,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getOutLoulibrary(source, comeLibraryId, goLibraryId, weight, name);
                 if (api.Result) {
-               //     sqlInsert(1, goLibraryId);
+                    //     sqlInsert(1, goLibraryId);
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -495,7 +559,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
             public void run() {
                 ApiResult api = UploadDataHttp.getTakeLoulibrary(comeLibraryId, weight, name);
                 if (api.Result) {
-              //      sqlInsert(1, "");
+                    //      sqlInsert(1, "");
                     loadingDialog.dismissDialog();
                     showMessage(api.ResultMessage);
                 } else {
@@ -528,7 +592,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private void sqlInsert(int state, String goId) {
         //state 1 已回收 2 未回收     接口只担任出的任务时 goId 去向库id  置为空
-        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "",state);
+        OperationLog log = new OperationLog(comeLibraryId, source, goId, name, plu, mNumUtil.getDecimalNet(weight), 0, "KG", NumFormatUtil.getDateDetail(), "", state);
         logManager.insertOperationLog(log);
     }
 
@@ -546,6 +610,8 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 return true;
 
             case KeyEvent.KEYCODE_F1:// 去皮
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -555,6 +621,8 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
                 if (mScale.zero()) {
+                    lastWeight = 0.0f;
+                    currWeight = 0.0f;
                     TvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");

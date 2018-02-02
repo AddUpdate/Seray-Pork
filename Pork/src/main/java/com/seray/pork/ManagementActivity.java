@@ -3,6 +3,9 @@ package com.seray.pork;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -14,7 +17,9 @@ import android.widget.LinearLayout;
 
 import com.lidroid.xutils.view.annotation.event.OnClick;
 import com.seray.adapter.ManagementAdapter;
+import com.seray.cache.CacheHelper;
 import com.seray.entity.Config;
+import com.seray.entity.LocalFileTag;
 import com.seray.entity.TareItem;
 import com.seray.http.API;
 import com.seray.pork.dao.ConfigManager;
@@ -26,6 +31,7 @@ import com.seray.view.PromptDialog;
 import com.seray.view.SetIpDialog;
 import com.seray.view.SetTareDialog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +45,21 @@ public class ManagementActivity extends BaseActivity {
     private ManagementAdapter adapter;
     private List<String> name = new ArrayList<>();
      LoadingDialog mLoadingDialog;
+    private  Handler mSettingHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int what = msg.what;
+            switch (what) {
+                case 6:
+                    Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    scanIntent.setData(Uri.fromFile(new File(FileHelp.DATA_PIC_DIR)));
+                    sendBroadcast(scanIntent);
+                    mLoadingDialog.dismissDialog();// TODO: 2018/1/24 待完善
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,18 +139,17 @@ public class ManagementActivity extends BaseActivity {
                             App.getApplication().exit();
                             break;
                         case 2:
+                            mLoadingDialog.showDialog();
                             sqlQueryThread.submit(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mLoadingDialog.showDialog();
                                     if (FileHelp.deleteDir(FileHelp.DATA_PIC_DIR)) {
                                         showMessage(R.string.test_clear_show_msg_ok);
                                     } else {
                                         showMessage(R.string.test_clear_show_msg_failed);
                                     }
                                     FileHelp.deleteDir(FileHelp.STOCK_DIR);
-                                  //  mSettingHandler.sendEmptyMessage(6);
-                                    mLoadingDialog.dismissDialog();// TODO: 2018/1/24 待完善 
+                                    mSettingHandler.sendEmptyMessage(6);
                                 }
                             });
                             break;

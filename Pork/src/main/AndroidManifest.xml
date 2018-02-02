@@ -121,7 +121,7 @@
             android:configChanges="orientation|keyboard|keyboardHidden" />
         <activity
             android:name=".FinishProductActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"></activity>
+            android:configChanges="orientation|keyboard|keyboardHidden" />
         <activity
             android:name=".ProductsSelectActivity"
             android:configChanges="orientation|keyboard|keyboardHidden" />
@@ -170,7 +170,8 @@
         <activity
             android:name="com.seray.stock.InBulkGoodsActivity"
             android:configChanges="orientation|keyboard|keyboardHidden" />
-        <activity android:name="com.seray.stock.OtherWeightActivity"></activity>
+        <activity android:name="com.seray.stock.OtherWeightActivity" />
+        <activity android:name=".QueryOrderActivity"></activity>
     </application>
 
 </manifest>

@@ -10,7 +10,7 @@ import com.seray.pork.R;
 
 public class PurchaseActivity extends BaseActivity {
 
-    private Button mSearchBtn, mInsertBtn, mWeighingBtn,mQRBtn, mUploadBtn;
+    private Button mSearchBtn, mInsertBtn, mWeighingBtn, mQRBtn, mUploadBtn, mOther;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -48,6 +48,9 @@ public class PurchaseActivity extends BaseActivity {
             case R.id.pur_weighing:
                 startActivity(OtherWeightActivity.class);
                 break;
+            case R.id.pur_other:
+                showMessage("此功能暂未开放");
+                break;
         }
     }
 
@@ -57,6 +60,7 @@ public class PurchaseActivity extends BaseActivity {
         mQRBtn = (Button) findViewById(R.id.pur_qr);
         mUploadBtn = (Button) findViewById(R.id.pur_upload);
         mWeighingBtn = (Button) findViewById(R.id.pur_weighing);
+        mOther = (Button) findViewById(R.id.pur_other);
     }
 
     private void initListener() {
@@ -65,5 +69,6 @@ public class PurchaseActivity extends BaseActivity {
         mQRBtn.setOnClickListener(this);
         mUploadBtn.setOnClickListener(this);
         mWeighingBtn.setOnClickListener(this);
+        mOther.setOnClickListener(this);
     }
 }

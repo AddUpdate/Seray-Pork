@@ -35,6 +35,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends BaseActivity {
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private MainHandler mMainHandler = new MainHandler(new WeakReference<>(this));
     private TextView tvWeight, TvTareWeight;
     private boolean flag = true;
@@ -46,6 +50,13 @@ public class MainActivity extends BaseActivity {
     MainAdapter adapter;
     private AlertDialog rebootDialog;
     private LocalServer mLocalServer = null;
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +104,7 @@ public class MainActivity extends BaseActivity {
         listPlu.add("0");
         listPlu.add(".");
         listPlu.add("CE");
-        listPlu.add("其他");
+        listPlu.add("装车");
         adapter = new MainAdapter(this, listPlu);
         gridView.setAdapter(adapter);
     }
@@ -103,7 +114,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mMisc.beep();
-                if (position != 3 && position != 7 && position != 11)
+                if (position != 3 && position != 7 && position != 11 && position != 15)
                     return;
                 switch (position) {
                     case 3:
@@ -114,6 +125,9 @@ public class MainActivity extends BaseActivity {
                         break;
                     case 11:
                         openRebootDialog();
+                        break;
+                    case 15:
+                        startActivity(QueryOrderActivity.class);
                         break;
                 }
             }
@@ -129,6 +143,7 @@ public class MainActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     private Boolean isOL() {
@@ -169,6 +184,13 @@ public class MainActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mMainHandler.sendEmptyMessage(1);
+                    mMainHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -178,7 +200,6 @@ public class MainActivity extends BaseActivity {
             }
         }.start();
     }
-
 
     private static class MainHandler extends Handler {
 
@@ -196,6 +217,9 @@ public class MainActivity extends BaseActivity {
                 switch (msg.what) {
                     case 1:
                         activity.weightChangedCyclicity();
+                        break;
+                    case 5:
+                        activity.lightScreenCyclicity();
                         break;
                 }
             }
@@ -218,6 +242,8 @@ public class MainActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
                 mMisc.beep();
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -228,6 +254,8 @@ public class MainActivity extends BaseActivity {
             case KeyEvent.KEYCODE_F2:// 置零
                 mMisc.beep();
                 if (mScale.zero()) {
+                    lastWeight = 0.0f;
+                    currWeight = 0.0f;
                     TvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");

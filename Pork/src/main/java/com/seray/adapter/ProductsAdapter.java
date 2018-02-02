@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.seray.entity.ProductsCategory;
+import com.seray.entity.Products;
 import com.seray.pork.R;
 
 import java.util.ArrayList;
@@ -18,19 +18,19 @@ import java.util.List;
  * Created by pc on 2017/12/7.
  */
 
-public class SeparateAdapter extends BaseAdapter{
+public class ProductsAdapter extends BaseAdapter {
 
     private Context mContext;
+    private List<Products> mData;
     LayoutInflater mInflater;
-    private List<ProductsCategory> mData;
 
-     public SeparateAdapter(Context context, List<ProductsCategory>data) {
+    public ProductsAdapter(Context context, List<Products> data) {
         this.mContext = context;
-        this.mData = data;
         mInflater = LayoutInflater.from(mContext);
+        this.mData = data;
     }
 
-    public void setNewData(@NonNull List<ProductsCategory> newData) {
+    public void setNewData(@NonNull List<Products> newData) {
         if (this.mData == null) {
             this.mData = new ArrayList<>();
         }
@@ -38,6 +38,7 @@ public class SeparateAdapter extends BaseAdapter{
         this.mData.addAll(newData);
         notifyDataSetChanged();
     }
+
     @Override
     public int getCount() {
         return mData == null ? 0 : mData.size();
@@ -56,18 +57,18 @@ public class SeparateAdapter extends BaseAdapter{
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        ProductsCategory itemDate = mData.get(position);
+        Products itemDate = mData.get(position);
 
         ViewHolder mHolder;
         if (convertView == null) {
             mHolder = new ViewHolder();
-            convertView = mInflater.inflate(R.layout.separate_group_item, null);
-            mHolder.nameTv = (TextView) convertView.findViewById(R.id.separate_group_item_name);
+            convertView = mInflater.inflate(R.layout.separate_gridview_plu_item, null);
+            mHolder.nameTv = (TextView) convertView.findViewById(R.id.separate_item_gv_plu);
             convertView.setTag(mHolder);
         } else {
             mHolder = (ViewHolder) convertView.getTag();
         }
-        mHolder.nameTv.setText(itemDate.getCategoryName());
+        mHolder.nameTv.setText(itemDate.getProductName());
         return convertView;
     }
 

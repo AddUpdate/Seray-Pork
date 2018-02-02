@@ -9,8 +9,8 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 
-import com.seray.adapter.SeparateAdapter;
-import com.seray.adapter.SeparateProductsAdapter;
+import com.seray.adapter.CategoryAdapter;
+import com.seray.adapter.ProductsAdapter;
 import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
 import com.seray.entity.PurchaseDetail;
@@ -30,8 +30,8 @@ public class ProductsSelectActivity extends BaseActivity {
     private List<ProductsCategory> categoryList = new ArrayList<>();
 
     private List<Products> productList;
-    SeparateAdapter separateAdapter;
-    SeparateProductsAdapter productsAdapter;
+    CategoryAdapter separateAdapter;
+    ProductsAdapter productsAdapter;
     String categoryName = "";
 
     @Override
@@ -66,11 +66,11 @@ public class ProductsSelectActivity extends BaseActivity {
     }
 
     private void initAdapter() {
-        separateAdapter = new SeparateAdapter(this, categoryList);
+        separateAdapter = new CategoryAdapter(this, categoryList);
         categoryGridView.setAdapter(separateAdapter);
    //     categoryGridView.setSelection(0);
         categoryGridView.setItemChecked(0, true);
-        productsAdapter = new SeparateProductsAdapter(this,productList);
+        productsAdapter = new ProductsAdapter(this,productList);
         productsGridView.setAdapter(productsAdapter);
         if (categoryList.size() > 0) {
             categoryName = categoryList.get(0).getCategoryName();

@@ -35,7 +35,6 @@ import java.util.List;
 public class ChooseFunctionActivity extends BaseActivity {
 
 
-
     private GridView mGridViewBtn;
     private List<String> name = new ArrayList<>();
     List<String> mName = new ArrayList<>();
@@ -47,6 +46,7 @@ public class ChooseFunctionActivity extends BaseActivity {
     boolean loginFlag = false;
     LoginDialog dialog;
     LoadingDialog mLoadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,8 +55,9 @@ public class ChooseFunctionActivity extends BaseActivity {
         dialog = new LoginDialog(this);
         initData();
         initAdapter();
-        showLogin("登录");
+        //     showLogin("登录");
         initListener();
+        updateAdapter();
     }
 
     private void initView() {
@@ -76,6 +77,9 @@ public class ChooseFunctionActivity extends BaseActivity {
         name.add("成品1、2号库");
         name.add("鲜品库");
         name.add("订单");
+        for (int i = 0; i < 8; i++) {
+            mPosition.add(i);
+        }
     }
 
     private void initAdapter() {

@@ -252,15 +252,19 @@ public class UploadDataHttp {
     /*
        实际重量上传
      */
-    public static ApiResult setUpdateActualWeight(String id, float weight,
-                                                  int number, String batchNumber,
-                                                  int state) {
+    public static ApiResult setUpdateActualWeight(String id,
+                                                   String batchNumber,
+                                                  int state,String dataHelper) {
         Map<String, String> params = new HashMap<>();
         params.put("Id", id);
-        params.put("ActualWeight", String.valueOf(weight));
-        params.put("Number", String.valueOf(number));
         params.put("PurchaseNumber", batchNumber);
         params.put("State", String.valueOf(state));
+      //  params.put("GoAlibraryName", goLibrary);
+        params.put("DataHelper", dataHelper);
+//        params.put("ActualWeight", String.valueOf(weight));
+//        params.put("Number", String.valueOf(number));
+//        params.put("GolibraryId", golibraryId);
+//        params.put("GoAlibraryName",goAlibraryName);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -473,14 +477,14 @@ public class UploadDataHttp {
     }
 
     /*
-     * 出分割库到分拣
+     * 出分割库到分拣(通用)
      */
-    public static ApiResult getOutDivision(String Division, String source, String comeLibraryId, String goLibraryId) {
+    public static ApiResult getOutDivision(String Division,String dataHelper) {
         Map<String, String> params = new HashMap<>();
         params.put("Division", Division);
-        params.put("AlibraryName", source);
-        params.put("ComelibraryId", comeLibraryId);
-        params.put("GolibraryId", goLibraryId);
+//        params.put("AlibraryName", source);
+//        params.put("ComelibraryId", comeLibraryId);
+        params.put("DataHelper", dataHelper);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;

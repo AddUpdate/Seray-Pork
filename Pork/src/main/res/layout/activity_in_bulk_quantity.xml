@@ -192,6 +192,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -201,6 +202,7 @@
                 android:textSize="@dimen/configTextSize" />
 
             <Spinner
+                android:visibility="gone"
                 android:id="@+id/spinner_in_bulk_come"
                 android:layout_width="130dp"
                 android:layout_height="match_parent"

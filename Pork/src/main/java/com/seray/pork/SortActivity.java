@@ -33,14 +33,15 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.camera.simplewebcam.CameraPreview;
 import com.gprinter.aidl.GpService;
 import com.gprinter.command.GpCom;
 import com.gprinter.io.GpDevice;
 import com.gprinter.io.PortParameters;
 import com.gprinter.service.GpPrintService;
 import com.lzscale.scalelib.misclib.GpScalePrinter;
-import com.seray.adapter.SeparateAdapter;
-import com.seray.adapter.SeparateProductsAdapter;
+import com.seray.adapter.CategoryAdapter;
+import com.seray.adapter.ProductsAdapter;
 import com.seray.cache.AppConfig;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
@@ -58,6 +59,7 @@ import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
@@ -71,6 +73,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -103,17 +106,26 @@ public class SortActivity extends BaseActivity {
 
     private BackDisplayBase backDisplay = null;
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private boolean flag = true;
     private SortHandler mSortHandler = new SortHandler(new WeakReference<>(this));
 
     private List<ProductsCategory> categoryList = new ArrayList<>();
     private List<Products> productList;
-    SeparateAdapter separateAdapter;
-    SeparateProductsAdapter productsAdapter;
+    CategoryAdapter separateAdapter;
+    ProductsAdapter productsAdapter;
 
-    private String name, weight, unit, plu = "",price;
+    private String name, weight, unit, plu = "", price;
     private int number;
     private String source, goLibrary, comeLibraryId, goLibraryId;
+
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
 
     private boolean isByWeight = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
@@ -131,6 +143,13 @@ public class SortActivity extends BaseActivity {
         categoryList.clear();
         categoryList = msg.getList();
         separateAdapter.setNewData(categoryList);
+    }
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
     }
 
     @Override
@@ -289,6 +308,7 @@ public class SortActivity extends BaseActivity {
     private void initData() {
         Intent intent = new Intent(this, BatteryService.class);
         startService(intent);
+        mCameraPreview = CameraPreview.getInstance();
         mNumUtil = NumFormatUtil.getInstance();
         ProductsCategoryManager pCaManager = ProductsCategoryManager.getInstance();
         ProductsManager productsManager = ProductsManager.getInstance();
@@ -308,10 +328,10 @@ public class SortActivity extends BaseActivity {
     }
 
     private void initAdapter() {
-        separateAdapter = new SeparateAdapter(this, categoryList);
+        separateAdapter = new CategoryAdapter(this, categoryList);
         groupListView.setAdapter(separateAdapter);
         groupListView.setItemChecked(0, true);
-        productsAdapter = new SeparateProductsAdapter(this, productList);
+        productsAdapter = new ProductsAdapter(this, productList);
         mGridViewPlu.setAdapter(productsAdapter);
         if (categoryList.size() > 0) {
             productList = categoryList.get(0).getProductsList();
@@ -343,6 +363,7 @@ public class SortActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     private void timer() {
@@ -352,6 +373,13 @@ public class SortActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mSortHandler.sendEmptyMessage(1);
+                    mSortHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (isStable()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -428,6 +456,9 @@ public class SortActivity extends BaseActivity {
                     case 1:
                         activity.weightChangedCyclicity();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -440,6 +471,10 @@ public class SortActivity extends BaseActivity {
             case R.id.bt_sort_ok:
                 weight = TvWeight.getText().toString();
                 name = TvName.getText().toString();
+                if (isOL()){
+                    showMessage("超出秤量程！");
+                    return;
+                }
                 float weightFt = Float.parseFloat(weight);
                 if (TextUtils.isEmpty(name)) {
                     showMessage("请选择品名");
@@ -539,6 +574,45 @@ public class SortActivity extends BaseActivity {
         logManager.insertOperationLog(log);
     }
 
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
+
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode != KeyEvent.KEYCODE_BACK) {
             mMisc.beep();
@@ -549,6 +623,8 @@ public class SortActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
                 cleanTareFloat();
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
                     TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
@@ -557,10 +633,11 @@ public class SortActivity extends BaseActivity {
                 }
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
+
                 if (mScale.zero()) {
                     cleanTareFloat();
-//                    lastWeight = 0.0F;
-//                    currWeight = 0.0F;
+                    lastWeight = 0.0F;
+                    currWeight = 0.0F;
                     TvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");

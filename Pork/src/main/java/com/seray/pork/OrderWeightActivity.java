@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.camera.simplewebcam.CameraPreview;
 import com.gprinter.aidl.GpService;
 import com.gprinter.command.GpCom;
 import com.gprinter.io.GpDevice;
@@ -39,6 +40,7 @@ import com.seray.http.UploadDataHttp;
 import com.seray.pork.dao.ConfigManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.OrderDetailManager;
+import com.seray.utils.FileHelp;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
@@ -47,6 +49,7 @@ import com.tscale.scalelib.jniscale.JNIScale;
 
 import junit.framework.Test;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -62,6 +65,10 @@ public class OrderWeightActivity extends BaseActivity {
     private LinearLayout linearWeight, linearNumber;
     private boolean flag = true;
     private JNIScale mScale;
+    private float currWeight = 0.0f;
+    private float lastWeight = 0.0f;
+    private float divisionValue = 0.02f;
+
     private float tareFloat = -1.0F;
     private boolean isByWeight = true;
     private String weightStr = "", orderDetailId, barCode;
@@ -76,6 +83,18 @@ public class OrderWeightActivity extends BaseActivity {
     ConfigManager configManager = ConfigManager.getInstance();
 
     private int intFlag = 4003;
+
+    private CameraPreview mCameraPreview = null;
+    private String lastImgName = null;
+    private String prevRecordImgName = null;
+    private boolean camerIsEnable = true;
+
+    private void lightScreenCyclicity() {
+        float w = mScale.getFloatNet();
+        if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
+            App.getApplication().openScreen();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +130,7 @@ public class OrderWeightActivity extends BaseActivity {
     }
 
     private void initData() {
+        mCameraPreview = CameraPreview.getInstance();
         numUtil = NumFormatUtil.getInstance();
         Intent intent = getIntent();
         if (intent != null) {
@@ -175,6 +195,7 @@ public class OrderWeightActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
+        divisionValue = mScale.getDivisionValue();
     }
 
     private void timer() {
@@ -184,6 +205,13 @@ public class OrderWeightActivity extends BaseActivity {
                 super.run();
                 while (flag) {
                     mOrderWeightHandler.sendEmptyMessage(1);
+                    mOrderWeightHandler.sendEmptyMessage(5);
+
+                    currWeight = mScale.getFloatNet();
+
+                    if (mScale.getStabFlag()) {
+                        lastWeight = currWeight;
+                    }
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -241,6 +269,9 @@ public class OrderWeightActivity extends BaseActivity {
                     case 2:
                         activity.updateView();
                         break;
+                    case 5:
+                        activity.lightScreenCyclicity();
+                        break;
                 }
             }
         }
@@ -275,6 +306,10 @@ public class OrderWeightActivity extends BaseActivity {
 
     private void setData() {
         weightStr = weightTv.getText().toString();
+        if (isOL()){
+            showMessage("超出秤量程！");
+            return;
+        }
         if (TotalNumber > 0) {
             if (state == 2) {
                 if (TextUtils.isEmpty(numberTv.getText().toString())) {
@@ -283,7 +318,7 @@ public class OrderWeightActivity extends BaseActivity {
                     number = Integer.valueOf(numberTv.getText().toString());
                 }
                 if (number > 0) {
-                    showNormalDialog("数量：" + number+"\t重量：" + weightStr);
+                    showNormalDialog("数量：" + number + "\t重量：" + weightStr);
                 } else {
                     showMessage("数量不能小于1");
                 }
@@ -359,6 +394,44 @@ public class OrderWeightActivity extends BaseActivity {
         orderManager.insertOrderDetail(orderDetail);
     }
 
+    private void camera() {
+        //生成本地设置  是否开启拍照
+        if (true) {
+            if (mCameraPreview != null && camerIsEnable) {
+                camerIsEnable = false;
+                try {
+                    String dir = FileHelp.getImgDir(), currImgName = FileHelp
+                            .getImgName();
+                    currImgName = mCameraPreview.taskPic(currImgName);
+                    if (lastImgName != null) {
+                        File file = new File(dir + lastImgName);
+                        if (file.exists())
+                            file.delete();
+                    }
+                    lastImgName = currImgName;
+                    prevRecordImgName = lastImgName;
+                } catch (Exception e) {
+                    prevRecordImgName = "";
+                }
+                camerIsEnable = true;
+            }
+        }
+    }
+
+    /**
+     * 获取拍照图片
+     */
+    String getCameraPic() {
+        // 如果当前关闭静默拍照
+//        if (!CacheHelper.isOpenCamera) {
+//            return null;
+//        }
+        // 当前记录没有触发拍照，并且是计重（非计件）模式
+        if (lastImgName == null)
+            return prevRecordImgName;
+        return FileHelp.encodeLibraryImg(lastImgName);
+    }
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         mMisc.beep();
         switch (keyCode) {
@@ -371,6 +444,8 @@ public class OrderWeightActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
                 cleanTareFloat();
+                lastWeight = 0.0f;
+                currWeight = 0.0f;
                 if (!mScale.tare()) {
                     showMessage("去皮失败");
                 }
@@ -378,6 +453,8 @@ public class OrderWeightActivity extends BaseActivity {
             case KeyEvent.KEYCODE_F2:// 置零
                 if (mScale.zero()) {
                     cleanTareFloat();
+                    lastWeight = 0.0f;
+                    currWeight = 0.0f;
                 } else {
                     showMessage("置零失败");
                 }
@@ -505,7 +582,6 @@ public class OrderWeightActivity extends BaseActivity {
             }
         }
     };
-
 
     private void initPortParam() {
         boolean state = getConnectState();
