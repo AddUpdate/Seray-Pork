@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.Picture;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 import com.camera.simplewebcam.CameraPreview;
 import com.seray.adapter.CategoryAdapter;
 import com.seray.adapter.ProductsAdapter;
+import com.seray.entity.ApiParameter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -44,6 +46,7 @@ import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
 import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
@@ -65,13 +68,15 @@ import java.util.List;
  */
 public class ExcessStockActivity extends BaseActivity {
     private ImageView mBatteryIv;
-    private TextView TvName, TvWeight, TvTareWeight, TvWeightType;
+    private TextView tvName, tvWeight, tvTareWeight, tvWeightType;
     private TextView mMaxUnitView, mTimeView;
-    private Spinner spinnerCome, spinnerLeave;
+    private Spinner spinnerCome, spinnerLeave,spinnerWeightType;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
+    private List<String> type_data = new ArrayList<>();
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
+    private ArrayAdapter<String> type_adapter;
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
 
@@ -95,12 +100,12 @@ public class ExcessStockActivity extends BaseActivity {
     ProductsAdapter productsAdapter;
 
     private String name, plu = "", unit, price, weight;
-    private int number;
+    private int number, typeLibrary;
     private String source, comeLibraryId, goLibraryId, goLibrary;
 
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
 
     OperationLogManager logManager = OperationLogManager.getInstance();
@@ -119,6 +124,7 @@ public class ExcessStockActivity extends BaseActivity {
         categoryList = msg.getList();
         separateAdapter.setNewData(categoryList);
     }
+
     private void lightScreenCyclicity() {
         float w = mScale.getFloatNet();
         if (isOL() || Math.abs(w - lastWeight) > divisionValue) {
@@ -144,10 +150,10 @@ public class ExcessStockActivity extends BaseActivity {
     private void initView() {
         loadingDialog = new LoadingDialog(this);
         mBatteryIv = (ImageView) findViewById(R.id.battery);
-        TvName = (TextView) findViewById(R.id.tv_excess_stock_name);
-        TvWeight = (TextView) findViewById(R.id.tv_excess_stock_weight);
-        TvTareWeight = (TextView) findViewById(R.id.tv_excess_stock_tare_weight);
-        TvWeightType = (TextView) findViewById(R.id.tv_excess_stock_weight_type);
+        tvName = (TextView) findViewById(R.id.tv_excess_stock_name);
+        tvWeight = (TextView) findViewById(R.id.tv_excess_stock_weight);
+        tvTareWeight = (TextView) findViewById(R.id.tv_excess_stock_tare_weight);
+        tvWeightType = (TextView) findViewById(R.id.tv_excess_stock_weight_type);
         submitIntoBt = (Button) findViewById(R.id.bt_excess_stock_into);
 
         mGridViewPlu = (GridView) findViewById(R.id.gv_excess_stock_plu);
@@ -155,15 +161,19 @@ public class ExcessStockActivity extends BaseActivity {
 
         groupListView.setItemsCanFocus(true);// 让ListView的item获得焦点
         groupListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
+        mGridViewPlu.setItemChecked(1, true);
+        mGridViewPlu.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
 
         spinnerCome = (Spinner) findViewById(R.id.spinner_excess_stock_come);
         spinnerCome.setGravity(Gravity.CENTER);
         spinnerLeave = (Spinner) findViewById(R.id.spinner_excess_stock_leave);
         spinnerLeave.setGravity(Gravity.CENTER);
+        spinnerWeightType = (Spinner) findViewById(R.id.spinner_excess_weight_type);
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
-        setPieceNum(TvWeight);
+        setPieceNum(tvWeight);
     }
 
     public void register() {
@@ -194,24 +204,10 @@ public class ExcessStockActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mMisc.beep();
-                TvName.setText(productList.get(position).getProductName());
+                tvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getProductName();
                 price = String.valueOf(productList.get(position).getUnitPrice());
-                int num = productList.get(position).getMeasurementMethod();
-                switch (num) {
-                    case 1:
-                        unit = "KG";
-                        break;
-                    case 2:
-                        unit = "袋";
-                        break;
-                    case 3:
-                        unit = "箱";
-                        break;
-                    default:
-                        unit = "";
-                        break;
-                }
+                unit = productList.get(position).getUnit();
                 isByWeight = unit.equals("KG") ? false : true;
                 toggleIsWeight();
             }
@@ -233,6 +229,7 @@ public class ExcessStockActivity extends BaseActivity {
                 tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 source = come_data.get(position);
+                typeLibrary = comeLibraryList.get(position).getType();
             }
 
             @Override
@@ -256,6 +253,19 @@ public class ExcessStockActivity extends BaseActivity {
 
             }
         });
+        spinnerWeightType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.red));    //设置颜色
+                tv.setTextSize(30.0f);    //设置大小
+                unit = type_data.get(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void initData() {
@@ -270,6 +280,8 @@ public class ExcessStockActivity extends BaseActivity {
             productsCategory.setProductsList(list);
             categoryList.add(productsCategory);
         }
+        type_data.add("袋");
+        type_data.add("箱");
     }
 
     public void setPieceNum(final TextView testview) {
@@ -304,6 +316,9 @@ public class ExcessStockActivity extends BaseActivity {
             productList = categoryList.get(0).getProductsList();
             productsAdapter.setNewData(productList);
         }
+        type_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
+        type_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerWeightType.setAdapter(type_adapter);
     }
 
     private void initLibrary() {
@@ -370,12 +385,12 @@ public class ExcessStockActivity extends BaseActivity {
             float tare = tareFloat;
             float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
             if (isOL()) {
-                TvWeight.setText(strNet);
+                tvWeight.setText(strNet);
             } else {
                 if (tareFloat > 0) {
                     fW -= tare;
                 }
-                TvWeight.setText(NumFormatUtil.df2.format(fW));
+                tvWeight.setText(NumFormatUtil.df2.format(fW));
             }
         }
         if (isStable()) {
@@ -435,9 +450,9 @@ public class ExcessStockActivity extends BaseActivity {
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_excess_stock_into:
-                weight = TvWeight.getText().toString();
-                name = TvName.getText().toString();
-                if (isOL()){
+                weight = tvWeight.getText().toString();
+                name = tvName.getText().toString();
+                if (isOL()) {
                     showMessage("超出秤量程！");
                     return;
                 }
@@ -456,75 +471,101 @@ public class ExcessStockActivity extends BaseActivity {
                     value = "\n重量： " + weight;
                 } else {
                     number = Integer.valueOf(weight);
+                    if (number <= 0) {
+                        showMessage("数量需大于0！");
+                        return;
+                    }
                     weight = "0.00";
                     value = "\n数量： " + number;
                 }
-                if (!source.equals("鲜品库") && goLibrary.equals("鲜品库")) {
-                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
-                } else if (source.equals("鲜品库") && !goLibrary.equals("鲜品库")) {
-                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
-                } else {
-                    showMessage("选择正确的来源去向");
-                }
+                camera();
+                //   if (!source.equals("鲜品库") && goLibrary.equals("鲜品库")) {
+                showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+//                } else if (source.equals("鲜品库") && !goLibrary.equals("鲜品库")) {
+//                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+//                } else {
+//                    showMessage("选择正确的来源去向");
+//                }
 
                 break;
         }
     }
 
-    private void submitInto() {
-        httpQueryThread.submit(new Runnable() {
-            @Override
-            public void run() {
-                ApiResult api = UploadDataHttp.getSaveInventory(submitData(), comeLibraryId, goLibraryId, goLibrary);
-                if (api.Result) {
-                    //   sqlInsert(1);
-                    loadingDialog.dismissDialog();
-                    showMessage(api.ResultMessage);
-                } else {
-                    sqlInsert(2);
-                    loadingDialog.dismissDialog();
-                    showMessage(api.ResultMessage);
-                }
-            }
-        });
-    }
+//    private void submitInto() {
+//        httpQueryThread.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                ApiResult api = UploadDataHttp.getSaveInventory(submitData(), comeLibraryId, goLibraryId, goLibrary);
+//                if (api.Result) {
+//                    //   sqlInsert(1);
+//                    loadingDialog.dismissDialogs();
+//                    showMessage(api.ResultMessage);
+//                } else {
+//                    sqlInsert(2);
+//                    loadingDialog.dismissDialogs();
+//                    showMessage(api.ResultMessage);
+//                }
+//            }
+//        });
+//    }
 
     private void submitOut() {
         sqlQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getOutInventory(comeLibraryId, source, goLibraryId, name, weight,String.valueOf(number));
+                ApiParameter apiParameter = new ApiParameter();
+                if (typeLibrary == 6) {
+                    apiParameter.setDivision(submitOutData());
+                }
+                apiParameter.setDataHelper(submitOutDataHelper());
+                ApiResult api = UploadDataHttp.api(typeLibrary, apiParameter);
                 if (api.Result) {
-                 //   sqlInsert(1);
-                    loadingDialog.dismissDialog();
+                    //   sqlInsert(1);
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
         });
     }
 
-    private String submitData() {
+    private String submitOutData() {
         JSONObject object = new JSONObject();
         String Division = "";
         try {
-            object.put("ItemName", name);
-            object.put("Weight", weight);
-            object.put("Source", source);
-            object.put("Number", number);
             object.put("PLU", plu);
             object.put("WeightCompany", unit);
             object.put("UnitPrice", price);
-            object.put("Remarks", "");
-
             Division = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return Division;
+    }
+
+    private String submitOutDataHelper() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("ItemName", name);
+            object.put("Weight", weight);
+            object.put("ComeAlibraryName", source);
+            object.put("Number", number);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", price);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
     }
 
     private void sqlInsert(int state) {
@@ -585,7 +626,7 @@ public class ExcessStockActivity extends BaseActivity {
                 currWeight = 0.0F;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
+                    tvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -595,14 +636,14 @@ public class ExcessStockActivity extends BaseActivity {
                     cleanTareFloat();
                     lastWeight = 0.0F;
                     currWeight = 0.0F;
-                    TvTareWeight.setText(R.string.base_weight);
+                    tvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");
                 }
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
                 clearProductInfo();
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_MULTIPLY: // 计件计重切换
                 toggleIsWeight();
@@ -642,14 +683,14 @@ public class ExcessStockActivity extends BaseActivity {
     }
 
     private void unitValu(String num) {
-        String iszero = TvWeight.getText().toString().trim();
+        String iszero = tvWeight.getText().toString().trim();
         boolean wzero = iszero.equals("0");
         if (wzero) {
-            TvWeight.setText(num);
+            tvWeight.setText(num);
         } else {
             if (iszero.length() >= 4)
                 return;
-            TvWeight.setText(iszero + num);
+            tvWeight.setText(iszero + num);
         }
     }
 
@@ -660,29 +701,38 @@ public class ExcessStockActivity extends BaseActivity {
         if (isByWeight) {
             cleanTareFloat();
             isByWeight = false;
-            TvWeightType.setText("计件");
-            TvWeightType.setTextColor(Color.RED);
-            unit = "袋";
-            TvWeight.setText("0");
+            tvWeightType.setVisibility(View.GONE);
+            spinnerWeightType.setVisibility(View.VISIBLE);
+            if (unit.equals("KG")){
+                unit="袋";
+            }
+            for (int i = 0; i < type_data.size(); i++) {
+                if (unit.equals(type_data.get(i))) {
+                    spinnerWeightType.setSelection(i, true);
+                    break;
+                }
+            }
+            tvWeight.setText("0");
         } else {
+            tvWeightType.setVisibility(View.VISIBLE);
+            spinnerWeightType.setVisibility(View.GONE);
             isByWeight = true;
-            TvWeightType.setText("重量   KG");
             unit = "KG";
-            TvWeightType.setTextColor(Color.WHITE);
         }
     }
 
     private void clearProductInfo() {
-        TvName.setText("");
         cleanTareFloat();
-        TvWeightType.setTextColor(Color.WHITE);
-        TvWeightType.setText("计重   KG");
+        tvName.setText("");
+        tvWeightType.setVisibility(View.VISIBLE);
+        spinnerWeightType.setVisibility(View.GONE);
+        unit = "KG";
         isByWeight = true;
     }
 
     private void clearEvent() {
         if (!isByWeight)
-            TvWeight.setText("0");
+            tvWeight.setText("0");
     }
 
     @Override
@@ -703,7 +753,7 @@ public class ExcessStockActivity extends BaseActivity {
                     mMisc.beep();
                     switch (flag) {
                         case 1:
-                            submitInto();
+                            //          submitInto();
                             break;
                         case 2:
                             submitOut();
@@ -747,6 +797,7 @@ public class ExcessStockActivity extends BaseActivity {
             }
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

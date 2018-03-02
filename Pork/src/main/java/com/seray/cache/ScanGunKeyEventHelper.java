@@ -1,6 +1,8 @@
 package com.seray.cache;
 
+import android.content.Context;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 
 import com.seray.utils.LogUtil;
@@ -38,9 +40,8 @@ public class ScanGunKeyEventHelper {
         checkLetterStatus(event);
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             char aChar = getInputCode(event);
-            if (aChar != 0) {
+            if (aChar != 0)
                 mStringBufferResult.append(aChar);
-            }
             if (keyCode == KeyEvent.KEYCODE_NUM_LOCK)   //针对
                 return;
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -75,6 +76,9 @@ public class ScanGunKeyEventHelper {
                 case KeyEvent.KEYCODE_PERIOD:
                     aChar = '.';
                     break;
+                case KeyEvent.KEYCODE_COMMA:
+                    aChar = ',';
+                    break;
                 case KeyEvent.KEYCODE_MINUS:
                     aChar = mCaps ? '_' : '-';
                     break;
@@ -102,6 +106,8 @@ public class ScanGunKeyEventHelper {
     }
 
     public interface OnScanSuccessListener {
+        boolean dispatchKeyEvent(KeyEvent event);
+
         void onScanSuccess(String barcode);
     }
 
@@ -110,5 +116,4 @@ public class ScanGunKeyEventHelper {
         mOnScanSuccessListener = null;
         mStringBufferResult = null;
     }
-
 }

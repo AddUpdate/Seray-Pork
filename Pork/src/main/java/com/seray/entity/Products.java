@@ -16,13 +16,13 @@ public class Products  {
     private String Remark;
     private String ParentId;
     private float UnitPrice;
-    private int MeasurementMethod; //计算单位
+    private String Unit; //计算单位
 
     public Products() {
     }
 
     public Products(String productId, String productName, String pluCode, String createdAt,
-                    int statusCode, String remark, String parentId, float unitPrice, int measurementMethod) {
+                    int statusCode, String remark, String parentId, float unitPrice, String unit) {
         this.ProductId = productId;
         this.ProductName = productName;
         this.PluCode = pluCode;
@@ -31,12 +31,12 @@ public class Products  {
         this.Remark = remark;
         this.ParentId = parentId;
         this.UnitPrice = unitPrice;
-        this.MeasurementMethod = measurementMethod;
+        this.Unit = unit;
     }
 
-    @Generated(hash = 1110386182)
+    @Generated(hash = 540888747)
     public Products(Long id, String ProductId, String ProductName, String PluCode, String CreatedAt,
-            int StatusCode, String Remark, String ParentId, float UnitPrice, int MeasurementMethod) {
+            int StatusCode, String Remark, String ParentId, float UnitPrice, String Unit) {
         this.id = id;
         this.ProductId = ProductId;
         this.ProductName = ProductName;
@@ -46,8 +46,9 @@ public class Products  {
         this.Remark = Remark;
         this.ParentId = ParentId;
         this.UnitPrice = UnitPrice;
-        this.MeasurementMethod = MeasurementMethod;
+        this.Unit = Unit;
     }
+
 
     public String getProductName() {
         return ProductName;
@@ -121,12 +122,12 @@ public class Products  {
         this.UnitPrice = UnitPrice;
     }
 
-    public int getMeasurementMethod() {
-        return this.MeasurementMethod;
+    public String getUnit() {
+        return Unit;
     }
 
-    public void setMeasurementMethod(int MeasurementMethod) {
-        this.MeasurementMethod = MeasurementMethod;
+    public void setUnit(String unit) {
+        Unit = unit;
     }
 
     @Override
@@ -141,7 +142,7 @@ public class Products  {
                 ", Remark='" + Remark + '\'' +
                 ", ParentId='" + ParentId + '\'' +
                 ", UnitPrice=" + UnitPrice +
-                ", MeasurementMethod=" + MeasurementMethod +
+                ", Unit='" + Unit + '\'' +
                 '}';
     }
 }

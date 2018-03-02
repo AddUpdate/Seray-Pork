@@ -327,7 +327,7 @@ public class EntryFragmentOne extends BaseTwoFragment {
                     fis = new FileInputStream(new File(dir + inputImageName));
                     bitmap = BitmapFactory.decodeStream(fis);
                     mInputImage.setImageBitmap(bitmap);
-                    mParameter.put(key, inputImageName);
+               //     mParameter.put(key, inputImageName);
                     mSubtotal.setPurOrderImg(FileHelp.encodePurchaseImg(inputImageName));
                 }
             } catch (Exception e) {

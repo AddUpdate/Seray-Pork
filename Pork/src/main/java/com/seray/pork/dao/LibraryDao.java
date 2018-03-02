@@ -27,7 +27,8 @@ public class LibraryDao extends AbstractDao<Library, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property LibraryId = new Property(1, String.class, "LibraryId", false, "LIBRARY_ID");
         public final static Property LibraryName = new Property(2, String.class, "LibraryName", false, "LIBRARY_NAME");
-        public final static Property State = new Property(3, String.class, "State", false, "STATE");
+        public final static Property Type = new Property(3, int.class, "Type", false, "TYPE");
+        public final static Property State = new Property(4, String.class, "State", false, "STATE");
     }
 
 
@@ -46,7 +47,8 @@ public class LibraryDao extends AbstractDao<Library, Long> {
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"LIBRARY_ID\" TEXT," + // 1: LibraryId
                 "\"LIBRARY_NAME\" TEXT," + // 2: LibraryName
-                "\"STATE\" TEXT);"); // 3: State
+                "\"TYPE\" INTEGER NOT NULL ," + // 3: Type
+                "\"STATE\" TEXT);"); // 4: State
     }
 
     /** Drops the underlying database table. */
@@ -73,10 +75,11 @@ public class LibraryDao extends AbstractDao<Library, Long> {
         if (LibraryName != null) {
             stmt.bindString(3, LibraryName);
         }
+        stmt.bindLong(4, entity.getType());
  
         String State = entity.getState();
         if (State != null) {
-            stmt.bindString(4, State);
+            stmt.bindString(5, State);
         }
     }
 
@@ -98,10 +101,11 @@ public class LibraryDao extends AbstractDao<Library, Long> {
         if (LibraryName != null) {
             stmt.bindString(3, LibraryName);
         }
+        stmt.bindLong(4, entity.getType());
  
         String State = entity.getState();
         if (State != null) {
-            stmt.bindString(4, State);
+            stmt.bindString(5, State);
         }
     }
 
@@ -116,7 +120,8 @@ public class LibraryDao extends AbstractDao<Library, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // LibraryId
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // LibraryName
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3) // State
+            cursor.getInt(offset + 3), // Type
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4) // State
         );
         return entity;
     }
@@ -126,7 +131,8 @@ public class LibraryDao extends AbstractDao<Library, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setLibraryId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setLibraryName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setState(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setType(cursor.getInt(offset + 3));
+        entity.setState(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
      }
     
     @Override

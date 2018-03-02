@@ -33,7 +33,7 @@ buildscript {
     }
 }
 greendao {
-    schemaVersion 1
+    schemaVersion 2
     daoPackage 'com.seray.pork.dao'
     targetGenDir 'src/main/java'
 }

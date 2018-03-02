@@ -102,7 +102,7 @@ public class BaseActivity extends FragmentActivity implements View.OnClickListen
     /**
      * 显示吐司
      */
-    public void showMessage(final String msg) {
+    public void showMessage(String msg) {
         this.msg = msg;
         mHandler.post(showRun);
     }

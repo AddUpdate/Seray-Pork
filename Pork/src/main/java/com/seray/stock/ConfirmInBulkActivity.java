@@ -106,9 +106,9 @@ public class ConfirmInBulkActivity extends BaseActivity {
                         confirmInBulkHandler.sendEmptyMessage(1);
                         showMessage("暂无数据");
                     }
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                 } else {
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -150,7 +150,7 @@ public class ConfirmInBulkActivity extends BaseActivity {
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 return true;
         }
         return super.onKeyDown(keyCode, event);

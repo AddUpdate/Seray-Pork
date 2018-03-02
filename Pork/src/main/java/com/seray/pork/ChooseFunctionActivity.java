@@ -55,9 +55,9 @@ public class ChooseFunctionActivity extends BaseActivity {
         dialog = new LoginDialog(this);
         initData();
         initAdapter();
-        //     showLogin("登录");
+        showLogin("登录");
         initListener();
-        updateAdapter();
+        //updateAdapter();
     }
 
     private void initView() {
@@ -77,9 +77,9 @@ public class ChooseFunctionActivity extends BaseActivity {
         name.add("成品1、2号库");
         name.add("鲜品库");
         name.add("订单");
-        for (int i = 0; i < 8; i++) {
-            mPosition.add(i);
-        }
+//        for (int i = 0; i < 8; i++) {
+//            mPosition.add(i);
+//        }
     }
 
     private void initAdapter() {
@@ -132,7 +132,7 @@ public class ChooseFunctionActivity extends BaseActivity {
             @Override
             public void run() {
                 ApiResult api = UploadDataHttp.LoginPost(phoneNumber, passWord);
-                mLoadingDialog.dismissDialog();
+                mLoadingDialog.dismissDialogs();
                 if (api.Result) {
                     loginFlag = true;
                     mPosition.clear();

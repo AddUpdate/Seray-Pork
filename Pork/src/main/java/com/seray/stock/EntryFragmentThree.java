@@ -51,6 +51,7 @@ public class EntryFragmentThree extends BaseTwoFragment {
 
     private PurchaseDetailAdapter mAdapter = null;
     LoadingDialog loadingDialog;
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receivePurchaseOrder(@NonNull PurchaseOrder order) {
         mOrder = order;
@@ -137,12 +138,12 @@ public class EntryFragmentThree extends BaseTwoFragment {
                     submitBt.post(new Runnable() {
                         @Override
                         public void run() {
-                            loadingDialog.dismissDialog();
+                            loadingDialog.dismissDialogs();
                             sInterface.restartStock(0);
                         }
                     });
                 }
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 showMessage(api.ResultMessage);
             }
         });
@@ -160,7 +161,11 @@ public class EntryFragmentThree extends BaseTwoFragment {
                 object.put("PurchaseNumber", subtotal.getBatchNumber());
                 object.put("PurchaseDate", subtotal.getStockDate());
                 object.put("SupplierPhone", subtotal.getTel());
-                object.put("Certificate", subtotal.getPurOrderImg());
+                if (i == 0) {
+                    object.put("OrderPicture", subtotal.getPurOrderImg());
+                }else {
+                    object.put("OrderPicture", "");
+                }
                 object.put("ItemName", detailList.get(i).getProductName());
                 object.put("PLU", detailList.get(i).getPluCode());
                 object.put("ParentsItemName", detailList.get(i).getParentsItemName());// TODO: 2017/11/27
@@ -168,7 +173,7 @@ public class EntryFragmentThree extends BaseTwoFragment {
                 object.put("Weight", detailList.get(i).getDecimalQuantity());
                 object.put("WeightCompany", detailList.get(i).getUnit());
                 object.put("UnitPrice", detailList.get(i).getDecimalUnitPrice());
-                object.put("OrderPicture", detailList.get(i).getCertificateImg());
+                object.put("Certificate", detailList.get(i).getCertificateImg());
                 object.put("ActualWeight", BigDecimal.ZERO);
                 object.put("Remarks", detailList.get(i).getRemark());
                 object.put("State", "2");
@@ -313,12 +318,10 @@ public class EntryFragmentThree extends BaseTwoFragment {
 
     @Override
     void clearEditFocus() {
-
     }
 
     @Override
     void pushParameter() {
-        LogUtil.e("Four", "PushParameter");
     }
 
     @Override
@@ -330,6 +333,7 @@ public class EntryFragmentThree extends BaseTwoFragment {
         numberTx.setText("");
         inputTx.setText("");
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

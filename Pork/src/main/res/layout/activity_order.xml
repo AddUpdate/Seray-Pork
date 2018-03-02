@@ -1,134 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_back"
-    android:orientation="vertical"
-    android:layout_margin="@dimen/dp_8"
     >
-    <LinearLayout
-        android:layout_width="700dp"
-        android:layout_height="@dimen/dp_60"
-        android:orientation="horizontal"
-        android:weightSum="3"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/dp_4"
-        >
-        <TextView
-            android:id="@+id/tv_order_wait_customer"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="待配货-客户"
-            android:textColor="@color/white"
-            android:textSize="@dimen/pluTextSize"
-            android:gravity="center"
-            android:background="@drawable/radio_selected"
-            />
-        <TextView
-            android:id="@+id/tv_order_wait_products"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/dp_25"
-            android:layout_weight="1"
-            android:text="待配货-品名"
-            android:textColor="@color/black"
-            android:textSize="@dimen/pluTextSize"
-            android:gravity="center"
-            android:background="@drawable/shapeone"
-            />
-        <TextView
-            android:id="@+id/tv_order_finish"
-            android:layout_marginLeft="@dimen/dp_25"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:background="@drawable/shapeone"
-            android:textColor="@color/black"
-            android:text="已配货"
-            android:gravity="center"
-            android:textSize="@dimen/pluTextSize"
-            android:layout_weight="1" />
-
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/order_category_layout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_50"
-        android:background="@color/stock_back"
-        android:orientation="horizontal"
-        android:layout_marginTop="@dimen/dp_4"
-        android:weightSum="3">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="订单号"
-            android:textColor="@color/white"
-            android:textSize="25sp"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="订单时间"
-            android:textColor="@color/white"
-            android:textSize="25sp"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="客户"
-            android:textColor="@color/white"
-            android:textSize="25sp"/>
-
-    </LinearLayout>
     <RelativeLayout
+        android:id="@+id/ll_gr"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ListView
-            android:id="@+id/lv_order"
+        android:layout_height="@dimen/dp_72"
+        android:layout_margin="@dimen/dp_8"
+      >
+        <RadioGroup
+            android:id="@+id/radio_gr"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/confirm_goods_rl"
-            />
-        <RelativeLayout
-            android:id="@+id/confirm_goods_rl"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_60"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/dp_10"
-            android:layout_marginBottom="@dimen/dp_10"
-            >
-            <Button
-                android:id="@+id/bt_order_updata"
-                android:layout_width="100dp"
-                android:layout_height="60dp"
-                android:text="刷新"
-                android:background="@drawable/bg_button_ok"
+            android:gravity="center"
+            android:weightSum="5"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/order_wait_customer_rb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/radio_selected"
+                android:button="@null"
                 android:gravity="center"
-                android:textSize="@dimen/configTextSize"
-                android:textColor="@color/white"
-                android:layout_toLeftOf="@+id/bt_order_return"
-                android:layout_marginRight="@dimen/dp_10"
-                />
-            <Button
-                android:id="@+id/bt_order_return"
-                android:layout_width="100dp"
-                android:layout_height="60dp"
-                android:text="返回"
-                android:background="@drawable/bg_btn_return"
+                android:text="待配货-客户"
+                android:textColor="@drawable/ziti"
+                android:checked="true"
+                android:layout_margin="@dimen/dp_8"
+                android:textSize="@dimen/configTextSize" />
+
+            <RadioButton
+                android:id="@+id/order_wait_products_rb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/shapeone"
+                android:button="@null"
                 android:gravity="center"
-                android:textSize="@dimen/configTextSize"
-                android:textColor="@color/white"
-                android:layout_alignParentRight="true"
-                />
-        </RelativeLayout>
+                android:text="待配货-品名"
+                android:textColor="@drawable/ziti"
+                android:layout_margin="@dimen/dp_8"
+                android:textSize="@dimen/configTextSize"/>
+
+            <RadioButton
+                android:id="@+id/order_products_sort_rb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/shapeone"
+                android:button="@null"
+                android:gravity="center"
+                android:text="扫码分拣"
+                android:layout_margin="@dimen/dp_8"
+                android:textColor="@drawable/ziti"
+                android:textSize="@dimen/configTextSize"/>
+            <RadioButton
+                android:id="@+id/order_finish_rb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/shapeone"
+                android:button="@null"
+                android:gravity="center"
+                android:text="待上车"
+                android:layout_margin="@dimen/dp_8"
+                android:textColor="@drawable/ziti"
+                android:textSize="@dimen/configTextSize"/>
+            <RadioButton
+                android:id="@+id/order_complete_car_rb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/shapeone"
+                android:button="@null"
+                android:gravity="center"
+                android:text="已上车"
+                android:layout_margin="@dimen/dp_8"
+                android:textColor="@drawable/ziti"
+                android:textSize="@dimen/configTextSize"/>
+        </RadioGroup>
     </RelativeLayout>
 
-</LinearLayout>
+    <FrameLayout
+        android:id="@+id/mian_fram"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/ll_gr"
+       />
+
+</RelativeLayout>

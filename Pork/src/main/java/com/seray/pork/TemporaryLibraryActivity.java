@@ -6,10 +6,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.Picture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -25,6 +29,7 @@ import android.widget.TextView;
 import com.camera.simplewebcam.CameraPreview;
 import com.seray.adapter.CategoryAdapter;
 import com.seray.adapter.ProductsAdapter;
+import com.seray.entity.ApiParameter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -33,6 +38,7 @@ import com.seray.entity.MonitorProdctsMessage;
 import com.seray.entity.OperationLog;
 import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
+import com.seray.http.API;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
@@ -41,6 +47,7 @@ import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
 import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
@@ -69,14 +76,16 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private float lastWeight = 0.0f;
     private float divisionValue = 0.02f;
 
-    private TextView tvWeight, tvName, TvTareWeight;
+    private TextView tvWeight, tvName, tvTareWeight,tvWeightType;
     private TextView mMaxUnitView, mTimeView;
     private Button initLibraryBt;
-    private Spinner spinnerCome, spinnerLeave;
+    private Spinner spinnerCome, spinnerLeave,spinnerWeightType;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
+    private List<String> type_data = new ArrayList<>();
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
+    private ArrayAdapter<String> type_adapter;
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
 
@@ -86,8 +95,10 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private GridView mGridViewPlu;
     private ListView groupListView;
 
-    private String comeLibraryId, goLibraryId, goLibrary, name = "", plu = "", weight = "", source, unit, unitPrice;
+    private String comeLibraryId, goLibraryId, goLibrary, name = "", plu = "", weight = "", source, unit = "KG", unitPrice;
+    private int typeLibrary, number;
     private boolean flag = true;
+    private boolean isByWeight = true;
     private TemporaryHandler mTemporaryHandler = new TemporaryHandler(new WeakReference<>(this));
 
     CategoryAdapter separateAdapter;
@@ -95,7 +106,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
 
     OperationLogManager logManager = OperationLogManager.getInstance();
@@ -143,7 +154,9 @@ public class TemporaryLibraryActivity extends BaseActivity {
         loadingDialog = new LoadingDialog(this);
         tvWeight = (TextView) findViewById(R.id.tv_temporary_weight);
         tvName = (TextView) findViewById(R.id.tv_temporary_name);
-        TvTareWeight = (TextView) findViewById(R.id.tv_temporary_tare_weight);
+        tvTareWeight = (TextView) findViewById(R.id.tv_temporary_tare_weight);
+        tvWeightType = (TextView) findViewById(R.id.tv_temporary_weight_type);
+        spinnerWeightType = (Spinner) findViewById(R.id.spinner_temporary_weight_type);
         initLibraryBt = (Button) findViewById(R.id.bt_temporary_into_libraries);
         mGridViewPlu = (GridView) findViewById(R.id.gv_temporary_plu);
         groupListView = (ListView) findViewById(R.id.lv_temporary_group);
@@ -161,7 +174,29 @@ public class TemporaryLibraryActivity extends BaseActivity {
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
+        setPieceNum(tvWeight);
+    }
 
+    public void setPieceNum(final TextView testview) {
+        testview.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!isByWeight) {
+                    if (s.toString().contains(".")) {
+                        s = s.toString().subSequence(0, s.toString().length() - 1);
+                        testview.setText(s);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
     private void initData() {
@@ -178,6 +213,8 @@ public class TemporaryLibraryActivity extends BaseActivity {
             productsCategory.setProductsList(list);
             categoryList.add(productsCategory);
         }
+        type_data.add("袋");
+        type_data.add("箱");
     }
 
     private void initAdapter() {
@@ -191,7 +228,9 @@ public class TemporaryLibraryActivity extends BaseActivity {
             productList = categoryList.get(0).getProductsList();
             productsAdapter.setNewData(productList);
         }
-
+        type_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
+        type_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerWeightType.setAdapter(type_adapter);
     }
 
     private void initLibrary() {
@@ -226,21 +265,9 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 tvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
                 unitPrice = String.valueOf(productList.get(position).getUnitPrice());
-                int num = productList.get(position).getMeasurementMethod();
-                switch (num) {
-                    case 1:
-                        unit = "KG";
-                        break;
-                    case 2:
-                        unit = "袋";
-                        break;
-                    case 3:
-                        unit = "箱";
-                        break;
-                    default:
-                        unit = "";
-                        break;
-                }
+                unit = productList.get(position).getUnit();
+                isByWeight = unit.equals("KG") ? false : true;
+                toggleIsWeight();
             }
         });
         groupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -260,6 +287,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 source = comeLibraryList.get(position).getLibraryName();
+                typeLibrary = comeLibraryList.get(position).getType();
             }
 
             @Override
@@ -283,6 +311,19 @@ public class TemporaryLibraryActivity extends BaseActivity {
 
             }
         });
+       spinnerWeightType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+           @Override
+           public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+               TextView tv = (TextView) view;
+               tv.setTextColor(getResources().getColor(R.color.red));    //设置颜色
+               tv.setTextSize(30.0f);    //设置大小
+               unit = type_data.get(position);
+           }
+           @Override
+           public void onNothingSelected(AdapterView<?> parent) {
+
+           }
+       });
     }
 
     private void initJNI() {
@@ -352,15 +393,15 @@ public class TemporaryLibraryActivity extends BaseActivity {
     }
 
     private void weightChangedCyclicity() {
-
-        String strNet = mScale.getStringNet().trim();
-        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-        if (isOL()) {
-            tvWeight.setText(strNet);
-        } else {
-            tvWeight.setText(NumFormatUtil.df2.format(fW));
+        if (isByWeight) {
+            String strNet = mScale.getStringNet().trim();
+            float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+            if (isOL()) {
+                tvWeight.setText(strNet);
+            } else {
+                tvWeight.setText(NumFormatUtil.df2.format(fW));
+            }
         }
-
         if (isStable()) {
             //   backDisplay.showIsStable(true);
             findViewById(R.id.stableflag).setVisibility(View.VISIBLE);
@@ -384,42 +425,34 @@ public class TemporaryLibraryActivity extends BaseActivity {
             case R.id.bt_temporary_into_libraries:
                 name = tvName.getText().toString();
                 weight = tvWeight.getText().toString();
-                if (isOL()){
+                if (isOL()) {
                     showMessage("超出秤量程！");
                     return;
                 }
-                if (!TextUtils.isEmpty(name) && new BigDecimal(weight).compareTo(new BigDecimal(0)) > 0) {
-                    if (source.equals("采购") && goLibrary.equals("分割房")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
-                    } else if (source.equals("采购") && goLibrary.equals("白条库")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
-                    } else if (source.equals("白条库") && goLibrary.equals("鲜品库")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 3);
-                    } else if (source.equals("白条库") && goLibrary.equals("分割房")) {
-                        showNormalDialog("品名： " + name + "\n重量： " + weight + "\n去向： 从 " + source + " 到 " + goLibrary, 4);
+                camera();
+                if (!TextUtils.isEmpty(name)) {
+                    String value;
+                    if (isByWeight) {
+                        if (new BigDecimal(weight).compareTo(new BigDecimal(0)) <= 0) {
+                            showMessage("重量不对");
+                            return;
+                        }
+                        number = 0;
+                        value = "\n重量： " + weight;
                     } else {
-                        showMessage("请选择正确的来源去向");
+                        number = Integer.valueOf(weight);
+                        if (number <= 0) {
+                            showMessage("数量需大于0！");
+                            return;
+                        }
+                        weight = "0.00";
+                        value = "\n数量： " + number;
                     }
+                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 4);
                 } else {
                     showMessage("重量或品名不符合规范");
                 }
                 break;
-//            case R.id.bt_temporary_out_libraries:
-//                name = tvName.getText().toString();
-//                weight = tvWeight.getText().toString();
-//
-//                if (!TextUtils.isEmpty(name) && new BigDecimal(weight).compareTo(new BigDecimal(0)) > 0) {
-//                    if (source.equals("白条库") && goLibrary.equals("鲜品库")) {
-//                        loadingDialog.showDialog();
-//                        submitTakeLibrary();
-//                    } else if (source.equals("白条库") && goLibrary.equals("分割房")) {
-//                        loadingDialog.showDialog();
-//                        submitOutLibrary();
-//                    } else {
-//                        showMessage("请选择正确的来源去向");
-//                    }
-//                } else
-//                    showMessage("重量或品名不符合规范");
         }
 
     }
@@ -497,11 +530,11 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 ApiResult api = UploadDataHttp.getSaveLoulibrary(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
                     //  sqlInsert(1, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -518,11 +551,11 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 ApiResult api = UploadDataHttp.getSaveDivision(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
                     //   sqlInsert(1, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -530,20 +563,25 @@ public class TemporaryLibraryActivity extends BaseActivity {
     }
 
     /*
-     * 出白条库 到分割
+     * 出白条库
      */
     private void submitOutLibrary() {
         sqlQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getOutLoulibrary(source, comeLibraryId, goLibraryId, weight, name);
+                ApiParameter apiParameter = new ApiParameter();
+                if (typeLibrary == 6) {
+                    apiParameter.setDivision(submitOutData());
+                }
+                apiParameter.setDataHelper(submitData());
+                ApiResult api = UploadDataHttp.api(typeLibrary, apiParameter);
                 if (api.Result) {
                     //     sqlInsert(1, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -560,34 +598,51 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 ApiResult api = UploadDataHttp.getTakeLoulibrary(comeLibraryId, weight, name);
                 if (api.Result) {
                     //      sqlInsert(1, "");
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2, "");
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
         });
     }
 
-    private String submitData() {
+    private String submitOutData() {
         JSONObject object = new JSONObject();
         String Division = "";
         try {
-            object.put("ItemName", name);
-            object.put("Weight", weight);
-            object.put("Source", source);
             object.put("PLU", plu);
             object.put("WeightCompany", unit);
             object.put("UnitPrice", unitPrice);
-            object.put("Remarks", "");
-
             Division = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return Division;
+    }
+
+    private String submitData() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("ItemName", name);
+            object.put("Weight", weight);
+            object.put("Number", number);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("ComeAlibraryName", source);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", unitPrice);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
     }
 
     private void sqlInsert(int state, String goId) {
@@ -596,8 +651,55 @@ public class TemporaryLibraryActivity extends BaseActivity {
         logManager.insertOperationLog(log);
     }
 
-    private void clearEvent() {
+    /**
+     * 计件与计重判断
+     */
+    protected void toggleIsWeight() {
+        if (isByWeight) {
+            isByWeight = false;
+            tvWeightType.setVisibility(View.GONE);
+            spinnerWeightType.setVisibility(View.VISIBLE);
+            if (unit.equals("KG")){
+                unit="袋";
+            }
+            for (int i = 0; i < type_data.size(); i++) {
+                if (unit.equals(type_data.get(i))) {
+                    spinnerWeightType.setSelection(i, true);
+                    break;
+                }
+            }
+            tvWeight.setText("0");
+        } else {
+            tvWeightType.setVisibility(View.VISIBLE);
+            spinnerWeightType.setVisibility(View.GONE);
+            isByWeight = true;
+            unit = "KG";
+        }
+    }
+
+    private void clearProductInfo() {
         tvName.setText("");
+        tvWeightType.setVisibility(View.VISIBLE);
+        spinnerWeightType.setVisibility(View.GONE);
+        unit = "KG";
+        isByWeight = true;
+    }
+
+    private void clearEvent() {
+        if (!isByWeight)
+            tvWeight.setText("0");
+    }
+
+    private void unitValu(String num) {
+        String iszero = tvWeight.getText().toString().trim();
+        boolean wzero = iszero.equals("0");
+        if (wzero) {
+            tvWeight.setText(num);
+        } else {
+            if (iszero.length() >= 4)
+                return;
+            tvWeight.setText(iszero + num);
+        }
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -614,7 +716,7 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
+                    tvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -623,13 +725,47 @@ public class TemporaryLibraryActivity extends BaseActivity {
                 if (mScale.zero()) {
                     lastWeight = 0.0f;
                     currWeight = 0.0f;
-                    TvTareWeight.setText(R.string.base_weight);
+                    tvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");
                 }
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                loadingDialog.dismissDialog();
+                clearProductInfo();
+                loadingDialog.dismissDialogs();
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_MULTIPLY: // 计件计重切换
+                toggleIsWeight();
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_0:
+                unitValu("0");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_1:
+                unitValu("1");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_2:
+                unitValu("2");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_3:
+                unitValu("3");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_4:
+                unitValu("4");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_5:
+                unitValu("5");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_6:
+                unitValu("6");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_7:
+                unitValu("7");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_8:
+                unitValu("8");
+                return true;
+            case KeyEvent.KEYCODE_NUMPAD_9:
+                unitValu("9");
                 return true;
         }
         return super.onKeyDown(keyCode, event);

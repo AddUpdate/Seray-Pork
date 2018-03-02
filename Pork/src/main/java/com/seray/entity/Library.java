@@ -13,19 +13,23 @@ public class Library {
     private Long id;
     private String LibraryId;
     private String LibraryName;
+    private int Type;
     private String State;
 
     public Library(){}
-    public Library(String libraryId,String libraryName,String state){
+    public Library(String libraryId,String libraryName,int type,String state){
         this.LibraryId = libraryId;
         this.LibraryName = libraryName;
+        this.Type = type;
         this.State = state;
     }
-    @Generated(hash = 1694802316)
-    public Library(Long id, String LibraryId, String LibraryName, String State) {
+    @Generated(hash = 1727727992)
+    public Library(Long id, String LibraryId, String LibraryName, int Type,
+            String State) {
         this.id = id;
         this.LibraryId = LibraryId;
         this.LibraryName = LibraryName;
+        this.Type = Type;
         this.State = State;
     }
     public Long getId() {
@@ -46,6 +50,15 @@ public class Library {
     public void setLibraryName(String LibraryName) {
         this.LibraryName = LibraryName;
     }
+
+    public int getType() {
+        return Type;
+    }
+
+    public void setType(int type) {
+        Type = type;
+    }
+
     public String getState() {
         return this.State;
     }

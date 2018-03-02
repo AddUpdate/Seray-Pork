@@ -1,7 +1,6 @@
 package com.seray.http;
 
 import com.seray.pork.dao.ConfigManager;
-import com.seray.utils.LogUtil;
 
 public class API {
 
@@ -93,8 +92,11 @@ public class API {
     /**
      * 出分拣
      */
-    public static String SET_TAKE_SORTING_AREA_URL =
-            BASE_HTTP + "TakeSortingArea.ashx";
+//    public static String SET_TAKE_SORTING_AREA_URL =
+//            BASE_HTTP + "TakeSortingArea.ashx";
+
+    public static String OUT_SORTING_AREA_URL =
+            BASE_HTTP + "OutSortingArea.ashx";
     /**
      * 入速冻库 成品1 2 号库
      */
@@ -130,5 +132,9 @@ public class API {
      */
     public static String UPDATET_ORDER_ACTUAL_WEIGHT =
             BASE_HTTP + "UpdatetOrderActualWeight.ashx";
-
+    /**
+     * 订单上车
+     */
+    public static String UPDATET_ORDER_VEHICLE =
+            BASE_HTTP + "UpdateOrderVehicle.ashx";
 }

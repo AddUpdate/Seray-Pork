@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.Picture;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import com.lzscale.scalelib.misclib.GpScalePrinter;
 import com.seray.adapter.CategoryAdapter;
 import com.seray.adapter.ProductsAdapter;
 import com.seray.cache.AppConfig;
+import com.seray.entity.ApiParameter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
@@ -87,15 +89,18 @@ import java.util.List;
  */
 
 public class SortActivity extends BaseActivity {
-    private TextView TvName, TvWeight, TvTareWeight, TvWeightType;
+    private TextView tvName, tvWeight, tvTareWeight, tvWeightType;
     private TextView mMaxUnitView, mTimeView;
     private ImageView mBatteryIv, mPrinterView;
 
-    private Spinner spinnerCome, spinnerLeave;
+    private Spinner spinnerCome, spinnerLeave,spinnerWeightType;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
+    private List<String> type_data = new ArrayList<>();
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
+    private ArrayAdapter<String> type_adapter;
+    
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
     private Button submitBt;
@@ -119,12 +124,12 @@ public class SortActivity extends BaseActivity {
     ProductsAdapter productsAdapter;
 
     private String name, weight, unit, plu = "", price;
-    private int number;
+    private int number,typeLibrary;
     private String source, goLibrary, comeLibraryId, goLibraryId;
 
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
 
     private boolean isByWeight = true;
@@ -169,10 +174,10 @@ public class SortActivity extends BaseActivity {
 
     private void initView() {
         loadingDialog = new LoadingDialog(this);
-        TvWeightType = (TextView) findViewById(R.id.tv_sort_weight_type);
-        TvName = (TextView) findViewById(R.id.tv_sort_name);
-        TvWeight = (TextView) findViewById(R.id.tv_sort_weight);
-        TvTareWeight = (TextView) findViewById(R.id.tv_sort_tare_weight);
+        tvWeightType = (TextView) findViewById(R.id.tv_sort_weight_type);
+        tvName = (TextView) findViewById(R.id.tv_sort_name);
+        tvWeight = (TextView) findViewById(R.id.tv_sort_weight);
+        tvTareWeight = (TextView) findViewById(R.id.tv_sort_tare_weight);
 
         submitBt = (Button) findViewById(R.id.bt_sort_ok);
 
@@ -188,12 +193,14 @@ public class SortActivity extends BaseActivity {
         spinnerCome.setGravity(Gravity.CENTER);
         spinnerLeave = (Spinner) findViewById(R.id.spinner_sort_leave);
         spinnerLeave.setGravity(Gravity.CENTER);
+        spinnerWeightType = (Spinner) findViewById(R.id.spinner_sort_weight_type);
+        
         mPrinterView = (ImageView) findViewById(R.id.server_order_count);
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mBatteryIv = (ImageView) findViewById(R.id.battery);
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
-        setPieceNum(TvWeight);
+        setPieceNum(tvWeight);
     }
 
     public void setPieceNum(final TextView testview) {
@@ -240,24 +247,10 @@ public class SortActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mMisc.beep();
-                TvName.setText(productList.get(position).getProductName());
+                tvName.setText(productList.get(position).getProductName());
                 plu = productList.get(position).getPluCode();
                 price = String.valueOf(productList.get(position).getUnitPrice());
-                int num = productList.get(position).getMeasurementMethod();
-                switch (num) {
-                    case 1:
-                        unit = "KG";
-                        break;
-                    case 2:
-                        unit = "袋";
-                        break;
-                    case 3:
-                        unit = "箱";
-                        break;
-                    default:
-                        unit = "";
-                        break;
-                }
+                unit = productList.get(position).getUnit();
                 isByWeight = unit.equals("KG") ? false : true;
                 toggleIsWeight();
             }
@@ -280,6 +273,7 @@ public class SortActivity extends BaseActivity {
                 //   showMessage(data_list.get(position));
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 source = come_data.get(position);
+                typeLibrary = comeLibraryList.get(position).getType();
             }
 
             @Override
@@ -303,6 +297,19 @@ public class SortActivity extends BaseActivity {
 
             }
         });
+        spinnerWeightType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.red));    //设置颜色
+                tv.setTextSize(30.0f);    //设置大小
+                unit = type_data.get(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void initData() {
@@ -319,12 +326,8 @@ public class SortActivity extends BaseActivity {
             productsCategory.setProductsList(list);
             categoryList.add(productsCategory);
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                connection();
-            }
-        }).start();
+        type_data.add("袋");
+        type_data.add("箱");
     }
 
     private void initAdapter() {
@@ -337,6 +340,9 @@ public class SortActivity extends BaseActivity {
             productList = categoryList.get(0).getProductsList();
             productsAdapter.setNewData(productList);
         }
+        type_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
+        type_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerWeightType.setAdapter(type_adapter);
     }
 
     private void initLibrary() {
@@ -403,12 +409,12 @@ public class SortActivity extends BaseActivity {
             float tare = tareFloat;
             float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
             if (isOL()) {
-                TvWeight.setText(strNet);
+                tvWeight.setText(strNet);
             } else {
                 if (tareFloat > 0) {
                     fW -= tare;
                 }
-                TvWeight.setText(NumFormatUtil.df2.format(fW));
+                tvWeight.setText(NumFormatUtil.df2.format(fW));
             }
         }
         if (isStable()) {
@@ -469,8 +475,8 @@ public class SortActivity extends BaseActivity {
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_sort_ok:
-                weight = TvWeight.getText().toString();
-                name = TvName.getText().toString();
+                weight = tvWeight.getText().toString();
+                name = tvName.getText().toString();
                 if (isOL()){
                     showMessage("超出秤量程！");
                     return;
@@ -483,23 +489,29 @@ public class SortActivity extends BaseActivity {
                 String value;
                 if (isByWeight) {
                     if (weightFt <= 0) {
-                        showMessage("重量不对");
+                        showMessage("重量需大于0");
                         return;
                     }
                     number = 0;
                     value = "\n重量： " + weight;
                 } else {
                     number = Integer.valueOf(weight);
+                    if (number <= 0) {
+                        showMessage("数量需大于0！");
+                        return;
+                    }
                     weight = "0";
                     value = "\n数量： " + number;
                 }
-                if (goLibrary.equals("分拣区") && !source.equals("分拣区")) {
-                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
-                } else if (source.equals("分拣区")) {
-                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
-                } else {
-                    showMessage("选择正确的库");
-                }
+                camera();
+                showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+//                if (goLibrary.equals("分拣区") && !source.equals("分拣区")) {
+//                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 1);
+//                } else if (source.equals("分拣区")) {
+//                    showNormalDialog("品名： " + name + value + "\n去向： 从 " + source + " 到 " + goLibrary, 2);
+//                } else {
+//                    showMessage("选择正确的库");
+//                }
                 break;
         }
     }
@@ -508,22 +520,24 @@ public class SortActivity extends BaseActivity {
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getTakeSortingArea(name, weight, String.valueOf(number), source, comeLibraryId, goLibraryId);
+                ApiParameter apiParameter = new ApiParameter();
+                apiParameter.setDataHelper(submitData());
+                ApiResult api = UploadDataHttp.api(typeLibrary,apiParameter);
                 if (api.Result) {
                     //   sqlInsert(1, "");
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setProductName(name);
-                    orderDetail.setAlibraryName("苏州源丰食品有限公司");
-                    orderDetail.setWeight(new BigDecimal(weight));
-                    orderDetail.setNumber(number);
-                    orderDetail.setBarCode(api.ResultJsonStr);
-                    orderDetail.setOrderDate(NumFormatUtil.getDateDetail());
-                    keyEnter(orderDetail);
+//                    OrderDetail orderDetail = new OrderDetail();
+//                    orderDetail.setProductName(name);
+//                    orderDetail.setAlibraryName("苏州源丰食品有限公司");
+//                    orderDetail.setWeight(new BigDecimal(weight));
+//                    orderDetail.setNumber(number);
+//                    orderDetail.setBarCode("1222");
+//                    orderDetail.setOrderDate(NumFormatUtil.getDateDetail());
+//                    keyEnter(orderDetail);
                 } else {
                     sqlInsert(2, "");
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -538,11 +552,11 @@ public class SortActivity extends BaseActivity {
                 ApiResult api = UploadDataHttp.getSaveSortingArea(submitData(), comeLibraryId, goLibraryId);
                 if (api.Result) {
                     // sqlInsert(1, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     sqlInsert(2, goLibraryId);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -551,21 +565,24 @@ public class SortActivity extends BaseActivity {
 
     private String submitData() {
         JSONObject object = new JSONObject();
-        String Division = "";
+        String DataHelper = "";
         try {
             object.put("ItemName", name);
             object.put("Weight", weight);
-            object.put("Source", source);
+            object.put("ComeAlibraryName", source);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
             object.put("PLU", plu);
             object.put("WeightCompany", unit);
             object.put("Number", number);
             object.put("UnitPrice", price);
-            object.put("Remarks", "");
-            Division = object.toString();
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return Division;
+        return DataHelper;
     }
 
     private void sqlInsert(int state, String goId) {
@@ -627,7 +644,7 @@ public class SortActivity extends BaseActivity {
                 currWeight = 0.0f;
                 if (mScale.tare()) {
                     float curTare = mScale.getFloatTare();
-                    TvTareWeight.setText(NumFormatUtil.df2.format(curTare));
+                    tvTareWeight.setText(NumFormatUtil.df2.format(curTare));
                 } else {
                     showMessage("去皮失败");
                 }
@@ -638,7 +655,7 @@ public class SortActivity extends BaseActivity {
                     cleanTareFloat();
                     lastWeight = 0.0F;
                     currWeight = 0.0F;
-                    TvTareWeight.setText(R.string.base_weight);
+                    tvTareWeight.setText(R.string.base_weight);
                 } else {
                     showMessage("置零失败");
                 }
@@ -646,7 +663,7 @@ public class SortActivity extends BaseActivity {
 
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
                 clearProductInfo();
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_MULTIPLY: // 计件计重切换
                 toggleIsWeight();
@@ -686,14 +703,14 @@ public class SortActivity extends BaseActivity {
     }
 
     private void unitValu(String num) {
-        String iszero = TvWeight.getText().toString().trim();
+        String iszero = tvWeight.getText().toString().trim();
         boolean wzero = iszero.equals("0");
         if (wzero) {
-            TvWeight.setText(num);
+            tvWeight.setText(num);
         } else {
             if (iszero.length() >= 4)
                 return;
-            TvWeight.setText(iszero + num);
+            tvWeight.setText(iszero + num);
         }
     }
 
@@ -704,29 +721,38 @@ public class SortActivity extends BaseActivity {
         if (isByWeight) {
             cleanTareFloat();
             isByWeight = false;
-            TvWeightType.setText("计件");
-            unit = "袋";
-            TvWeightType.setTextColor(Color.RED);
-            TvWeight.setText("0");
+            tvWeightType.setVisibility(View.GONE);
+            spinnerWeightType.setVisibility(View.VISIBLE);
+            if (unit.equals("KG")){
+                unit="袋";
+            }
+            for (int i = 0; i < type_data.size(); i++) {
+                if (unit.equals(type_data.get(i))) {
+                    spinnerWeightType.setSelection(i, true);
+                    break;
+                }
+            }
+            tvWeight.setText("0");
         } else {
+            tvWeightType.setVisibility(View.VISIBLE);
+            spinnerWeightType.setVisibility(View.GONE);
             isByWeight = true;
-            TvWeightType.setText("重量   KG");
             unit = "KG";
-            TvWeightType.setTextColor(Color.WHITE);
         }
     }
 
     private void clearProductInfo() {
-        TvName.setText("");
         cleanTareFloat();
-        TvWeightType.setTextColor(Color.WHITE);
-        TvWeightType.setText("计重   KG");
+        tvName.setText("");
+        tvWeightType.setVisibility(View.VISIBLE);
+        spinnerWeightType.setVisibility(View.GONE);
+        unit = "KG";
         isByWeight = true;
     }
 
     private void clearEvent() {
         if (!isByWeight)
-            TvWeight.setText("0");
+            tvWeight.setText("0");
     }
 
     @Override
@@ -792,25 +818,25 @@ public class SortActivity extends BaseActivity {
             }
         }
     }
-
-    private GpService mGpService = null;
-
-    private PrinterServiceConnection mPrintConnect = null;
-
-    private PortParameters mPortParam = new PortParameters();
-
-    private class PrinterServiceConnection implements ServiceConnection {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mGpService = null;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mGpService = GpService.Stub.asInterface(service);
-            initPortParam();
-        }
-    }
+//
+//    private GpService mGpService = null;
+//
+//    private PrinterServiceConnection mPrintConnect = null;
+//
+//    private PortParameters mPortParam = new PortParameters();
+//
+//    private class PrinterServiceConnection implements ServiceConnection {
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            mGpService = null;
+//        }
+//
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            mGpService = GpService.Stub.asInterface(service);
+//            initPortParam();
+//        }
+//    }
 
 //    private BroadcastReceiver mPrintReceiver = new BroadcastReceiver() {
 //
@@ -850,160 +876,159 @@ public class SortActivity extends BaseActivity {
 //        }
 //    };
 
-    private BroadcastReceiver PrinterStatusBroadcastReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (GpCom.ACTION_CONNECT_STATUS.equals(intent.getAction())) {
-                int type = intent.getIntExtra(GpPrintService.CONNECT_STATUS, 0);
-                LogUtil.d("TYPE RECEIVE " + type);
-                if (type == GpDevice.STATE_CONNECTING) {
-                    showMessage("打印机正在连接");
-                    mPortParam.setPortOpenState(false);
-                } else if (type == GpDevice.STATE_NONE) {
-                    showMessage("打印机未连接");
-                    mPortParam.setPortOpenState(false);
-                    mPrinterView.setVisibility(View.INVISIBLE);
-                    AppConfig.isUseGpPrinter = false;
-                } else if (type == GpDevice.STATE_VALID_PRINTER) {
-                    showMessage("打印机已连接");
-                    mPortParam.setPortOpenState(true);
-                    mPrinterView.setVisibility(View.VISIBLE);
-                    AppConfig.isUseGpPrinter = true;
-                }
-            }
-        }
-    };
-
-    private void initPortParam() {
-        boolean state = getConnectState();
-        mPortParam = new PortParameters();
-        mPortParam.setPortOpenState(state);
-        getUsbDeviceList();
-        connectOrDisConnectToDevice();
-    }
-
-    private boolean getConnectState() {
-        boolean state = false;
-        try {
-            if (mGpService.getPrinterConnectStatus(0) == GpDevice.STATE_CONNECTED) {
-                state = true;
-            }
-        } catch (RemoteException e) {
-            LogUtil.e(e.getMessage());
-        }
-        return state;
-    }
-
-    boolean checkPortParameters(PortParameters param) {
-        boolean rel = false;
-        int type = param.getPortType();
-        if (type == PortParameters.USB) {
-            if (!param.getUsbDeviceName().equals("")) {
-                rel = true;
-            }
-        }
-        return rel;
-    }
-
-    void connectOrDisConnectToDevice() {
-        int rel = 0;
-        try {
-            if (!mPortParam.getPortOpenState()) {
-
-                if (checkPortParameters(mPortParam)) {
-                    mGpService.closePort(0);
-                    if (mPortParam.getPortType() == PortParameters.USB) {
-                        rel = mGpService.openPort(0, mPortParam.getPortType(), mPortParam.getUsbDeviceName(), 0);
-                    }
-                    GpCom.ERROR_CODE r = GpCom.ERROR_CODE.values()[rel];
-                    if (r != GpCom.ERROR_CODE.SUCCESS) {
-                        if (r == GpCom.ERROR_CODE.DEVICE_ALREADY_OPEN) {
-                            mPortParam.setPortOpenState(true);
-                        } else {
-                            showMessage(GpCom.getErrorText(r));
-                        }
-                    }
-                } else {
-                    showMessage("端口参数错误");
-                }
-            } else {
-                mGpService.closePort(0);
-            }
-        } catch (RemoteException e) {
-            LogUtil.e(e.getMessage());
-        }
-    }
-
-    public void getUsbDeviceList() {
-        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> devices = manager.getDeviceList();
-        Iterator<UsbDevice> deviceIterator = devices.values().iterator();
-        int count = devices.size();
-        if (count > 0) {
-            if (deviceIterator.hasNext()) {
-                UsbDevice device = deviceIterator.next();
-                String deviceName = device.getDeviceName();
-                if (checkUsbDevicePidVid(device)) {
-                    mPortParam.setPortType(PortParameters.USB);
-                    mPortParam.setIpAddr("");
-                    mPortParam.setPortNumber(10000);
-                    mPortParam.setBluetoothAddr("");
-                    mPortParam.setUsbDeviceName(deviceName);
-                }
-            }
-        } else {
-            showMessage("未连接USB打印机");
-        }
-    }
-
-    boolean checkUsbDevicePidVid(UsbDevice dev) {
-        int pid = dev.getProductId();
-        int vid = dev.getVendorId();
-        boolean rel = false;
-        if (vid == 34918 && pid == 256 || vid == 1137 && pid == 85 || vid == 6790 && pid == 30084 || vid == 26728 && pid == 256 || vid == 26728 && pid == 512 || vid == 26728 && pid == 768 || vid == 26728 && pid == 1024 || vid == 26728 && pid == 1280 || vid == 26728 && pid == 1536) {
-            rel = true;
-        }
-        return rel;
-    }
-
-    private void connection() {
-        mPrintConnect = new PrinterServiceConnection();
-        Intent intent = new Intent(this, GpPrintService.class);
-        bindService(intent, mPrintConnect, Context.BIND_AUTO_CREATE);
-    }
-
-    private PendingIntent pi;
+//    private BroadcastReceiver PrinterStatusBroadcastReceiver = new BroadcastReceiver() {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (GpCom.ACTION_CONNECT_STATUS.equals(intent.getAction())) {
+//                int type = intent.getIntExtra(GpPrintService.CONNECT_STATUS, 0);
+//                LogUtil.d("TYPE RECEIVE " + type);
+//                if (type == GpDevice.STATE_CONNECTING) {
+//                    showMessage("打印机正在连接");
+//                    mPortParam.setPortOpenState(false);
+//                } else if (type == GpDevice.STATE_NONE) {
+//                    showMessage("打印机未连接");
+//                    mPortParam.setPortOpenState(false);
+//                    mPrinterView.setVisibility(View.INVISIBLE);
+//                    AppConfig.isUseGpPrinter = false;
+//                } else if (type == GpDevice.STATE_VALID_PRINTER) {
+//                    showMessage("打印机已连接");
+//                    mPortParam.setPortOpenState(true);
+//                    mPrinterView.setVisibility(View.VISIBLE);
+//                    AppConfig.isUseGpPrinter = true;
+//                }
+//            }
+//        }
+//    };
+//
+//    private void initPortParam() {
+//        boolean state = getConnectState();
+//        mPortParam = new PortParameters();
+//        mPortParam.setPortOpenState(state);
+//        getUsbDeviceList();
+//        connectOrDisConnectToDevice();
+//    }
+//
+//    private boolean getConnectState() {
+//        boolean state = false;
+//        try {
+//            if (mGpService.getPrinterConnectStatus(0) == GpDevice.STATE_CONNECTED) {
+//                state = true;
+//            }
+//        } catch (RemoteException e) {
+//            LogUtil.e(e.getMessage());
+//        }
+//        return state;
+//    }
+//
+//    boolean checkPortParameters(PortParameters param) {
+//        boolean rel = false;
+//        int type = param.getPortType();
+//        if (type == PortParameters.USB) {
+//            if (!param.getUsbDeviceName().equals("")) {
+//                rel = true;
+//            }
+//        }
+//        return rel;
+//    }
+//
+//    void connectOrDisConnectToDevice() {
+//        int rel = 0;
+//        try {
+//            if (!mPortParam.getPortOpenState()) {
+//
+//                if (checkPortParameters(mPortParam)) {
+//                    mGpService.closePort(0);
+//                    if (mPortParam.getPortType() == PortParameters.USB) {
+//                        rel = mGpService.openPort(0, mPortParam.getPortType(), mPortParam.getUsbDeviceName(), 0);
+//                    }
+//                    GpCom.ERROR_CODE r = GpCom.ERROR_CODE.values()[rel];
+//                    if (r != GpCom.ERROR_CODE.SUCCESS) {
+//                        if (r == GpCom.ERROR_CODE.DEVICE_ALREADY_OPEN) {
+//                            mPortParam.setPortOpenState(true);
+//                        } else {
+//                            showMessage(GpCom.getErrorText(r));
+//                        }
+//                    }
+//                } else {
+//                    showMessage("端口参数错误");
+//                }
+//            } else {
+//                mGpService.closePort(0);
+//            }
+//        } catch (RemoteException e) {
+//            LogUtil.e(e.getMessage());
+//        }
+//    }
+//
+//    public void getUsbDeviceList() {
+//        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+//        HashMap<String, UsbDevice> devices = manager.getDeviceList();
+//        Iterator<UsbDevice> deviceIterator = devices.values().iterator();
+//        int count = devices.size();
+//        if (count > 0) {
+//            if (deviceIterator.hasNext()) {
+//                UsbDevice device = deviceIterator.next();
+//                String deviceName = device.getDeviceName();
+//                if (checkUsbDevicePidVid(device)) {
+//                    mPortParam.setPortType(PortParameters.USB);
+//                    mPortParam.setIpAddr("");
+//                    mPortParam.setPortNumber(10000);
+//                    mPortParam.setBluetoothAddr("");
+//                    mPortParam.setUsbDeviceName(deviceName);
+//                }
+//            }
+//        } else {
+//            showMessage("未连接USB打印机");
+//        }
+//    }
+//
+//    boolean checkUsbDevicePidVid(UsbDevice dev) {
+//        int pid = dev.getProductId();
+//        int vid = dev.getVendorId();
+//        boolean rel = false;
+//        if (vid == 34918 && pid == 256 || vid == 1137 && pid == 85 || vid == 6790 && pid == 30084 || vid == 26728 && pid == 256 || vid == 26728 && pid == 512 || vid == 26728 && pid == 768 || vid == 26728 && pid == 1024 || vid == 26728 && pid == 1280 || vid == 26728 && pid == 1536) {
+//            rel = true;
+//        }
+//        return rel;
+//    }
+//
+//    private void connection() {
+//        mPrintConnect = new PrinterServiceConnection();
+//        Intent intent = new Intent(this, GpPrintService.class);
+//        bindService(intent, mPrintConnect, Context.BIND_AUTO_CREATE);
+//    }
+//
+//    private PendingIntent pi;
 
     public void register() {
         IntentFilter timeFilter = new IntentFilter();
         timeFilter.addAction(Intent.ACTION_TIME_TICK);
         registerReceiver(timeReceiver, timeFilter);
 
-        //  registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(GpCom.ACTION_CONNECT_STATUS);
-        registerReceiver(PrinterStatusBroadcastReceiver, filter);
-        IntentFilter dateFilter = new IntentFilter();
-        dateFilter.addAction("com.seray.scale.DATE_CHANGED");
-        // registerReceiver(dateReceiver, dateFilter);
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 23);
-        c.set(Calendar.MINUTE, 59);
-        c.set(Calendar.SECOND, 59);
-        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent();
-        intent.setAction("com.seray.scale.DATE_CHANGED");
-        pi = PendingIntent.getBroadcast(this, 0, intent, 0);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), 1000 * 60 * 60 * 24, pi);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(GpCom.ACTION_CONNECT_STATUS);
+//        registerReceiver(PrinterStatusBroadcastReceiver, filter);
+//        IntentFilter dateFilter = new IntentFilter();
+//        dateFilter.addAction("com.seray.scale.DATE_CHANGED");
+//        // registerReceiver(dateReceiver, dateFilter);
+//        Calendar c = Calendar.getInstance();
+//        c.set(Calendar.HOUR_OF_DAY, 23);
+//        c.set(Calendar.MINUTE, 59);
+//        c.set(Calendar.SECOND, 59);
+//        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+//        Intent intent = new Intent();
+//        intent.setAction("com.seray.scale.DATE_CHANGED");
+//        pi = PendingIntent.getBroadcast(this, 0, intent, 0);
+//        am.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), 1000 * 60 * 60 * 24, pi);
     }
 
     /**
      * 准备打印
      */
-    private void keyEnter(OrderDetail detail) {
-        GpScalePrinter.getInstance(mGpService).printOrder(detail, null);
-    }
+//    private void keyEnter(OrderDetail detail) {
+//        GpScalePrinter.getInstance(mGpService).printOrder(detail, null);
+//    }
 
     @Override
     protected void onDestroy() {
@@ -1012,23 +1037,21 @@ public class SortActivity extends BaseActivity {
         unregisterReceiver(timeReceiver);
         EventBus.getDefault().unregister(this);
         mSortHandler.removeCallbacksAndMessages(null);
-        if (mGpService != null) {
-            try {
-                mGpService.closePort(0);
-                if (mPrintConnect != null) {
-                    unbindService(mPrintConnect);
-                }
-            } catch (RemoteException e) {
-                LogUtil.e(e.getMessage());
-            }
-        }
+//        if (mGpService != null) {
+//            try {
+//                mGpService.closePort(0);
+//                if (mPrintConnect != null) {
+//                    unbindService(mPrintConnect);
+//                }
+//            } catch (RemoteException e) {
+//                LogUtil.e(e.getMessage());
+//            }
+//        }
         Intent intent = new Intent(this, BatteryService.class);
         stopService(intent);
-        //   unregisterReceiver(mPrintReceiver);
-        unregisterReceiver(PrinterStatusBroadcastReceiver);
-        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        am.cancel(pi);
-        mPortParam = null;
-        // android.os.Process.killProcess(android.os.Process.myPid());
+//        unregisterReceiver(PrinterStatusBroadcastReceiver);
+//        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+//        am.cancel(pi);
+//        mPortParam = null;
     }
 }

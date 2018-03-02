@@ -376,7 +376,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                 if (api.Result) {
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, numberInt, state, 1);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                     if (state == 1) {
                         returnValue();
@@ -390,7 +390,7 @@ public class InBulkQuantityActivity extends BaseActivity {
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, weightFt, numberInt, state, 2);
                     sqlInsert(state);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -519,7 +519,7 @@ public class InBulkQuantityActivity extends BaseActivity {
         mMisc.beep();
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 clearZero();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零

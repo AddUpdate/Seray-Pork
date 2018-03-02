@@ -8,13 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,19 +24,19 @@ import android.widget.TextView;
 
 import com.camera.simplewebcam.CameraPreview;
 import com.seray.cache.ScanGunKeyEventHelper;
+import com.seray.entity.ApiParameter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.Library;
 import com.seray.entity.LibraryList;
 import com.seray.entity.MonitorLibraryMessage;
 import com.seray.entity.OperationLog;
+import com.seray.entity.PurchaseDetail;
 import com.seray.http.UploadDataHttp;
-import com.seray.pork.dao.LibraryManager;
 import com.seray.pork.dao.OperationLogManager;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
 import com.seray.utils.FileHelp;
 import com.seray.utils.LibraryUtil;
-import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
@@ -53,39 +51,42 @@ import org.json.JSONObject;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 成品12号库
  */
-public class FinishProductActivity extends BaseActivity implements ScanGunKeyEventHelper.OnScanSuccessListener {
+public class FinishProductActivity extends BaseActivity {
     private ImageView mBatteryIv;
     private TextView tareWeightTv, weightTv, nameTv, standardTv, numberTv;
     private TextView mMaxUnitView, mTimeView;
     private EditText numberEt, codeEt;
-    private Button intoBt, outBt;
+    private Button intoBt;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
+    private List<String> type_data = new ArrayList<>();
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
+    private ArrayAdapter<String> type_adapter;
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
-    private Spinner comeSpinner, leaveSpinner;
+
+    private Spinner comeSpinner, leaveSpinner,spinnerWeightType;
     private JNIScale mScale;
     private boolean flag = true;
     private FinishProductHandler mFinishProductHandler = new FinishProductHandler(new WeakReference<>(this));
     private String comeLibraryId, comeLibrary, goLibrary, goLibraryId;
-    private String codeData, weightData, numberData, name, standard, plu = "";
+    private int typeLibrary;
+    private String codeData, weightData, numberData, name, standard, plu = "",price,unit;
     LibraryUtil libraryUtil = new LibraryUtil(this);
     OperationLogManager logManager = OperationLogManager.getInstance();
     LoadingDialog loadingDialog;
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
-    ScanGunKeyEventHelper scanGunKeyEventHelper = null;
+   // ScanGunKeyEventHelper scanGunKeyEventHelper = null;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
@@ -120,18 +121,17 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         tareWeightTv = (TextView) findViewById(R.id.tv_finish_product_tare_weight);
         weightTv = (TextView) findViewById(R.id.tv_finish_product_weight);
         numberEt = (EditText) findViewById(R.id.et_finish_product_number);
+        numberEt.setInputType(InputType.TYPE_NULL);
         intoBt = (Button) findViewById(R.id.bt_finish_product_into);
-        outBt = (Button) findViewById(R.id.bt_finish_product_out);
         comeSpinner = (Spinner) findViewById(R.id.spinner_finish_come);
         leaveSpinner = (Spinner) findViewById(R.id.spinner_finish_leave);
-
+        spinnerWeightType = (Spinner) findViewById(R.id.spinner_finish_product_type);
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
     }
 
     private void initLibrary() {
-
         come_data.clear();
         go_data.clear();
         List<LibraryList> libraryList = libraryUtil.libraryJson("InventoryThree");
@@ -157,8 +157,14 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         Intent intent = new Intent(this, BatteryService.class);
         startService(intent);
         intoBt.setOnClickListener(this);
-        outBt.setOnClickListener(this);
-        scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
+        nameTv.setOnClickListener(this);
+        type_data.add("KG");
+        type_data.add("袋");
+        type_data.add("箱");
+        type_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
+        type_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerWeightType.setAdapter(type_adapter);
+   //    scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
 
         comeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -169,6 +175,7 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
                 tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 comeLibrary = comeLibraryList.get(position).getLibraryName();
+                typeLibrary = comeLibraryList.get(position).getType();
             }
 
             @Override
@@ -189,39 +196,54 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        spinnerWeightType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.red));    //设置颜色
+                tv.setTextSize(30.0f);    //设置大小
+                unit = type_data.get(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
-//        codeEt.setOnKeyListener(new View.OnKeyListener() {
-//            @Override
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-//                    if (keyCode != KeyEvent.KEYCODE_BACK) {
-//                        mMisc.beep();
-//                    }
-//                    String txt = codeEt.getText().toString();
-//                    if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
-//                        txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
-//                    } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-//                        txt += keyCode - KeyEvent.KEYCODE_0;
-//                    } else if (keyCode == KeyEvent.KEYCODE_NUM_LOCK) {
-//                        if (!txt.isEmpty())
-//                            txt = txt.substring(0, txt.length() - 1);
-//                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
-//                        txt = "";
-//                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
-//                        clearEvent();
-//                        txt = "";
-//                        return true;
-//                    } else {
-//                        return false;
-//                    }
-//                    codeEt.setText(txt);
-//                    return true;
-//                }
-//                return true;
-//            }
-//        });
+
+        numberEt.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (keyCode != KeyEvent.KEYCODE_BACK) {
+                        mMisc.beep();
+                    }
+                    String txt = numberEt.getText().toString();
+                    if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+                        txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
+                    } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+                        txt += keyCode - KeyEvent.KEYCODE_0;
+                    } else if (keyCode == KeyEvent.KEYCODE_NUM_LOCK) {
+                        if (!txt.isEmpty())
+                            txt = txt.substring(0, txt.length() - 1);
+                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
+                        txt = "";
+                    } else if (keyCode == KeyEvent.KEYCODE_E) {
+                        txt += "";
+                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
+                        clearEvent();
+                        txt = "";
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    numberEt.setText(txt);
+                    return true;
+                }
+                return true;
+            }
+        });
     }
 
     private void camera() {
@@ -265,35 +287,26 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
     @Override
     public void onClick(View view) {
         //    weightData = weightTv.getText().toString();
-        //    numberData = numberEt.getText().toString();
+            numberData = numberEt.getText().toString();
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_finish_product_into:
                 //&& !TextUtils.isEmpty(numberData)
+                if (unit.equals("KG")){
+                    showMessage("此处只支持计件商品");
+                    return;
+                }
                 camera();
-                if (!TextUtils.isEmpty(codeData)) {
-                    //      if (comeLibrary.equals("分拣区")||comeLibrary.equals("采购")||comeLibrary.equals("速冻库")||comeLibrary.equals("成品1号库")||){
-                    showNormalDialog("序号：" + codeData + "\n品名：" + name + "\n规格：" + standard + "\n确定？");
-                    //     }else {
-                    //  submitOutLibrary();  出库
-                    //     }
+                if (!TextUtils.isEmpty(name)&& !TextUtils.isEmpty(numberData)) {
+                    showNormalDialog("品名：" + name + "\n数量：" + numberData );
                 } else {
                     showMessage("信息不完整");
                 }
                 break;
-//            case R.id.bt_finish_product_out:
-//                if (!TextUtils.isEmpty(codeData) && !TextUtils.isEmpty(numberData)&&new BigDecimal(weightData).compareTo(new BigDecimal(0)) >= 0) {
-//                    if (comeLibrary.equals("成品1号库")) {
-//                        //   submitIntoLibrary();
-//                    } else if (comeLibrary.equals("成品2号库")){
-//                        //  submitIntoLibrary();// TODO: 2017/12/12  成品二号库接口或参数
-//                    }else {
-//                        showMessage("请选择正确的来源");
-//                    }
-//                } else {
-//                    showMessage("信息不完整");
-//                }
-            //   break;
+            case R.id.tv_finish_product_name:
+                Intent skipIntent = new Intent(FinishProductActivity.this, ProductsSelectActivity.class);
+                startActivity(skipIntent);
+                break;
         }
     }
 
@@ -301,20 +314,20 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getSaveFreeze(codeData,
-                        comeLibraryId,
-                        comeLibrary,
-                        goLibraryId,
-                        goLibrary,
-                        getCameraPic() == null ? "" : getCameraPic());
+                ApiParameter apiParameter = new ApiParameter();
+                if (typeLibrary == 6) {
+                    apiParameter.setDivision(submitOutData());
+                }
+                apiParameter.setDataHelper(submitOutDataHelper());
+                ApiResult api = UploadDataHttp.api(typeLibrary, apiParameter);
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFinishProductHandler.sendEmptyMessage(3);
                //     sqlInsert(1);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                 } else {
                     sqlInsert(2);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                 }
             }
         });
@@ -327,12 +340,13 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         logManager.insertOperationLog(log);
     }
 
-    private String submitData() {
+    private String submitOutData() {
         JSONObject object = new JSONObject();
         String Division = "";
         try {
-            object.put("Weight", weightData);
-            object.put("Number", numberData);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", price);
             Division = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -340,32 +354,67 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         return Division;
     }
 
-
-
-    private void getBarCode() {
-        httpQueryThread.submit(new Runnable() {
-            @Override
-            public void run() {
-                ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
-                if (api.Result) {
-                    showMessage(api.ResultMessage);
-                    JSONObject obj;
-                    try {
-                        obj = new JSONObject(api.ResultJsonStr);
-                        JSONObject object = obj.getJSONObject("Result");
-                        name = object.getString("ItemName");
-                        standard = object.getString("Weight");//需要一份对应品名的规格表
-                        weightData = object.getString("Weight");
-                        numberData = object.getString("Number");
-                        plu = object.getString("PLU");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    mFinishProductHandler.sendEmptyMessage(2);
-                }
-            }
-        });
+    private String submitOutDataHelper() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("ItemName", name);
+            object.put("Weight", "0");
+            object.put("ComeAlibraryName", comeLibrary);
+            object.put("Number", numberData);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", price);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
     }
+
+    // from ProductsSelectActivity
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveProducts(PurchaseDetail msg) {
+        name = msg.getProductName();
+        plu = msg.getPluCode();
+        price = String.valueOf(msg.getUnitPrice());
+        unit = msg.getUnit();
+        nameTv.setText(name);
+        for (int i = 0; i < type_data.size(); i++) {
+            if (unit.equals(type_data.get(i))) {
+                spinnerWeightType.setSelection(i, true);
+                break;
+            }
+        }
+    }
+//    private void getBarCode() {
+//        httpQueryThread.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
+//                if (api.Result) {
+//                    showMessage(api.ResultMessage);
+//                    JSONObject obj;
+//                    try {
+//                        obj = new JSONObject(api.ResultJsonStr);
+//                        JSONObject object = obj.getJSONObject("Result");
+//                        name = object.getString("ItemName");
+//                        standard = object.getString("Weight");//需要一份对应品名的规格表
+//                        weightData = object.getString("Weight");
+//                        numberData = object.getString("Number");
+//                        plu = object.getString("PLU");
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                    mFinishProductHandler.sendEmptyMessage(2);
+//                }
+//            }
+//        });
+//    }
 
     public void register() {
         IntentFilter timeFilter = new IntentFilter();
@@ -393,48 +442,47 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode != KeyEvent.KEYCODE_BACK) {
-            mMisc.beep();
-        }
         switch (keyCode) {
-
-            case KeyEvent.KEYCODE_F1:// 去皮
-                if (mScale.tare()) {
-                    float curTare = mScale.getFloatTare();
-                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
-                } else {
-                    showMessage("去皮失败");
-                }
-                return true;
-            case KeyEvent.KEYCODE_F2:// 置零
-                if (mScale.zero()) {
-                    tareWeightTv.setText(R.string.base_weight);
-                } else {
-                    showMessage("置零失败");
-                }
+//            case KeyEvent.KEYCODE_F1:// 去皮
+//                if (mScale.tare()) {
+//                    float curTare = mScale.getFloatTare();
+//                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
+//                } else {
+//                    showMessage("去皮失败");
+//                }
+//                return true;
+//            case KeyEvent.KEYCODE_F2:// 置零
+//                if (mScale.zero()) {
+//                    tareWeightTv.setText(R.string.base_weight);
+//                } else {
+//                    showMessage("置零失败");
+//                }
+//                return true;
+            case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
+                loadingDialog.dismissDialogs();
                 return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        int code = event.getKeyCode();
-        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
-            return super.dispatchKeyEvent(event);
-        } else {
-            scanGunKeyEventHelper.analysisKeyEvent(event);
-        }
-        return true;
-    }
-
-    @Override
-    public void onScanSuccess(String barcode) {
-        codeData = barcode;
-        codeEt.setText(codeData);
-        if (!TextUtils.isEmpty(codeData))
-            getBarCode();
-    }
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//        int code = event.getKeyCode();
+//        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
+//            return super.dispatchKeyEvent(event);
+//        } else {
+//            scanGunKeyEventHelper.analysisKeyEvent(event);
+//        }
+//        return true;
+//    }
+//
+//    @Override
+//    public void onScanSuccess(String barcode) {
+//        codeData = barcode;
+//        codeEt.setText(codeData);
+//        if (!TextUtils.isEmpty(codeData))
+//            getBarCode();
+//    }
 
     private static class FinishProductHandler extends Handler {
 
@@ -539,9 +587,6 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
 
     private void clearEvent() {
         nameTv.setText("");
-        standardTv.setText("");
-        numberTv.setText("");
-        codeEt.setText("");
         numberEt.setText("");
     }
 
@@ -574,6 +619,6 @@ public class FinishProductActivity extends BaseActivity implements ScanGunKeyEve
         stopService(intent);
         flag = false;
         mFinishProductHandler.removeCallbacksAndMessages(null);
-        scanGunKeyEventHelper.onDestroy();
+     //   scanGunKeyEventHelper.onDestroy();
     }
 }

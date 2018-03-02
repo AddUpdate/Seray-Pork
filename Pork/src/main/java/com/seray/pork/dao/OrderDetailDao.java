@@ -28,17 +28,21 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
         public final static Property OrderDetailId = new Property(1, String.class, "orderDetailId", false, "ORDER_DETAIL_ID");
         public final static Property ActualNumber = new Property(2, int.class, "actualNumber", false, "ACTUAL_NUMBER");
         public final static Property ActualWeight = new Property(3, float.class, "actualWeight", false, "ACTUAL_WEIGHT");
-        public final static Property State = new Property(4, int.class, "state", false, "STATE");
-        public final static Property OrderNumber = new Property(5, String.class, "orderNumber", false, "ORDER_NUMBER");
-        public final static Property ProductName = new Property(6, String.class, "productName", false, "PRODUCT_NAME");
-        public final static Property AlibraryName = new Property(7, String.class, "alibraryName", false, "ALIBRARY_NAME");
-        public final static Property Weight = new Property(8, float.class, "weight", false, "WEIGHT");
-        public final static Property Number = new Property(9, int.class, "number", false, "NUMBER");
-        public final static Property OrderDate = new Property(10, String.class, "orderDate", false, "ORDER_DATE");
-        public final static Property BarCode = new Property(11, String.class, "barCode", false, "BAR_CODE");
-        public final static Property Price = new Property(12, float.class, "price", false, "PRICE");
-        public final static Property DiscountPrice = new Property(13, float.class, "discountPrice", false, "DISCOUNT_PRICE");
-        public final static Property Amount = new Property(14, float.class, "amount", false, "AMOUNT");
+        public final static Property VehicleNumber = new Property(4, int.class, "vehicleNumber", false, "VEHICLE_NUMBER");
+        public final static Property VehicleWeight = new Property(5, float.class, "vehicleWeight", false, "VEHICLE_WEIGHT");
+        public final static Property State = new Property(6, int.class, "state", false, "STATE");
+        public final static Property IsVehicle = new Property(7, String.class, "isVehicle", false, "IS_VEHICLE");
+        public final static Property OrderNumber = new Property(8, String.class, "orderNumber", false, "ORDER_NUMBER");
+        public final static Property ProductName = new Property(9, String.class, "productName", false, "PRODUCT_NAME");
+        public final static Property AlibraryName = new Property(10, String.class, "alibraryName", false, "ALIBRARY_NAME");
+        public final static Property Weight = new Property(11, float.class, "weight", false, "WEIGHT");
+        public final static Property Number = new Property(12, int.class, "number", false, "NUMBER");
+        public final static Property OrderDate = new Property(13, String.class, "orderDate", false, "ORDER_DATE");
+        public final static Property BarCode = new Property(14, String.class, "barCode", false, "BAR_CODE");
+        public final static Property Price = new Property(15, float.class, "price", false, "PRICE");
+        public final static Property DiscountPrice = new Property(16, float.class, "discountPrice", false, "DISCOUNT_PRICE");
+        public final static Property Amount = new Property(17, float.class, "amount", false, "AMOUNT");
+        public final static Property Picture = new Property(18, String.class, "picture", false, "PICTURE");
     }
 
 
@@ -58,17 +62,21 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
                 "\"ORDER_DETAIL_ID\" TEXT," + // 1: orderDetailId
                 "\"ACTUAL_NUMBER\" INTEGER NOT NULL ," + // 2: actualNumber
                 "\"ACTUAL_WEIGHT\" REAL NOT NULL ," + // 3: actualWeight
-                "\"STATE\" INTEGER NOT NULL ," + // 4: state
-                "\"ORDER_NUMBER\" TEXT," + // 5: orderNumber
-                "\"PRODUCT_NAME\" TEXT," + // 6: productName
-                "\"ALIBRARY_NAME\" TEXT," + // 7: alibraryName
-                "\"WEIGHT\" REAL NOT NULL ," + // 8: weight
-                "\"NUMBER\" INTEGER NOT NULL ," + // 9: number
-                "\"ORDER_DATE\" TEXT," + // 10: orderDate
-                "\"BAR_CODE\" TEXT," + // 11: barCode
-                "\"PRICE\" REAL NOT NULL ," + // 12: price
-                "\"DISCOUNT_PRICE\" REAL NOT NULL ," + // 13: discountPrice
-                "\"AMOUNT\" REAL NOT NULL );"); // 14: amount
+                "\"VEHICLE_NUMBER\" INTEGER NOT NULL ," + // 4: vehicleNumber
+                "\"VEHICLE_WEIGHT\" REAL NOT NULL ," + // 5: vehicleWeight
+                "\"STATE\" INTEGER NOT NULL ," + // 6: state
+                "\"IS_VEHICLE\" TEXT," + // 7: isVehicle
+                "\"ORDER_NUMBER\" TEXT," + // 8: orderNumber
+                "\"PRODUCT_NAME\" TEXT," + // 9: productName
+                "\"ALIBRARY_NAME\" TEXT," + // 10: alibraryName
+                "\"WEIGHT\" REAL NOT NULL ," + // 11: weight
+                "\"NUMBER\" INTEGER NOT NULL ," + // 12: number
+                "\"ORDER_DATE\" TEXT," + // 13: orderDate
+                "\"BAR_CODE\" TEXT," + // 14: barCode
+                "\"PRICE\" REAL NOT NULL ," + // 15: price
+                "\"DISCOUNT_PRICE\" REAL NOT NULL ," + // 16: discountPrice
+                "\"AMOUNT\" REAL NOT NULL ," + // 17: amount
+                "\"PICTURE\" TEXT);"); // 18: picture
     }
 
     /** Drops the underlying database table. */
@@ -92,37 +100,49 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
         }
         stmt.bindLong(3, entity.getActualNumber());
         stmt.bindDouble(4, entity.getActualWeight());
-        stmt.bindLong(5, entity.getState());
+        stmt.bindLong(5, entity.getVehicleNumber());
+        stmt.bindDouble(6, entity.getVehicleWeight());
+        stmt.bindLong(7, entity.getState());
+ 
+        String isVehicle = entity.getIsVehicle();
+        if (isVehicle != null) {
+            stmt.bindString(8, isVehicle);
+        }
  
         String orderNumber = entity.getOrderNumber();
         if (orderNumber != null) {
-            stmt.bindString(6, orderNumber);
+            stmt.bindString(9, orderNumber);
         }
  
         String productName = entity.getProductName();
         if (productName != null) {
-            stmt.bindString(7, productName);
+            stmt.bindString(10, productName);
         }
  
         String alibraryName = entity.getAlibraryName();
         if (alibraryName != null) {
-            stmt.bindString(8, alibraryName);
+            stmt.bindString(11, alibraryName);
         }
-        stmt.bindDouble(9, entity.getWeight());
-        stmt.bindLong(10, entity.getNumber());
+        stmt.bindDouble(12, entity.getWeight());
+        stmt.bindLong(13, entity.getNumber());
  
         String orderDate = entity.getOrderDate();
         if (orderDate != null) {
-            stmt.bindString(11, orderDate);
+            stmt.bindString(14, orderDate);
         }
  
         String barCode = entity.getBarCode();
         if (barCode != null) {
-            stmt.bindString(12, barCode);
+            stmt.bindString(15, barCode);
         }
-        stmt.bindDouble(13, entity.getPrice());
-        stmt.bindDouble(14, entity.getDiscountPrice());
-        stmt.bindDouble(15, entity.getAmount());
+        stmt.bindDouble(16, entity.getPrice());
+        stmt.bindDouble(17, entity.getDiscountPrice());
+        stmt.bindDouble(18, entity.getAmount());
+ 
+        String picture = entity.getPicture();
+        if (picture != null) {
+            stmt.bindString(19, picture);
+        }
     }
 
     @Override
@@ -140,37 +160,49 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
         }
         stmt.bindLong(3, entity.getActualNumber());
         stmt.bindDouble(4, entity.getActualWeight());
-        stmt.bindLong(5, entity.getState());
+        stmt.bindLong(5, entity.getVehicleNumber());
+        stmt.bindDouble(6, entity.getVehicleWeight());
+        stmt.bindLong(7, entity.getState());
+ 
+        String isVehicle = entity.getIsVehicle();
+        if (isVehicle != null) {
+            stmt.bindString(8, isVehicle);
+        }
  
         String orderNumber = entity.getOrderNumber();
         if (orderNumber != null) {
-            stmt.bindString(6, orderNumber);
+            stmt.bindString(9, orderNumber);
         }
  
         String productName = entity.getProductName();
         if (productName != null) {
-            stmt.bindString(7, productName);
+            stmt.bindString(10, productName);
         }
  
         String alibraryName = entity.getAlibraryName();
         if (alibraryName != null) {
-            stmt.bindString(8, alibraryName);
+            stmt.bindString(11, alibraryName);
         }
-        stmt.bindDouble(9, entity.getWeight());
-        stmt.bindLong(10, entity.getNumber());
+        stmt.bindDouble(12, entity.getWeight());
+        stmt.bindLong(13, entity.getNumber());
  
         String orderDate = entity.getOrderDate();
         if (orderDate != null) {
-            stmt.bindString(11, orderDate);
+            stmt.bindString(14, orderDate);
         }
  
         String barCode = entity.getBarCode();
         if (barCode != null) {
-            stmt.bindString(12, barCode);
+            stmt.bindString(15, barCode);
         }
-        stmt.bindDouble(13, entity.getPrice());
-        stmt.bindDouble(14, entity.getDiscountPrice());
-        stmt.bindDouble(15, entity.getAmount());
+        stmt.bindDouble(16, entity.getPrice());
+        stmt.bindDouble(17, entity.getDiscountPrice());
+        stmt.bindDouble(18, entity.getAmount());
+ 
+        String picture = entity.getPicture();
+        if (picture != null) {
+            stmt.bindString(19, picture);
+        }
     }
 
     @Override
@@ -185,17 +217,21 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // orderDetailId
             cursor.getInt(offset + 2), // actualNumber
             cursor.getFloat(offset + 3), // actualWeight
-            cursor.getInt(offset + 4), // state
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // orderNumber
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // productName
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // alibraryName
-            cursor.getFloat(offset + 8), // weight
-            cursor.getInt(offset + 9), // number
-            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // orderDate
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // barCode
-            cursor.getFloat(offset + 12), // price
-            cursor.getFloat(offset + 13), // discountPrice
-            cursor.getFloat(offset + 14) // amount
+            cursor.getInt(offset + 4), // vehicleNumber
+            cursor.getFloat(offset + 5), // vehicleWeight
+            cursor.getInt(offset + 6), // state
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // isVehicle
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // orderNumber
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // productName
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // alibraryName
+            cursor.getFloat(offset + 11), // weight
+            cursor.getInt(offset + 12), // number
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // orderDate
+            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // barCode
+            cursor.getFloat(offset + 15), // price
+            cursor.getFloat(offset + 16), // discountPrice
+            cursor.getFloat(offset + 17), // amount
+            cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18) // picture
         );
         return entity;
     }
@@ -206,17 +242,21 @@ public class OrderDetailDao extends AbstractDao<OrderDetail, Long> {
         entity.setOrderDetailId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setActualNumber(cursor.getInt(offset + 2));
         entity.setActualWeight(cursor.getFloat(offset + 3));
-        entity.setState(cursor.getInt(offset + 4));
-        entity.setOrderNumber(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setProductName(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
-        entity.setAlibraryName(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setWeight(cursor.getFloat(offset + 8));
-        entity.setNumber(cursor.getInt(offset + 9));
-        entity.setOrderDate(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setBarCode(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setPrice(cursor.getFloat(offset + 12));
-        entity.setDiscountPrice(cursor.getFloat(offset + 13));
-        entity.setAmount(cursor.getFloat(offset + 14));
+        entity.setVehicleNumber(cursor.getInt(offset + 4));
+        entity.setVehicleWeight(cursor.getFloat(offset + 5));
+        entity.setState(cursor.getInt(offset + 6));
+        entity.setIsVehicle(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setOrderNumber(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setProductName(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setAlibraryName(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setWeight(cursor.getFloat(offset + 11));
+        entity.setNumber(cursor.getInt(offset + 12));
+        entity.setOrderDate(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
+        entity.setBarCode(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
+        entity.setPrice(cursor.getFloat(offset + 15));
+        entity.setDiscountPrice(cursor.getFloat(offset + 16));
+        entity.setAmount(cursor.getFloat(offset + 17));
+        entity.setPicture(cursor.isNull(offset + 18) ? null : cursor.getString(offset + 18));
      }
     
     @Override

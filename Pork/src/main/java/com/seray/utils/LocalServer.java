@@ -85,7 +85,7 @@ public class LocalServer extends NanoHTTPD {
     private void receiveSendLibname() {
         String alibraryList = fields.get("alibraryList");
         LogUtil.e("alibraryList", alibraryList.trim());
-        Library library = new Library("", alibraryList.trim(), "");
+        Library library = new Library("", alibraryList.trim(),0, "");
         libraryManager.deleteAll();
         libraryManager.insertLibrary(library);
         EventBus.getDefault().post(new MonitorLibraryMessage(library));//to separate,sort,temporary,excessStock,FinishProduct,FrozenLibrary
@@ -137,9 +137,21 @@ public class LocalServer extends NanoHTTPD {
                 String remark = jsonObject.getString("Remarks");
                 String parentId = jsonObject.getString("ParentId");
                 float unitPrice = (float) jsonObject.getDouble("UnitPrice");
-                int measurementMethod = jsonObject.getInt("MeasurementMethod");
+                int num = jsonObject.getInt("MeasurementMethod");
+                String unit="KG";
+                switch (num) {
+                    case 1:
+                        unit = "KG";
+                        break;
+                    case 2:
+                        unit = "袋";
+                        break;
+                    case 3:
+                        unit = "箱";
+                        break;
+                }
                 Products products = new Products(productId, productName, pluCode, createdAt, statusCode,
-                        remark, parentId, unitPrice, measurementMethod);
+                        remark, parentId, unitPrice, unit);
                 productsList.add(products);
             }
             ProductsCategory productsCy = new ProductsCategory(categoryId, categoryName);
@@ -165,17 +177,17 @@ public class LocalServer extends NanoHTTPD {
         return supplierList;
     }
 
-    private List<Library> getLibraryHttp(String v) throws JSONException {
-        List<Library> libraryList = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray(v);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String id = jsonObject.getString("id");
-            String alibraryname = jsonObject.getString("alibraryname");
-            String state = jsonObject.getString("state");
-            Library Library = new Library(id, alibraryname, state);
-            libraryList.add(Library);
-        }
-        return libraryList;
-    }
+//    private List<Library> getLibraryHttp(String v) throws JSONException {
+//        List<Library> libraryList = new ArrayList<>();
+//        JSONArray jsonArray = new JSONArray(v);
+//        for (int i = 0; i < jsonArray.length(); i++) {
+//            JSONObject jsonObject = jsonArray.getJSONObject(i);
+//            String id = jsonObject.getString("id");
+//            String alibraryname = jsonObject.getString("alibraryname");
+//            String state = jsonObject.getString("state");
+//            Library Library = new Library(id, alibraryname, state);
+//            libraryList.add(Library);
+//        }
+//        return libraryList;
+//    }
 }

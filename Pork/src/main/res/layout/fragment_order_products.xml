@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_back"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:id="@+id/order_products_category_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@color/stock_back"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:gravity="center"
+            android:text="品名"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="需配量"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="已配量"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.8"
+            android:gravity="center"
+            android:text="状态"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/lv_order_products"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/confirm_goods_rl"
+            />
+        <RelativeLayout
+            android:id="@+id/confirm_goods_rl"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_60"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/dp_10"
+            android:layout_marginBottom="@dimen/dp_10"
+            >
+            <Button
+                android:id="@+id/bt_order_products_updata"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:text="刷新"
+                android:background="@drawable/bg_button_ok"
+                android:gravity="center"
+                android:textSize="@dimen/configTextSize"
+                android:textColor="@color/white"
+                android:layout_toLeftOf="@+id/bt_order_products_return"
+                android:layout_marginRight="@dimen/dp_10"
+                />
+            <Button
+                android:id="@+id/bt_order_products_return"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:text="返回"
+                android:background="@drawable/bg_btn_return"
+                android:gravity="center"
+                android:textSize="@dimen/configTextSize"
+                android:textColor="@color/white"
+                android:layout_alignParentRight="true"
+                />
+
+        </RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>
+

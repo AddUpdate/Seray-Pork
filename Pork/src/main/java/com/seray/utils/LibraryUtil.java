@@ -48,8 +48,10 @@ public class LibraryUtil {
                     JSONObject comeResult = come.getJSONObject(j);
                     String alibraryId = comeResult.getString("AlibraryId");
                     String alibraryName = comeResult.getString("AlibraryName");
+                    int type= comeResult.getInt("Type");
                     library.setLibraryId(alibraryId);
                     library.setLibraryName(alibraryName);
+                    library.setType(type);
                     list.add(library);
                 }
                 libraryLi.setLibraryList(list);

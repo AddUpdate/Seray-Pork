@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.seray.entity.ApiParameter;
 import com.seray.entity.ApiResult;
 import com.seray.entity.OrderDetail;
 import com.seray.entity.OrderPick;
@@ -35,6 +36,30 @@ public class UploadDataHttp {
      */
     private static final String BATCH_NUMBER_TAG = "UploadBatchNumberPostTag";
 
+    public static ApiResult api(int flag, ApiParameter parameter) {
+        ApiResult api = new ApiResult();
+        switch (flag) {
+            case 1:
+                api = OutLoulibrary(parameter);//出白条库
+                break;
+            case 2:
+            case 3:
+            case 5:
+                api = OutInventory(parameter);//出库存
+                break;
+            case 6:
+                api = OutDivision(parameter);//出分割
+                break;
+            case 7:
+                api = outSortingArea(parameter);//出分拣
+                break;
+            case 8:
+                //    api = setUpdateActualWeight();
+                break;
+        }
+        return api;
+    }
+
     /**
      * 登录
      */
@@ -52,7 +77,7 @@ public class UploadDataHttp {
         try {
             Response response = HttpUtils.syncResponsePost(API.LOGIN_URL,
                     BATCH_NUMBER_TAG, params);
-            LogUtil.d("loginApi",API.LOGIN_URL);
+            LogUtil.d("loginApi", API.LOGIN_URL);
             if (response.isSuccessful()) {
                 code = response.code();
                 jsonStr = response.body().string();
@@ -253,13 +278,13 @@ public class UploadDataHttp {
        实际重量上传
      */
     public static ApiResult setUpdateActualWeight(String id,
-                                                   String batchNumber,
-                                                  int state,String dataHelper) {
+                                                  String batchNumber,
+                                                  int state, String dataHelper) {
         Map<String, String> params = new HashMap<>();
         params.put("Id", id);
         params.put("PurchaseNumber", batchNumber);
         params.put("State", String.valueOf(state));
-      //  params.put("GoAlibraryName", goLibrary);
+        //  params.put("GoAlibraryName", goLibrary);
         params.put("DataHelper", dataHelper);
 //        params.put("ActualWeight", String.valueOf(weight));
 //        params.put("Number", String.valueOf(number));
@@ -347,13 +372,14 @@ public class UploadDataHttp {
     /*
      * 出白条库 到分割
      */
-    public static ApiResult getOutLoulibrary(String AlibraryName, String ComelibraryId, String GolibraryId, String weight, String name) {
+    public static ApiResult OutLoulibrary(ApiParameter apiParameter) {
+        //   String AlibraryName, String ComelibraryId, String GolibraryId, String weight, String name
         Map<String, String> params = new HashMap<>();
-        params.put("AlibraryName", AlibraryName);
-        params.put("ComelibraryId", ComelibraryId);
-        params.put("GolibraryId", GolibraryId);
-        params.put("Weight", weight);
-        params.put("ItemName", name);
+        params.put("DataHelper", apiParameter.getDataHelper());
+//        params.put("ComelibraryId", ComelibraryId);
+//        params.put("GolibraryId", GolibraryId);
+//        params.put("Weight", weight);
+//        params.put("ItemName", name);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -434,8 +460,8 @@ public class UploadDataHttp {
     }
 
     /*
-    * 进分割库
-    */
+     * 进分割库
+     */
     public static ApiResult getSaveDivision(String Division, String ComelibraryId, String GolibraryId) {
         Map<String, String> params = new HashMap<>();
         params.put("Division", Division);
@@ -477,14 +503,14 @@ public class UploadDataHttp {
     }
 
     /*
-     * 出分割库到分拣(通用)
+     * 出分割库到其他地方(通用)
      */
-    public static ApiResult getOutDivision(String Division,String dataHelper) {
+    public static ApiResult OutDivision(ApiParameter parameter) {
         Map<String, String> params = new HashMap<>();
-        params.put("Division", Division);
+        params.put("Division", parameter.getDivision());
 //        params.put("AlibraryName", source);
 //        params.put("ComelibraryId", comeLibraryId);
-        params.put("DataHelper", dataHelper);
+        params.put("DataHelper", parameter.getDataHelper());
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -614,22 +640,22 @@ public class UploadDataHttp {
     /*
      * 出分拣
      */
-    public static ApiResult getTakeSortingArea(String name, String weight, String number, String AlibraryName,
-                                               String comelibraryId, String golibraryId) {
+    public static ApiResult outSortingArea(ApiParameter apiParameter) {
         Map<String, String> params = new HashMap<>();
-        params.put("ItemName", name);
-        params.put("Weight", weight);
-        params.put("Number", number);
-        params.put("AlibraryName", AlibraryName);
-        params.put("ComelibraryId", comelibraryId);
-        params.put("GolibraryId", golibraryId);
+        params.put("DataHelper", apiParameter.getDataHelper());
+//     params.put("ItemName", name);
+//        params.put("Weight", weight);
+//        params.put("Number", number);
+//        params.put("AlibraryName", AlibraryName);
+//        params.put("ComelibraryId", comelibraryId);
+//        params.put("GolibraryId", golibraryId);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
         String jsonStr = null;
         boolean isSuccess = false;
         try {
-            Response response = HttpUtils.syncResponsePost(API.SET_TAKE_SORTING_AREA_URL,
+            Response response = HttpUtils.syncResponsePost(API.OUT_SORTING_AREA_URL,
                     BATCH_NUMBER_TAG, params);
             if (response.isSuccessful()) {
                 code = response.code();
@@ -670,7 +696,6 @@ public class UploadDataHttp {
         params.put("GoAlibraryName", goAlibraryName);
         params.put("AlibraryName", alibraryName);
         params.put("Picture", picture);
-        LogUtil.d("picture-----", picture);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -794,16 +819,17 @@ public class UploadDataHttp {
     }
 
     /*
-    * 出鲜品库
+    * 出鲜品库 成品1 2 号库  速冻库
     */
-    public static ApiResult getOutInventory(String comelibraryId, String comebraryName, String golibraryId, String name, String weight,String number) {
+    public static ApiResult OutInventory(ApiParameter parameter) {
         Map<String, String> params = new HashMap<>();
-        params.put("ComelibraryId", comelibraryId);
-        params.put("AlibraryName", comebraryName);
-        params.put("GolibraryId", golibraryId);
-        params.put("ItemName", name);
-        params.put("Weight", weight);
-        params.put("Number", number);
+        params.put("DataHelper", parameter.getDataHelper());
+//      params.put("ComelibraryId", comelibraryId);
+//        params.put("AlibraryName", comebraryName);
+//        params.put("GolibraryId", golibraryId);
+//        params.put("ItemName", name);
+//        params.put("Weight", weight);
+//        params.put("Number", number);
 
         ApiResult api = new ApiResult();
         int code = -99;
@@ -910,17 +936,18 @@ public class UploadDataHttp {
     /*
           获取订单列表
        */
-    public static ApiResult getOrderList() {
+    public static ApiResult getOrderList(int type, String details, int pageIndex) {
         Map<String, String> params = new HashMap<>();
+        params.put("Type", String.valueOf(type));
+        params.put("Details", details);
+        params.put("PageIndex", String.valueOf(pageIndex));
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
         String jsonStr = null;
+        String[] sourceDetail = new String[1];
         boolean isSuccess = false;
-        SparseArray<List<OrderPick>> mSparseArray = new SparseArray<>();
         List<OrderPick> orderPickList = new ArrayList<>();
-        List<OrderPick> orderPickList2 = new ArrayList<>();
-        List<OrderPick> orderPickList3 = new ArrayList<>();
         try {
             Response response = HttpUtils.syncResponsePost(API.GET_ORDERS_URL,
                     BATCH_NUMBER_TAG, params);
@@ -930,56 +957,53 @@ public class UploadDataHttp {
                 JSONObject obj = new JSONObject(jsonStr);
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
-                JSONArray message = obj.getJSONArray("Result");
-                //    List<OrderPick> orderPickList = new ArrayList<>();
-                NumFormatUtil mNumUtil;
-                mNumUtil = NumFormatUtil.getInstance();
-                for (int i = 0; i < message.length(); i++) {
-                    OrderPick orderPick = new OrderPick();
-                    JSONObject jsonObject = message.getJSONObject(i);
-                    orderPick.setState(jsonObject.getString("State"));
-                    orderPick.setName(jsonObject.getString("CustomerName"));
-                    orderPick.setOrderId(jsonObject.getString("OrderId"));
-                    orderPick.setOrderDate(jsonObject.getString("OrderDate"));
-                    orderPick.setTel(jsonObject.getString("UserTelephone"));
-                    orderPick.setOrderNumber(jsonObject.getString("OrderNumber"));
-                    orderPick.setTotalNumber(jsonObject.getInt("TotalNumber"));
-                    orderPick.setPaymentMethod(jsonObject.getString("PaymentMethod"));
-                    orderPick.setAmount(mNumUtil.getDecimalPrice(jsonObject.getDouble("TotalAmount")));
-                    orderPick.setRemark(jsonObject.getString("Remarks"));
+                if (type != 2 && type != 4) {
+                    sourceDetail[0] = String.valueOf(obj.getInt("TotalPageIndex"));
+                    JSONArray message = obj.getJSONArray("Result");
+                    NumFormatUtil mNumUtil;
+                    mNumUtil = NumFormatUtil.getInstance();
+                    for (int i = 0; i < message.length(); i++) {
+                        OrderPick orderPick = new OrderPick();
+                        JSONObject jsonObject = message.getJSONObject(i);
+                        orderPick.setState(jsonObject.getString("State"));
+                        orderPick.setName(jsonObject.getString("CustomerName"));
+                        orderPick.setOrderId(jsonObject.getString("OrderId"));
+                        orderPick.setOrderDate(jsonObject.getString("OrderDate"));
+                        orderPick.setTel(jsonObject.getString("UserTelephone"));
+                        orderPick.setOrderNumber(jsonObject.getString("OrderNumber"));
+                        orderPick.setTotalNumber(jsonObject.getInt("TotalNumber"));
+                        orderPick.setPaymentMethod(jsonObject.getString("PaymentMethod"));
+                        orderPick.setAmount(mNumUtil.getDecimalPrice(jsonObject.getDouble("TotalAmount")));
+                        orderPick.setRemark(jsonObject.getString("Remarks"));
 
-                    JSONArray orderdetail = jsonObject.getJSONArray("orderdetail");
+                        JSONArray orderdetail = jsonObject.getJSONArray("orderdetail");
 
-                    List<OrderDetail> orderDetailList = new ArrayList<>();
-                    for (int j = 0; j < orderdetail.length(); j++) {
-                        OrderDetail orderDetail = new OrderDetail();
-                        JSONObject detailObject = orderdetail.getJSONObject(j);
-                        orderDetail.setOrderNumber(detailObject.getString("OrderNumber"));
-                        orderDetail.setOrderDetailId(detailObject.getString("OrderDetailId"));
-                        orderDetail.setProductName(detailObject.getString("CommodityName"));
-                        orderDetail.setAlibraryName(detailObject.getString("AlibraryName"));
-                        orderDetail.setNumber(detailObject.getInt("Number"));
-                        orderDetail.setActualNumber(detailObject.getInt("ActualNumber"));
-                        orderDetail.setOrderDate(detailObject.getString("OrderDate"));
-                        orderDetail.setAmount(mNumUtil.getDecimalPrice(detailObject.getDouble("Amount")));
-                        orderDetail.setBarCode(detailObject.getString("BarCode"));
-                        orderDetail.setWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("Weight")));
-                        orderDetail.setActualWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("ActualWeight")));
-                        orderDetail.setState(detailObject.getString("State").equals("已完成") ? 1 : 2);
-                        orderDetailList.add(orderDetail);
-                    }
-                    orderPick.setDetailList(orderDetailList);
-                    if (orderPick.getState().equals("配送中") || orderPick.getState().equals("已完成")) {
-                        orderPickList3.add(orderPick);
-                    } else {
+                        List<OrderDetail> orderDetailList = new ArrayList<>();
+                        for (int j = 0; j < orderdetail.length(); j++) {
+                            OrderDetail orderDetail = new OrderDetail();
+                            JSONObject detailObject = orderdetail.getJSONObject(j);
+                            orderDetail.setOrderNumber(detailObject.getString("OrderNumber"));
+                            orderDetail.setOrderDetailId(detailObject.getString("OrderDetailId"));
+                            orderDetail.setProductName(detailObject.getString("CommodityName"));
+                            orderDetail.setNumber(detailObject.getInt("Number"));
+                            orderDetail.setActualNumber(detailObject.getInt("ActualNumber"));
+                            orderDetail.setOrderDate(detailObject.getString("OrderDate"));
+                            orderDetail.setAmount(mNumUtil.getDecimalPrice(detailObject.getDouble("Amount")));
+                            if (type == 3 || type == 5) {
+                                orderDetail.setIsVehicle(detailObject.getString("isvehicle"));
+                                orderDetail.setVehicleNumber(detailObject.getInt("VehicleNumber"));
+                                orderDetail.setVehicleWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("VehicleWeight")));
+                            }
+                            orderDetail.setWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("Weight")));
+                            orderDetail.setActualWeight(mNumUtil.getDecimalNetWithOutHalfUp(detailObject.getDouble("ActualWeight")));
+                            orderDetail.setState(detailObject.getString("State").equals("已完成") ? 1 : 2);
+                            orderDetailList.add(orderDetail);
+                        }
+                        orderPick.setDetailList(orderDetailList);
+
                         orderPickList.add(orderPick);
                     }
                 }
-                OrderPick orderPick2 = new OrderPick();
-                orderPickList2.add(orderPick2);
-                mSparseArray.put(1, orderPickList);
-                mSparseArray.put(2, orderPickList2);
-                mSparseArray.put(3, orderPickList3);
                 LogUtil.d("jsonStr", jsonStr);
             } else {
                 code = response.code();
@@ -997,20 +1021,20 @@ public class UploadDataHttp {
             api.ResultMessage = msg;
             api.ResultJsonStr = jsonStr;
             api.ResultCode = code;
-            api.SparseArray = mSparseArray;
+            api.sourceDetail = sourceDetail;
+            api.orderPickList = orderPickList;
         }
         return api;
     }
 
     /*
-   * 自己订单配货实际数量
-   */
-    public static ApiResult updatetOrderActual(String id, String actualWeight, String actualNumber, String state) {
+     * 自己订单配货实际数量
+     */
+    public static ApiResult updatetOrderActual(String id, String state, String dataHelper) {
         Map<String, String> params = new HashMap<>();
         params.put("Id", id);
-        params.put("ActualWeight", actualWeight);
-        params.put("ActualNumber", actualNumber);
         params.put("State", state);
+        params.put("DataHelper", dataHelper);
         ApiResult api = new ApiResult();
         int code = -99;
         String msg = null;
@@ -1046,5 +1070,47 @@ public class UploadDataHttp {
         return api;
     }
 
+    /*
+      * 订单上车
+      */
+    public static ApiResult updatetOrderVehicle(String orderNumber, String details,int state) {
+        Map<String, String> params = new HashMap<>();
+        params.put("OrderNumber", orderNumber);
+        params.put("Details", details);
+        params.put("State",String.valueOf(state));
+        ApiResult api = new ApiResult();
+        int code = -99;
+        String msg = null;
+        String jsonStr = null;
+        boolean isSuccess = false;
+        try {
+            Response response = HttpUtils.syncResponsePost(API.UPDATET_ORDER_VEHICLE,
+                    BATCH_NUMBER_TAG, params);
+            if (response.isSuccessful()) {
+                code = response.code();
+                jsonStr = response.body().string();
+                JSONObject obj = new JSONObject(jsonStr);
+                isSuccess = obj.getString("ResultCode").equals("1");
+                msg = obj.getString("ResultMessage");
+                LogUtil.d("jsonStr", jsonStr);
+            } else {
+                code = response.code();
+                msg = "访问服务器失败";
+                LogUtil.d("message", "访问服务器失败");
+            }
+        } catch (JSONException e) {
+            msg = "解析错误";
+            LogUtil.d("message", "解析错误");
+        } catch (IOException e) {
+            msg = "访问服务器失败";
+            LogUtil.d("message", "访问服务器失败");
+        } finally {
+            api.Result = isSuccess;
+            api.ResultMessage = msg;
+            api.ResultJsonStr = jsonStr;
+            api.ResultCode = code;
+        }
+        return api;
+    }
 
 }

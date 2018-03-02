@@ -20,7 +20,7 @@ public class ApiResult {
     public List<PurchaseSubtotal> SubtotalList;
     public List<PurchaseDetail> DetailList;
     public List<PurchaseSearch> SearchList;
-    public SparseArray<List<OrderPick>> SparseArray;
+    public List<OrderPick> orderPickList;
 
     public ApiResult() {
     }
@@ -42,7 +42,7 @@ public class ApiResult {
                 ", SubtotalList=" + SubtotalList +
                 ", DetailList=" + DetailList +
                 ", SearchList=" + SearchList +
-                ", mSparseArray=" + SparseArray +
+                ", orderPickList=" + orderPickList +
                 '}';
     }
 }

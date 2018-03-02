@@ -54,7 +54,7 @@ public class ManagementActivity extends BaseActivity {
                     Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                     scanIntent.setData(Uri.fromFile(new File(FileHelp.DATA_PIC_DIR)));
                     sendBroadcast(scanIntent);
-                    mLoadingDialog.dismissDialog();// TODO: 2018/1/24 待完善
+                    mLoadingDialog.dismissDialogs();// TODO: 2018/1/24 待完善
                     break;
             }
         }

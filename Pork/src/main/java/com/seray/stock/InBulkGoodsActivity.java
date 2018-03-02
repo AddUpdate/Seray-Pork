@@ -98,9 +98,9 @@ public class InBulkGoodsActivity extends BaseActivity {
                         InBulkGoodsHandler.sendEmptyMessage(1);
                         showMessage("暂无数据");
                     }
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                 } else {
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }

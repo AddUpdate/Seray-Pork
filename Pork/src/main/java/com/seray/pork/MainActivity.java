@@ -82,8 +82,10 @@ public class MainActivity extends BaseActivity {
 
     private void initData() {
         try {
-            mLocalServer = new LocalServer();
-            mLocalServer.start();
+            if (mLocalServer == null) {
+                mLocalServer = new LocalServer();
+                mLocalServer.start();
+            }
         } catch (IOException e) {
             LogUtil.e(e.getMessage());
         }
@@ -104,7 +106,7 @@ public class MainActivity extends BaseActivity {
         listPlu.add("0");
         listPlu.add(".");
         listPlu.add("CE");
-        listPlu.add("装车");
+        listPlu.add("其他");
         adapter = new MainAdapter(this, listPlu);
         gridView.setAdapter(adapter);
     }

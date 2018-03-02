@@ -69,6 +69,7 @@
             android:textSize="@dimen/managerTipTextSize"
             android:text="请选择供应商"
             android:layout_marginLeft="@dimen/dp_4"
+            android:singleLine="true"
             android:gravity="center"
             />
     </LinearLayout>

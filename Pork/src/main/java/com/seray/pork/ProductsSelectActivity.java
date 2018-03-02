@@ -96,20 +96,7 @@ public class ProductsSelectActivity extends BaseActivity {
                 mMisc.beep();
                 String name = productList.get(position).getProductName();
                 String plu = productList.get(position).getPluCode();
-                int mUnit = productList.get(position).getMeasurementMethod();
-                String unit = "";
-                switch (mUnit) {
-                    case 1:
-                        unit = "KG";
-                        break;
-                    case 2:
-                        unit = "袋";
-                        break;
-                    case 3:
-                        unit = "箱";
-                        break;
-                }
-                //        int measurementMethod = productList.get(position).getMeasurementMethod();
+                String unit= productList.get(position).getUnit();
                 EventBus.getDefault().post(new PurchaseDetail(name, plu, unit, categoryName)); //to entryFragmentTwo
                 finish();
             }

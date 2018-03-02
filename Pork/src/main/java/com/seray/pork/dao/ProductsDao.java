@@ -33,7 +33,7 @@ public class ProductsDao extends AbstractDao<Products, Long> {
         public final static Property Remark = new Property(6, String.class, "Remark", false, "REMARK");
         public final static Property ParentId = new Property(7, String.class, "ParentId", false, "PARENT_ID");
         public final static Property UnitPrice = new Property(8, float.class, "UnitPrice", false, "UNIT_PRICE");
-        public final static Property MeasurementMethod = new Property(9, int.class, "MeasurementMethod", false, "MEASUREMENT_METHOD");
+        public final static Property Unit = new Property(9, String.class, "Unit", false, "UNIT");
     }
 
 
@@ -58,7 +58,7 @@ public class ProductsDao extends AbstractDao<Products, Long> {
                 "\"REMARK\" TEXT," + // 6: Remark
                 "\"PARENT_ID\" TEXT," + // 7: ParentId
                 "\"UNIT_PRICE\" REAL NOT NULL ," + // 8: UnitPrice
-                "\"MEASUREMENT_METHOD\" INTEGER NOT NULL );"); // 9: MeasurementMethod
+                "\"UNIT\" TEXT);"); // 9: Unit
     }
 
     /** Drops the underlying database table. */
@@ -107,7 +107,11 @@ public class ProductsDao extends AbstractDao<Products, Long> {
             stmt.bindString(8, ParentId);
         }
         stmt.bindDouble(9, entity.getUnitPrice());
-        stmt.bindLong(10, entity.getMeasurementMethod());
+ 
+        String Unit = entity.getUnit();
+        if (Unit != null) {
+            stmt.bindString(10, Unit);
+        }
     }
 
     @Override
@@ -150,7 +154,11 @@ public class ProductsDao extends AbstractDao<Products, Long> {
             stmt.bindString(8, ParentId);
         }
         stmt.bindDouble(9, entity.getUnitPrice());
-        stmt.bindLong(10, entity.getMeasurementMethod());
+ 
+        String Unit = entity.getUnit();
+        if (Unit != null) {
+            stmt.bindString(10, Unit);
+        }
     }
 
     @Override
@@ -170,7 +178,7 @@ public class ProductsDao extends AbstractDao<Products, Long> {
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // Remark
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // ParentId
             cursor.getFloat(offset + 8), // UnitPrice
-            cursor.getInt(offset + 9) // MeasurementMethod
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9) // Unit
         );
         return entity;
     }
@@ -186,7 +194,7 @@ public class ProductsDao extends AbstractDao<Products, Long> {
         entity.setRemark(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setParentId(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setUnitPrice(cursor.getFloat(offset + 8));
-        entity.setMeasurementMethod(cursor.getInt(offset + 9));
+        entity.setUnit(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
      }
     
     @Override

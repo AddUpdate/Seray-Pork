@@ -22,7 +22,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.seray.cache.ScanGunKeyEventHelper;
+import com.seray.entity.ApiParameter;
+import com.seray.entity.PurchaseDetail;
 import com.seray.service.BatteryMsg;
 import com.seray.service.BatteryService;
 import com.seray.utils.FileHelp;
@@ -36,16 +37,17 @@ import com.seray.http.UploadDataHttp;
 import com.seray.pork.dao.OperationLogManager;
 
 import com.seray.utils.LibraryUtil;
-import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.PromptDialog;
 import com.tscale.scalelib.jniscale.JNIScale;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -55,32 +57,34 @@ import java.util.List;
 /**
  * 速冻库
  */
-public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEventHelper.OnScanSuccessListener{
+public class FrozenLibraryActivity extends BaseActivity {
     private ImageView mBatteryIv;
-    private TextView tareWeightTv, weightTv, nameTv, standardTv, numberTv;
+    private TextView  nameTv;
     private TextView mMaxUnitView, mTimeView;
-    private EditText numberEt, codeEt;
-    private Button intoBt, outBt;
+    private EditText numberEt;
+    private Button intoBt;
     private List<String> come_data = new ArrayList<>();
     private List<String> go_data = new ArrayList<>();
+    private List<String> type_data = new ArrayList<>();
     private ArrayAdapter<String> come_adapter;
     private ArrayAdapter<String> go_adapter;
+    private ArrayAdapter<String> type_adapter;
     private List<Library> comeLibraryList = new ArrayList<>();
     private List<Library> goLibraryList = new ArrayList<>();
-    private Spinner comeSpinner, leaveSpinner;
+    private Spinner comeSpinner, leaveSpinner,spinnerWeightType;
     private JNIScale mScale;
     private boolean flag = true;
     private FrozenHandler mFrozenHandler = new FrozenHandler(new WeakReference<>(this));
     private String comeLibraryId, comeLibrary, goLibraryId, goLibrary;
-    private String codeData, weightData, numberData = "", name, standard, plu = "",picture;
+    private String codeData, numberData = "", name = "", unit = "", plu = "", price = "";
+    private int typeLibrary;
     LibraryUtil libraryUtil = new LibraryUtil(this);
     private CameraPreview mCameraPreview = null;
     private String lastImgName = null;
-    private String prevRecordImgName = null;
+    private String prevRecordImgName = "";
     private boolean camerIsEnable = true;
     OperationLogManager logManager = OperationLogManager.getInstance();
     LoadingDialog loadingDialog;
-    ScanGunKeyEventHelper scanGunKeyEventHelper = null;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLibrary(MonitorLibraryMessage msg) {
@@ -109,20 +113,16 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         mBatteryIv = (ImageView) findViewById(R.id.battery);
         loadingDialog = new LoadingDialog(this);
         nameTv = (TextView) findViewById(R.id.tv_frozen_library_name);
-        standardTv = (TextView) findViewById(R.id.tv_frozen_library_standard);
-        numberTv = (TextView) findViewById(R.id.tv_frozen_library_number);
-        codeEt = (EditText) findViewById(R.id.et_frozen_library_code);
-        codeEt.setInputType(InputType.TYPE_NULL);
-        tareWeightTv = (TextView) findViewById(R.id.tv_frozen_library_tare_weight);
-        weightTv = (TextView) findViewById(R.id.tv_frozen_library_weight);
+//        codeEt = (EditText) findViewById(R.id.et_frozen_library_code);
+//        codeEt.setInputType(InputType.TYPE_NULL);
+//        tareWeightTv = (TextView) findViewById(R.id.tv_frozen_library_tare_weight);
+//        weightTv = (TextView) findViewById(R.id.tv_frozen_library_weight);
         numberEt = (EditText) findViewById(R.id.et_frozen_library_number);
         numberEt.setInputType(InputType.TYPE_NULL);
-        numberEt.setCursorVisible(false);
         intoBt = (Button) findViewById(R.id.bt_frozen_library_into);
-        outBt = (Button) findViewById(R.id.bt_frozen_library_out);
         comeSpinner = (Spinner) findViewById(R.id.spinner_frozen_come);
         leaveSpinner = (Spinner) findViewById(R.id.spinner_frozen_leave);
-
+spinnerWeightType = (Spinner) findViewById(R.id.spinner_frozen_library_type);
         mMaxUnitView = (TextView) findViewById(R.id.maxUnit);
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
@@ -155,10 +155,15 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     private void initListener() {
         Intent intent = new Intent(this, BatteryService.class);
         startService(intent);
-        scanGunKeyEventHelper = new ScanGunKeyEventHelper(this);
         intoBt.setOnClickListener(this);
-        outBt.setOnClickListener(this);
+        nameTv.setOnClickListener(this);
 
+        type_data.add("KG");
+        type_data.add("袋");
+        type_data.add("箱");
+        type_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type_data);
+        type_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinnerWeightType.setAdapter(type_adapter);
         comeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -168,6 +173,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
                 tv.setGravity(Gravity.CENTER_HORIZONTAL);   //设置居中
                 comeLibraryId = comeLibraryList.get(position).getLibraryId();
                 comeLibrary = comeLibraryList.get(position).getLibraryName();
+                typeLibrary = comeLibraryList.get(position).getType();
             }
 
             @Override
@@ -186,6 +192,19 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
                 goLibrary = goLibraryList.get(position).getLibraryName();
             }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerWeightType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TextView tv = (TextView) view;
+                tv.setTextColor(getResources().getColor(R.color.red));    //设置颜色
+                tv.setTextSize(30.0f);    //设置大小
+                unit = type_data.get(position);
+            }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -210,6 +229,38 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
 //                return false;
 //            }
 //        });
+        numberEt.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (keyCode != KeyEvent.KEYCODE_BACK) {
+                        mMisc.beep();
+                    }
+                    String txt = numberEt.getText().toString();
+                    if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+                        txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
+                    } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+                        txt += keyCode - KeyEvent.KEYCODE_0;
+                    } else if (keyCode == KeyEvent.KEYCODE_NUM_LOCK) {
+                        if (!txt.isEmpty())
+                            txt = txt.substring(0, txt.length() - 1);
+                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
+                        txt = "";
+                    } else if (keyCode == KeyEvent.KEYCODE_E) {
+                        txt += "";
+                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
+                        clearEvent();
+                        txt = "";
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    numberEt.setText(txt);
+                    return true;
+                }
+                return true;
+            }
+        });
     }
 
 
@@ -256,18 +307,22 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         super.onClick(view);
         switch (view.getId()) {
             case R.id.bt_frozen_library_into:
+                if (unit.equals("KG")){
+                    showMessage("此处只支持计件商品");
+                    return;
+                }
                 //    weightData = weightTv.getText().toString();
-                //   numberData = numberEt.getText().toString();
+                numberData = numberEt.getText().toString();
                 camera();
-                if (!TextUtils.isEmpty(codeData)) {
-                    //    if (comeLibrary.equals("采购")||comeLibrary.equals("分拣区")||comeLibrary.equals("速冻库")){
-                    showNormalDialog("序号：" + codeData + "\n品名：" + name + "\n规格：" + standard);
-                    //    }else {
-                    //出库
-                    //  }
+                if (!TextUtils.isEmpty(name)&&!TextUtils.isEmpty(numberData)) {
+                    showNormalDialog("品名：" + name + "\n数量：" + numberData );
                 } else {
                     showMessage("信息不完整");
                 }
+                break;
+            case R.id.tv_frozen_library_name:
+                Intent skipIntent = new Intent(FrozenLibraryActivity.this, ProductsSelectActivity.class);
+                startActivity(skipIntent);
                 break;
         }
     }
@@ -277,15 +332,20 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getSaveFreeze(codeData, comeLibraryId, comeLibrary, goLibraryId, goLibrary,getCameraPic());
+                ApiParameter apiParameter = new ApiParameter();
+                if (typeLibrary == 6) {
+                    apiParameter.setDivision(submitOutData());
+                }
+                apiParameter.setDataHelper(submitOutDataHelper());
+                ApiResult api = UploadDataHttp.api(typeLibrary, apiParameter);
                 showMessage(api.ResultMessage);
                 if (api.Result) {
                     mFrozenHandler.sendEmptyMessage(3);
-                   // sqlInsert(1);
-                    loadingDialog.dismissDialog();
+                    // sqlInsert(1);
+                    loadingDialog.dismissDialogs();
                 } else {
                     sqlInsert(2);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                 }
             }
         });
@@ -293,48 +353,87 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
 
     private void sqlInsert(int state) {
         //state 1 已回收 2 未回收
-        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, name, plu, new BigDecimal(weightData), numberData.equals("") ? 0 : Integer.valueOf(numberData), standard, NumFormatUtil.getDateDetail(),getCameraPic(), state);
+        OperationLog log = new OperationLog(comeLibraryId, comeLibrary, goLibraryId, name, plu, BigDecimal.ZERO, numberData.equals("") ? 0 : Integer.valueOf(numberData), unit, NumFormatUtil.getDateDetail(), getCameraPic(), state);
         logManager.insertOperationLog(log);
     }
 
-    private void getBarCode() {
-        httpQueryThread.submit(new Runnable() {
-            @Override
-            public void run() {
-                ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
-                if (api.Result) {
-                    JSONObject obj;
-                    try {
-                        obj = new JSONObject(api.ResultJsonStr);
-                        JSONObject object = obj.getJSONObject("Result");
-                        name = object.getString("ItemName");
-                        standard = object.getString("Weight");//需要一份对应品名的规格表
-                        weightData = object.getString("Weight");
-                        numberData = object.getString("Number");
-                        plu = object.getString("PLU");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    mFrozenHandler.sendEmptyMessage(2);
-                } else {
-                    showMessage(api.ResultMessage);
-                }
-            }
-        });
-    }
-
-    private String submitData() {
+    private String submitOutData() {
         JSONObject object = new JSONObject();
         String Division = "";
         try {
-            object.put("Weight", weightData);
-            object.put("Number", numberData);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", price);
             Division = object.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return Division;
     }
+
+    private String submitOutDataHelper() {
+        JSONObject object = new JSONObject();
+        String DataHelper = "";
+        try {
+            object.put("ItemName", name);
+            object.put("Weight", "0");
+            object.put("ComeAlibraryName", comeLibrary);
+            object.put("Number", numberData);
+            object.put("PLU", plu);
+            object.put("WeightCompany", unit);
+            object.put("UnitPrice", price);
+            object.put("ComelibraryId", comeLibraryId);
+            object.put("GolibraryId", goLibraryId);
+            object.put("GoAlibraryName", goLibrary);
+            object.put("Picture", getCameraPic());
+            DataHelper = object.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return DataHelper;
+    }
+
+    // from ProductsSelectActivity
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveProducts(PurchaseDetail msg) {
+        name = msg.getProductName();
+        plu = msg.getPluCode();
+        price = String.valueOf(msg.getUnitPrice());
+        unit = msg.getUnit();
+        nameTv.setText(name);
+        for (int i = 0; i < type_data.size(); i++) {
+            if (unit.equals(type_data.get(i))) {
+                spinnerWeightType.setSelection(i, true);
+                break;
+            }
+        }
+    }
+
+//    private void getBarCode() {
+//        httpQueryThread.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                ApiResult api = UploadDataHttp.getBarCodeContent(codeData);
+//                if (api.Result) {
+//                    JSONObject obj;
+//                    try {
+//                        obj = new JSONObject(api.ResultJsonStr);
+//                        JSONObject object = obj.getJSONObject("Result");
+//                        name = object.getString("ItemName");
+//                        standard = object.getString("Weight");//需要一份对应品名的规格表
+//                        weightData = object.getString("Weight");
+//                        numberData = object.getString("Number");
+//                        plu = object.getString("PLU");
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                    mFrozenHandler.sendEmptyMessage(2);
+//                } else {
+//                    showMessage(api.ResultMessage);
+//                }
+//            }
+//        });
+//    }
 
     @Override
     protected void onResume() {
@@ -343,52 +442,49 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode != KeyEvent.KEYCODE_BACK) {
-            mMisc.beep();
-        }
-        switch (keyCode) {
 
-            case KeyEvent.KEYCODE_F1:// 去皮
-                if (mScale.tare()) {
-                    float curTare = mScale.getFloatTare();
-                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
-                } else {
-                    showMessage("去皮失败");
-                }
-                return true;
-            case KeyEvent.KEYCODE_F2:// 置零
-                if (mScale.zero()) {
-                    tareWeightTv.setText(R.string.base_weight);
-                } else {
-                    showMessage("置零失败");
-                }
-                return true;
+        switch (keyCode) {
+//            case KeyEvent.KEYCODE_F1:// 去皮
+//                if (mScale.tare()) {
+//                    float curTare = mScale.getFloatTare();
+//                    tareWeightTv.setText(NumFormatUtil.df2.format(curTare));
+//                } else {
+//                    showMessage("去皮失败");
+//                }
+//                return true;
+//            case KeyEvent.KEYCODE_F2:// 置零
+//                if (mScale.zero()) {
+//                    tareWeightTv.setText(R.string.base_weight);
+//                } else {
+//                    showMessage("置零失败");
+//                }
+//                return true;
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                loadingDialog.dismissDialog();
+                loadingDialog.dismissDialogs();
                 return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        int code = event.getKeyCode();
-        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
-            return super.dispatchKeyEvent(event);
-        } else {
-            scanGunKeyEventHelper.analysisKeyEvent(event);
-        }
-        return true;
-    }
-
-    @Override
-    public void onScanSuccess(String barcode) {
-        codeData = barcode;
-        LogUtil.d("codeEt", codeData);
-        codeEt.setText(codeData);
-        if (!TextUtils.isEmpty(codeData))
-            getBarCode();
-    }
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//        int code = event.getKeyCode();
+//        if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_F3) {
+//            return super.dispatchKeyEvent(event);
+//        } else {
+//            scanGunKeyEventHelper.analysisKeyEvent(event);
+//        }
+//        return true;
+//    }
+//
+//    @Override
+//    public void onScanSuccess(String barcode) {
+//        codeData = barcode;
+//        LogUtil.d("codeEt", codeData);
+//        codeEt.setText(codeData);
+//        if (!TextUtils.isEmpty(codeData))
+//            getBarCode();
+//    }
 
 
     private static class FrozenHandler extends Handler {
@@ -405,16 +501,7 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
             FrozenLibraryActivity activity = mWeakReference.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case 1:
-//                        activity.setTareFloat();
-                        activity.weightChangedCyclicity();
-                        break;
-                    case 2:
-//                        activity.setTareFloat();
-                        activity.setViewData();
-                        break;
                     case 3:
-//                        activity.setTareFloat();
                         activity.clearEvent();
                         break;
                 }
@@ -422,54 +509,8 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         }
     }
 
-    private Boolean isOL() {
-        return mScale.getStringNet().contains("OL");
-    }
-
-    /**
-     * 判断秤稳定
-     */
-    private boolean isStable() {
-        return mScale.getStabFlag();
-    }
-
-    private void weightChangedCyclicity() {
-        if (true) {
-            String strNet = mScale.getStringNet().trim();
-            float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-            if (isOL()) {
-                weightTv.setText(strNet);
-            } else {
-                weightTv.setText(NumFormatUtil.df2.format(fW));
-            }
-        }
-        if (isStable()) {
-            //   backDisplay.showIsStable(true);
-            findViewById(R.id.stableflag).setVisibility(View.VISIBLE);
-        } else {
-            //  backDisplay.showIsStable(false);
-            findViewById(R.id.stableflag).setVisibility(View.INVISIBLE);
-        }
-        if (mScale.getZeroFlag()) {
-            // backDisplay.showIsZero(true);
-            findViewById(R.id.zeroflag).setVisibility(View.VISIBLE);
-        } else {
-            //    backDisplay.showIsZero(false);
-            findViewById(R.id.zeroflag).setVisibility(View.INVISIBLE);
-        }
-    }
-
-    private void setViewData() {
-        nameTv.setText(name);
-        standardTv.setText(standard);
-        numberTv.setText(numberData);
-    }
-
     private void clearEvent() {
         nameTv.setText("");
-        standardTv.setText("");
-        numberTv.setText("");
-        codeEt.setText("");
         numberEt.setText("");
     }
 
@@ -511,10 +552,10 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
             }
         }).setTitle("提示").show();
     }
+
     //接收电量消息 每半小时一次
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveBattery(BatteryMsg msg) {
-
         if (msg != null) {
 
             int level = msg.getLevel();
@@ -550,6 +591,5 @@ public class FrozenLibraryActivity extends BaseActivity implements ScanGunKeyEve
         mFrozenHandler.removeCallbacksAndMessages(null);
         Intent intent = new Intent(this, BatteryService.class);
         stopService(intent);
-        scanGunKeyEventHelper.onDestroy();
     }
 }

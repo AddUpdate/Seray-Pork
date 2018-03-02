@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_back"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@color/stock_back"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:gravity="center"
+            android:text="客户"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="订单号"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="需配数量"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="已配数量"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.8"
+            android:gravity="center"
+            android:text="状态"
+            android:textColor="@color/white"
+            android:textSize="@dimen/configTextSize" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/lv_products_sort"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/confirm_goods_rl" />
+
+        <RelativeLayout
+            android:id="@+id/confirm_goods_rl"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_60"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_10">
+
+            <TextView
+                android:id="@+id/tv_products_sort_name"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:textSize="@dimen/configTextSize"
+                android:textColor="@color/white"
+                android:layout_toLeftOf="@+id/bt_products_sort_scan"
+                android:layout_marginRight="@dimen/dp_60"
+                />
+            <Button
+                android:id="@+id/bt_products_sort_scan"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:layout_marginEnd="5dp"
+                android:layout_toStartOf="@id/bt_products_sort_return"
+                android:background="@drawable/bg_button_ok"
+                android:gravity="center"
+                android:text="扫码"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize" />
+
+            <Button
+                android:id="@+id/bt_products_sort_return"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/bg_btn_return"
+                android:gravity="center"
+                android:text="返回"
+                android:textColor="@color/white"
+                android:textSize="@dimen/configTextSize" />
+        </RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>

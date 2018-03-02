@@ -24,7 +24,6 @@
             android:indeterminateBehavior="repeat"
             android:indeterminateDrawable="@drawable/dialog_loading"
             android:indeterminateOnly="true"/>
-
         <TextView
             android:id="@+id/dialog_message"
             android:layout_width="wrap_content"

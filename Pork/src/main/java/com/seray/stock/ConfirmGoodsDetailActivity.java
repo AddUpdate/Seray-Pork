@@ -61,13 +61,13 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private List<PurchaseDetail> detailList = new ArrayList<>();
     private String batchNumber, productName, productId, recordWeight;
     private BigDecimal actualWeight;
-    private String strWeight = "80";
+    private String strWeight = "0";
     private String plu;
     private int state;
     private int actualNumber;
     private int position;
     private int goId = 1;//1 白条库  2 分割房
-    private String goLibraryId;
+    private String goLibraryId = "";
     LoadingDialog mLoadingDialog;
     private boolean timeflag = true;
     private boolean weightFlag = false;
@@ -293,20 +293,20 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
     private void updateWeight() {
         mLoadingDialog.showDialog();
         //  String numberStr = String.valueOf(number);
-        if (isOL()){
+        if (isOL()) {
             showMessage("超出秤量程！");
             return;
         }
-         float weightFt = Float.parseFloat(strWeight);
+        float weightFt = Float.parseFloat(strWeight);
         //  final int n = Integer.parseInt(numberStr);
         if (weightFt < 0) {
             showMessage("重量不能为小于0");
-            mLoadingDialog.dismissDialog();
+            mLoadingDialog.dismissDialogs();
             return;
         }
         if (weightFt == 0 && state == 2) {
             showMessage("重量不能为小于0");
-            mLoadingDialog.dismissDialog();
+            mLoadingDialog.dismissDialogs();
             return;
         }
         httpQueryThread.submit(new Runnable() {
@@ -323,14 +323,14 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
                     } else {
                         mHandler.sendEmptyMessage(0);
                     }
-                    mLoadingDialog.dismissDialog();
+                    mLoadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 } else {
                     state = 2;
                     PurchaseDetailManager instance = PurchaseDetailManager.getInstance();
                     instance.updatePurchaseDetail(batchNumber, productName, productId, Float.parseFloat(strWeight), 0, state, 2);
                     sqlInsert();
-                    mLoadingDialog.dismissDialog();
+                    mLoadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
@@ -342,6 +342,7 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         OperationLog log = new OperationLog("", "", goLibraryId, productName, plu, numUtil.getDecimalNet(strWeight), 0, "KG", NumFormatUtil.getDateDetail(), getCameraPic(), 2);
         logManager.insertOperationLog(log);
     }
+
     private String submitData() {
         JSONObject object = new JSONObject();
         String DataHelper = "";
@@ -357,12 +358,13 @@ public class ConfirmGoodsDetailActivity extends BaseActivity {
         }
         return DataHelper;
     }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         mMisc.beep();
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
-                mLoadingDialog.dismissDialog();
+                mLoadingDialog.dismissDialogs();
                 return true;
             case KeyEvent.KEYCODE_F2:// 置零
                 lastWeight = 0.0f;

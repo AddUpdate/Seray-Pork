@@ -26,7 +26,6 @@ public class OrderAdapter extends BaseAdapter {
 
     public OrderAdapter(Context context) {
         this.mContext = context;
-     //   this.mData = data;
         mInflater = LayoutInflater.from(mContext);
     }
 

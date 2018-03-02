@@ -131,12 +131,12 @@ public class EntrySearchActivity extends BaseActivity {
                 if (api.Result) {
                     mSearchList = api.SearchList;
                     mEntrySearchHandler.sendEmptyMessage(1);
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     if (mSearchList.size() == 0) {
                         showMessage("查无信息");
                     }
                 } else {
-                    loadingDialog.dismissDialog();
+                    loadingDialog.dismissDialogs();
                     showMessage(api.ResultMessage);
                 }
             }
