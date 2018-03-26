@@ -139,7 +139,6 @@ public class SerialPortUtil {
      * 关闭串口
      */
     public void closeSerialPort() {
-
         if (isStop)
             return;
         isStop = true;

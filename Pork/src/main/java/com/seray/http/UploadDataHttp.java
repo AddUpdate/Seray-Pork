@@ -61,12 +61,62 @@ public class UploadDataHttp {
     }
 
     /**
-     * 登录
+     * 卡登录
      */
-
-    public static ApiResult LoginPost(String phone, String password) {
+    public static ApiResult LoginPost(String cardId) {
         Map<String, String> params = new HashMap<>();
-        params.put("PhoneNumber", phone);
+        params.put("CardId", cardId);
+     //   params.put("PassWord", password);
+        ApiResult api = new ApiResult();
+        int code = -99;
+        String msg = null;
+        String jsonStr = null;
+        boolean isSuccess = false;
+        String[] sourceDetail = new String[0];
+        try {
+            Response response = HttpUtils.syncResponsePost(API.LOGIN_URL,
+                    BATCH_NUMBER_TAG, params);
+            if (response.isSuccessful()) {
+                code = response.code();
+                jsonStr = response.body().string();
+                JSONObject obj = new JSONObject(jsonStr);
+                isSuccess = obj.getString("ResultCode").equals("1");
+                msg = obj.getString("ResultMessage");
+                String result = obj.getString("Result");
+                String name = obj.getString("AdminName");
+
+                if (!TextUtils.isEmpty(result)) {
+                    String[] sourceStrArray = result.split(",");
+                    sourceDetail = sourceStrArray;
+                    LogUtil.d("jsonStr", jsonStr);
+                }
+                jsonStr = name;
+            } else {
+                code = response.code();
+                msg = "访问服务器失败";
+                LogUtil.d("message", "访问服务器失败");
+            }
+        } catch (JSONException e) {
+            msg = "解析错误";
+            LogUtil.d("message", "解析错误");
+        } catch (IOException e) {
+            msg = "访问服务器失败";
+            LogUtil.d("message", "访问服务器失败");
+        } finally {
+            api.Result = isSuccess;
+            api.ResultMessage = msg;
+            api.ResultJsonStr = jsonStr;
+            api.ResultCode = code;
+            api.sourceDetail = sourceDetail;
+        }
+        return api;
+    }
+    /**
+     * 账号登录
+     */
+    public static ApiResult LoginNumberPost(String phoneNumber,String password) {
+        Map<String, String> params = new HashMap<>();
+        params.put("PhoneNumber", phoneNumber);
         params.put("PassWord", password);
         ApiResult api = new ApiResult();
         int code = -99;
@@ -77,7 +127,6 @@ public class UploadDataHttp {
         try {
             Response response = HttpUtils.syncResponsePost(API.LOGIN_URL,
                     BATCH_NUMBER_TAG, params);
-            LogUtil.d("loginApi", API.LOGIN_URL);
             if (response.isSuccessful()) {
                 code = response.code();
                 jsonStr = response.body().string();
@@ -85,11 +134,14 @@ public class UploadDataHttp {
                 isSuccess = obj.getString("ResultCode").equals("1");
                 msg = obj.getString("ResultMessage");
                 String result = obj.getString("Result");
+                String name = obj.getString("AdminName");
+
                 if (!TextUtils.isEmpty(result)) {
                     String[] sourceStrArray = result.split(",");
                     sourceDetail = sourceStrArray;
                     LogUtil.d("jsonStr", jsonStr);
                 }
+                jsonStr = name;
             } else {
                 code = response.code();
                 msg = "访问服务器失败";
@@ -1073,10 +1125,11 @@ public class UploadDataHttp {
     /*
       * 订单上车
       */
-    public static ApiResult updatetOrderVehicle(String orderNumber, String details,int state) {
+    public static ApiResult updatetOrderVehicle(String orderNumber, String details,String name,int state) {
         Map<String, String> params = new HashMap<>();
         params.put("OrderNumber", orderNumber);
         params.put("Details", details);
+        params.put("RealName",name);
         params.put("State",String.valueOf(state));
         ApiResult api = new ApiResult();
         int code = -99;

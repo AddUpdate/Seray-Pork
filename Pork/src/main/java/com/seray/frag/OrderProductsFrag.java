@@ -19,18 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lzscale.scalelib.misclib.Misc;
-import com.seray.adapter.OrderAdapter;
 import com.seray.entity.ApiResult;
-import com.seray.entity.OrderDetail;
-import com.seray.entity.OrderPick;
 import com.seray.entity.OrderProduct;
 import com.seray.entity.OrderProductDetail;
 import com.seray.http.UploadDataHttp;
 import com.seray.pork.BaseActivity;
-import com.seray.pork.OrderDetailActivity;
 import com.seray.pork.OrderProductsDetailActivity;
 import com.seray.pork.R;
-import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
 
@@ -42,11 +37,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by pc on 2018/2/7.
+ * 按品名配货
  */
 
 public class OrderProductsFrag extends Fragment implements View.OnClickListener {
-    private int mType = 2;// 1 待配货 2 按品名配货  3 已配货
+    private int mType = 2;// 1 待配货 2 按品名配货  3 已配货待上车 4 扫码分拣成订单形式  5 已上车
     private Button mReturn, mUptata;
     private ListView listView;
     //    private SparseArray<List<OrderPick>> mSparseArray = new SparseArray<>();
@@ -58,12 +53,24 @@ public class OrderProductsFrag extends Fragment implements View.OnClickListener 
     private String returnMessage = "";
     NumFormatUtil mNumUtil;
     View view;
+    Toast mToast = null;
+
+    private void myToast(String msg) {
+        if (mToast == null) {
+            mToast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(msg);
+            mToast.setDuration(Toast.LENGTH_SHORT);
+        }
+        mToast.show();
+    }
+
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case 0x111:
                     productsAdapter.setNewData(productsList);
-                    Toast.makeText(getContext(), "暂无数据", Toast.LENGTH_SHORT).show();
+                    myToast("暂无数据");
                     loadingDialog.dismissDialogs();
                     break;
                 case 0x222:
@@ -72,7 +79,7 @@ public class OrderProductsFrag extends Fragment implements View.OnClickListener 
                     break;
                 case 0x333:
                     loadingDialog.dismissDialogs();
-                    Toast.makeText(getContext(), returnMessage, Toast.LENGTH_SHORT).show();
+                    myToast(returnMessage);
                     break;
             }
         }

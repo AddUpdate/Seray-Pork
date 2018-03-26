@@ -45,11 +45,24 @@
             android:layout_margin="@dimen/dp_8"
             />
         <Button
+            android:id="@+id/manage_config"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="基础配置"
+            android:textColor="@color/white"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_products_item"
+            android:textSize="@dimen/managerTipTextSize"
+            android:layout_margin="@dimen/dp_8"
+            android:layout_marginLeft="@dimen/dp_8"
+            />
+        <Button
             android:id="@+id/management"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="管理中心"
+            android:text="运维中心"
             android:textColor="@color/white"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/bg_products_item"

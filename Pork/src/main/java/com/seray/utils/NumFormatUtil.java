@@ -18,7 +18,7 @@ public class NumFormatUtil {
     public static final int PASSWORD_TO_OPERATION = 0;
     public static final int PASSWORD_TO_SETTING = 1;
     public static final int PASSWORD_TO_UNIT = 2;
-    public static final int PASSWORD_TO_REPORT = 3;
+    public static final int PASSWORD_TO_CONFIG = 3;
 
     public static DecimalFormat df2 = new DecimalFormat("######0.00");
     public static DecimalFormat df3 = new DecimalFormat("######0.000");
@@ -131,9 +131,9 @@ public class NumFormatUtil {
             case PASSWORD_TO_OPERATION:
                 pwd = "015";
                 break;
-//            case PASSWORD_TO_REPORT:
-//                pwd = "658138";
-//                break;
+            case PASSWORD_TO_CONFIG:
+                pwd = "018";
+                break;
         }
         return pwd;
     }

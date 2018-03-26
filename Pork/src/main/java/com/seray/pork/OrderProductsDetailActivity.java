@@ -119,6 +119,7 @@ public class OrderProductsDetailActivity extends BaseActivity {
                     if (position == i) {
                         detailList.get(i).setActualWeight(actualWeight);
                         detailList.get(i).setActualNumber(actualNumber);
+                        detailList.get(i).setState(state);
                         updateAdapter();
                         break;
                     }

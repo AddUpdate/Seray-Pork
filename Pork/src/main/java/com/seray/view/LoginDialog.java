@@ -44,7 +44,6 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_NUMPAD_DIVIDE) {
                         mMisc.beep();
-
                         return true;
                     }
                     if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
@@ -76,7 +75,6 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         telEt.setInputType(InputType.TYPE_NULL);
         passwordEt.setInputType(InputType.TYPE_NULL);
         posBtn.setOnClickListener(this);
-
         telEt.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {

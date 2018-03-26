@@ -6,10 +6,12 @@ import com.seray.entity.Library;
 import com.seray.entity.MonitorLibraryMessage;
 import com.seray.entity.MonitorProdctsMessage;
 import com.seray.entity.MonitorSupplierMsg;
+import com.seray.entity.OperationLog;
 import com.seray.entity.Products;
 import com.seray.entity.ProductsCategory;
 import com.seray.entity.Supplier;
 import com.seray.pork.dao.LibraryManager;
+import com.seray.pork.dao.OperationLogManager;
 import com.seray.pork.dao.ProductsCategoryManager;
 import com.seray.pork.dao.ProductsManager;
 import com.seray.pork.dao.SupplierManager;
@@ -35,6 +37,7 @@ public class LocalServer extends NanoHTTPD {
     SupplierManager supplierManager = SupplierManager.getInstance();
     ProductsCategoryManager productsCategoryManager = ProductsCategoryManager.getInstance();
     ProductsManager productsManager = ProductsManager.getInstance();
+    OperationLogManager operationLogManager = OperationLogManager.getInstance();
 
     private Map<String, String> fields;
 
@@ -73,7 +76,7 @@ public class LocalServer extends NanoHTTPD {
 
     private void receiveSendSupplier() throws JSONException {
         String supplierList = fields.get("supplierList");
-        LogUtil.e("localServer", supplierList);
+        LogUtil.d("localServer", supplierList);
         if (!TextUtils.isEmpty(supplierList)) {
             List<Supplier> list = getSupplierHttp(supplierList);
             supplierManager.deleteAll();
@@ -84,15 +87,16 @@ public class LocalServer extends NanoHTTPD {
 
     private void receiveSendLibname() {
         String alibraryList = fields.get("alibraryList");
-        LogUtil.e("alibraryList", alibraryList.trim());
-        Library library = new Library("", alibraryList.trim(),0, "");
+        LogUtil.d("alibraryList", alibraryList.trim());
+        Library library = new Library("", alibraryList.trim(), 0, "");
         libraryManager.deleteAll();
         libraryManager.insertLibrary(library);
         EventBus.getDefault().post(new MonitorLibraryMessage(library));//to separate,sort,temporary,excessStock,FinishProduct,FrozenLibrary
     }
-//    private void receiveSendLibname() throws JSONException {
+
+    //    private void receiveSendLibname() throws JSONException {
 //        String alibraryList = fields.get("alibraryList");
-//        LogUtil.e("alibraryList",alibraryList);
+//        LogUtil.d("alibraryList",alibraryList);
 //        if (!TextUtils.isEmpty(alibraryList)) {
 //            List<Library> list = getLibraryHttp(alibraryList);
 //            libraryManager.deleteAll();
@@ -100,10 +104,17 @@ public class LocalServer extends NanoHTTPD {
 //            EventBus.getDefault().post(new MonitorLibraryMessage(list));//to separate,sort,temporary
 //        }
     //  }
+    //流程操作日志 查询
+    private List<OperationLog> returnData(String date, String newDate) {
+        List<OperationLog> OperationLogList = new ArrayList<>();
+        OperationLogList = operationLogManager.queryOperationLogByQueryBuilder(date, newDate);
+
+        return OperationLogList;
+    }
 
     private void receiveGoodsName() throws JSONException {
         String itemList = fields.get("itemList");
-        LogUtil.e("localServer", itemList);
+        LogUtil.d("localServer", itemList);
         if (!TextUtils.isEmpty(itemList)) {
             List<ProductsCategory> list = getProductHttp(itemList);
             productsCategoryManager.deleteAll();
@@ -138,7 +149,7 @@ public class LocalServer extends NanoHTTPD {
                 String parentId = jsonObject.getString("ParentId");
                 float unitPrice = (float) jsonObject.getDouble("UnitPrice");
                 int num = jsonObject.getInt("MeasurementMethod");
-                String unit="KG";
+                String unit = "KG";
                 switch (num) {
                     case 1:
                         unit = "KG";
@@ -158,7 +169,7 @@ public class LocalServer extends NanoHTTPD {
             productsCy.setProductsList(productsList);
             list.add(productsCy);
         }
-        LogUtil.e("list", list.toString());
+        LogUtil.d("list", list.toString());
         return list;
     }
 

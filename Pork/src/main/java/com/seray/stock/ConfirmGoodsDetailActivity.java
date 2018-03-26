@@ -48,7 +48,7 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 
 /**
- * 确认实际重量入库 批次号列表 详情
+ * 确认实际吊秤重量入库  详情
  */
 
 public class ConfirmGoodsDetailActivity extends BaseActivity {

@@ -53,9 +53,11 @@ public class ConfigManager {
         try {
             mConfig = configDao.queryBuilder().where(ConfigDao.Properties.Key.eq(config.getKey())).unique();
             if (mConfig != null) {
-                mConfig.setValue(config.getValue());
-                configDao.update(mConfig);
-                LogUtil.e("config1", config.toString());
+                if (!mConfig.getValue().equals(config.getValue())) {
+                    mConfig.setValue(config.getValue());
+                    configDao.update(mConfig);
+                    LogUtil.d("config1", config.toString());
+                }
             } else {
                 flag = configDao.insert(config) != -1;
                 LogUtil.i(TAG, "insert Config :" + flag + "--====>" + config.toString());
@@ -82,7 +84,7 @@ public class ConfigManager {
                 public void run() {
                     for (int i = 0; i < productsList.size(); i++) {
                         mManager.getDaoSession().insert(productsList.get(i));
-                        LogUtil.e(TAG, "insert Config :" + "-->" + (productsList.get(i).toString()));
+                        LogUtil.i(TAG, "insert Config :" + "-->" + (productsList.get(i).toString()));
                     }
                 }
             });
@@ -90,7 +92,7 @@ public class ConfigManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LogUtil.e(TAG, "insert Config :" + flag);
+        LogUtil.i(TAG, "insert Config :" + flag);
         return flag;
     }
 

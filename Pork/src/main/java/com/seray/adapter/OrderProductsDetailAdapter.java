@@ -82,23 +82,15 @@ public class OrderProductsDetailAdapter extends BaseAdapter {
                 mHolder.quantityTv.setText(String.valueOf(itemDate.getNumber()));
             }
             mHolder.actualQuantityTv.setText(String.valueOf(itemDate.getActualNumber()));
-            if (itemDate.getActualNumber() >= itemDate.getNumber())
-                state = 1;
-            else
-                state = 2;
         } else {
             mHolder.quantityTv.setText(String.valueOf(itemDate.getDecimalWeight())+"KG");
             mHolder.actualQuantityTv.setText(String.valueOf(itemDate.getDecimalActualWeight()));
-            if (itemDate.getDecimalWeight().compareTo(itemDate.getDecimalActualWeight()) <= 0)
-                state = 1;
-            else
-                state = 2;
         }
         if (state == 1) {
-            mHolder.state.setText("足量");
+            mHolder.state.setText("已完成");
             mHolder.state.setTextColor(mContext.getResources().getColor(R.color.white));
         } else {
-            mHolder.state.setText("不足");
+            mHolder.state.setText("未完成");
             mHolder.state.setTextColor(mContext.getResources().getColor(R.color.red));
         }
         return convertView;

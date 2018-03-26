@@ -161,12 +161,12 @@ public class OperationLogManager {
     }
 
     /**
-     * 使用queryBuilder进行查询
+     * 使用queryBuilder进行查询  日期区间查询
      *
      * @return
      */
-    public List<OperationLog> queryOperationLogByQueryBuilder(long id) {
+    public List<OperationLog> queryOperationLogByQueryBuilder(String Date,String newData) {
         QueryBuilder<OperationLog> queryBuilder = mManager.getDaoSession().queryBuilder(OperationLog.class);
-        return queryBuilder.where(OperationLogDao.Properties.Id.eq(id)).list();
+        return queryBuilder.where(OperationLogDao.Properties.Date.between(Date,newData)).list();
     }
 }

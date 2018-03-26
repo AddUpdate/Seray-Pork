@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_back"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_10"
+    >
+
+    <GridView
+        android:id="@+id/gv_config_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:horizontalSpacing="8dp"
+        android:numColumns="2"
+        android:verticalSpacing="8dp"
+        android:padding="@dimen/dp_8"
+        />
+</LinearLayout>

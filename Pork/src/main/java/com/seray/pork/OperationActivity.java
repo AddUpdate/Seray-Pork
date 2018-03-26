@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.cache.AppConfig;
 import com.seray.cache.AppConfig.ScaleType;
@@ -38,14 +39,14 @@ public class OperationActivity extends BaseActivity {
     private JNIScale mScale;
     private EditText et_calload, et_maxUnit;
     private TextView internelCount, weight;
-    private Spinner mSpFdn, mSpBigFdn, mSpZeroRange, mSpRangeMode, mSpZeroTrack, mSpType,mUnitDeci;
+    private Spinner mSpFdn, mSpBigFdn, mSpZeroRange, mSpRangeMode, mSpZeroTrack, mSpType, mUnitDeci;
     private Button demarcate, finishAll, maxUnitBtn, mZeroCodeBtn;
     private String[] arrDiv = {"1", "2", "5", "10", "20", "50", "100", "200", "500"};
     private String[] arrTrack = {"零点追踪范围0.0倍当前分度值", "零点追踪范围0.5倍当前分度值", "零点追踪范围1.0倍当前分度值",
             "零点追踪范围2.0倍当前分度值",
             "零点追踪范围4.0倍当前分度值"};
     private String[] types = {"T-200", "SR-200"};
-    private String [] unitDeci = {"1", "2","3"};
+    private String[] unitDeci = {"1", "2", "3"};
     private String[] rangeModes = {"量程模式：单精度", "量程模式：双精度", "量程模式：双量程"};
     private String[] zeroRangeTabs = {"置零范围：0%", "置零范围：2%", "置零范围：3%", "置零范围：4%", "置零范围：10%",
             "置零范围：20%",
@@ -64,6 +65,7 @@ public class OperationActivity extends BaseActivity {
     private int zeroStep = 0;
     private int zeroISN = 0;
     private float calload = 0.00f;
+    private int mainUnit = 0;
     private Runnable timerRun = new Runnable() {
         @Override
         public void run() {
@@ -102,7 +104,6 @@ public class OperationActivity extends BaseActivity {
     private void initJNI() {
         mScale = JNIScale.getScale();
         mScale.setUnit(0);
-        mScale.setMainUnitDeci(3);
         mScale.setStabDelay(40);//秤的稳定时间150  --> 0.75s
     }
 
@@ -163,7 +164,7 @@ public class OperationActivity extends BaseActivity {
         if (curAutoPtr == 0 || curAutoPtr != curManualPtr) {
             boolean isSuccess = mScale.setAutoZeroRangePtr(curManualPtr);
             if (!isSuccess) {
-                Toast.makeText(this,"设置开机自动置零范围失败",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "设置开机自动置零范围失败", Toast.LENGTH_SHORT).show();
             }
         }
         mSpZeroRange.setSelection(curManualPtr);
@@ -175,10 +176,12 @@ public class OperationActivity extends BaseActivity {
 //        if (AppConfig.isT200()) {
 //            mSpType.setSelection(0);
 //        } else if (AppConfig.isSR200()) {
-            mSpType.setSelection(1);
-       // }
-       ;
-        mUnitDeci.setSelection( 1);
+        mSpType.setSelection(1);
+        // }
+        ;
+        String wt = mScale.getStringNet().trim();
+        mainUnit = wt.substring(wt.indexOf(".") + 1, wt.length()).length();
+        mUnitDeci.setSelection(mainUnit - 1);
     }
 
     private void initListener() {
@@ -200,12 +203,12 @@ public class OperationActivity extends BaseActivity {
                 }
                 boolean isOk = mScale.setFdnPtr(position);
                 if (!isOk) {
-                    Toast.makeText(OperationActivity.this,"分度值[1]设置失败",Toast.LENGTH_SHORT).show();
-              //      insertOperationLog("分度值[1]" + arrDiv[position] + "g设置失败");
+                    Toast.makeText(OperationActivity.this, "分度值[1]设置失败", Toast.LENGTH_SHORT).show();
+                    //      insertOperationLog("分度值[1]" + arrDiv[position] + "g设置失败");
                 } else {
-                  showMessage("分度值[1]设置成功");
-                    Toast.makeText(OperationActivity.this,"分度值[1]设置成功",Toast.LENGTH_SHORT).show();
-              //      insertOperationLog("分度值[1]" + arrDiv[position] + "g设置成功");
+                    showMessage("分度值[1]设置成功");
+                    Toast.makeText(OperationActivity.this, "分度值[1]设置成功", Toast.LENGTH_SHORT).show();
+                    //      insertOperationLog("分度值[1]" + arrDiv[position] + "g设置成功");
                 }
             }
 
@@ -224,13 +227,13 @@ public class OperationActivity extends BaseActivity {
                 }
                 boolean isOk = mScale.setBigFdnPtr(position);
                 if (!isOk) {
-                    Toast.makeText(OperationActivity.this,"分度值[2]设置失败",Toast.LENGTH_SHORT).show();
-                  showMessage("分度值[2]设置失败");
-              //      insertOperationLog("分度值[2]" + arrDiv[position] + "g设置失败");
+                    Toast.makeText(OperationActivity.this, "分度值[2]设置失败", Toast.LENGTH_SHORT).show();
+                    showMessage("分度值[2]设置失败");
+                    //      insertOperationLog("分度值[2]" + arrDiv[position] + "g设置失败");
                 } else {
-                    Toast.makeText(OperationActivity.this,"分度值[2]设置成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "分度值[2]设置成功", Toast.LENGTH_SHORT).show();
                     showMessage("分度值[2]设置成功");
-    //                insertOperationLog("分度值[2]" + arrDiv[position] + "g设置成功");
+                    //                insertOperationLog("分度值[2]" + arrDiv[position] + "g设置成功");
                 }
             }
 
@@ -249,11 +252,11 @@ public class OperationActivity extends BaseActivity {
                 }
                 boolean isOk = mScale.setRangeMode(position);
                 if (!isOk) {
-                    Toast.makeText(OperationActivity.this,"量程模式设置失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "量程模式设置失败", Toast.LENGTH_SHORT).show();
                     showMessage("量程模式设置失败");
 //                    insertOperationLog(rangeModes[position] + "设置失败");
                 } else {
-                    Toast.makeText(OperationActivity.this,"量程模式设置成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "量程模式设置成功", Toast.LENGTH_SHORT).show();
                     showMessage("量程模式设置设置成功");
 //                    insertOperationLog(rangeModes[position] + "设置成功");
                 }
@@ -271,16 +274,14 @@ public class OperationActivity extends BaseActivity {
                     isUnitDeci = false;
                     return;
                 }
-                boolean isOk = mScale.setMainUnitDeci(position+1);
-
-                if (!isOk) {
-                    Toast.makeText(OperationActivity.this,"保留小数点位数设置失败",Toast.LENGTH_SHORT).show();
-                    showMessage("保留小数点位数设置失败");
-//                    insertOperationLog(rangeModes[position] + "设置失败");
-                } else {
-                    Toast.makeText(OperationActivity.this,"保留小数点位数设置成功",Toast.LENGTH_SHORT).show();
+                boolean isOk = mScale.setMainUnitDeci(Integer.valueOf(unitDeci[position]));
+                LogUtil.d("isOk", isOk + "");
+                if (isOk) {
                     showMessage("保留小数点位数设置成功");
 //                    insertOperationLog(rangeModes[position] + "设置成功");
+                } else {
+                    showMessage("保留小数点位数设置失败");
+//                    insertOperationLog(rangeModes[position] + "设置失败");
                 }
 
             }
@@ -303,17 +304,17 @@ public class OperationActivity extends BaseActivity {
                 // 增加设置自动归零范围
                 boolean isAutoOk = mScale.setAutoZeroRangePtr(position);
                 if (isManualOk && isAutoOk) {
-                    Toast.makeText(OperationActivity.this,"置零范围设置成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "置零范围设置成功", Toast.LENGTH_SHORT).show();
 
                     showMessage("置零范围设置成功");
 //                    insertOperationLog(zeroRangeTabs[position] + "设置成功");
                 } else if (!isManualOk) {
-                    Toast.makeText(OperationActivity.this,"手动置零范围设置失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "手动置零范围设置失败", Toast.LENGTH_SHORT).show();
 
                     showMessage("手动置零范围设置失败");
 //                    insertOperationLog(zeroRangeTabs[position] + "设置失败");
                 } else {
-                    Toast.makeText(OperationActivity.this,"自动置零范围设置失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "自动置零范围设置失败", Toast.LENGTH_SHORT).show();
 
                     showMessage("自动置零范围设置失败");
 //                    insertOperationLog(zeroRangeTabs[position] + "设置失败");
@@ -335,12 +336,12 @@ public class OperationActivity extends BaseActivity {
                 }
                 boolean isOk = mScale.setZeroTrackPtr(position);
                 if (!isOk) {
-                    Toast.makeText(OperationActivity.this,"追踪范围设置失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "追踪范围设置失败", Toast.LENGTH_SHORT).show();
 
                     showMessage("追踪范围设置失败");
 //                    insertOperationLog(arrTrack[position] + "设置失败");
                 } else {
-                    Toast.makeText(OperationActivity.this,"追踪范围设置成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "追踪范围设置成功", Toast.LENGTH_SHORT).show();
 
                     showMessage("追踪范围设置成功");
 //                    insertOperationLog(arrTrack[position] + "设置成功");
@@ -377,7 +378,7 @@ public class OperationActivity extends BaseActivity {
                         .setMessage(R.string.operation_demarcate_msg).setPositiveButton(R.string
                         .reprint_ok, null)
                         .show();
-             //   insertOperationLog("更换秤类型为" + types[position]);
+                //   insertOperationLog("更换秤类型为" + types[position]);
             }
 
             @Override
@@ -398,11 +399,11 @@ public class OperationActivity extends BaseActivity {
         String maxUnit = et_maxUnit.getText().toString();
         float inputMaxUnit;
         if (TextUtils.isEmpty(maxUnit)) {
-            Toast.makeText(OperationActivity.this,"请输入最大量程",Toast.LENGTH_SHORT).show();
+            Toast.makeText(OperationActivity.this, "请输入最大量程", Toast.LENGTH_SHORT).show();
 
             showMessage("请输入最大量程");
         } else if (!NumFormatUtil.isNumeric(maxUnit)) {
-            Toast.makeText(OperationActivity.this,"请输入正确的数字",Toast.LENGTH_SHORT).show();
+            Toast.makeText(OperationActivity.this, "请输入正确的数字", Toast.LENGTH_SHORT).show();
 
             showMessage("请输入正确的数字");
             et_maxUnit.setText("");
@@ -410,18 +411,18 @@ public class OperationActivity extends BaseActivity {
             inputMaxUnit = Float.parseFloat(maxUnit);// 输入的最大量程
             if (inputMaxUnit > 3000) {
                 showMessage("最大量程大于3000，请重新输入");
-                Toast.makeText(OperationActivity.this,"最大量程大于3000，请重新输入",Toast.LENGTH_SHORT).show();
+                Toast.makeText(OperationActivity.this, "最大量程大于3000，请重新输入", Toast.LENGTH_SHORT).show();
             } else if (inputMaxUnit > 0) {
                 mScale.setMainUnitFull(inputMaxUnit);// 设置主单位称重量程
                 float midUnit = inputMaxUnit / 2;
                 mScale.setMainUnitMidFull(midUnit);// 设置主单位半量程
                 float curFullUnit = mScale.getMainUnitFull();
                 if (curFullUnit == inputMaxUnit) {// 获取设置最大量程操作后的最大量程，可行
-                    Toast.makeText(OperationActivity.this,"最大量程设置成功",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "最大量程设置成功", Toast.LENGTH_SHORT).show();
                     showMessage("最大量程设置成功");
 //                    insertOperationLog("最大量程" + inputMaxUnit + "kg设置成功");
                 } else {
-                    Toast.makeText(OperationActivity.this,"最大量程设置失败",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OperationActivity.this, "最大量程设置失败", Toast.LENGTH_SHORT).show();
                     showMessage("最大量程设置失败");
 //                    insertOperationLog("最大量程" + inputMaxUnit + "kg设置失败");
                 }
@@ -534,16 +535,16 @@ public class OperationActivity extends BaseActivity {
                         int count = mScale.getInternelCount();
                         boolean cali = mScale.saveNormalCalibration(zeroISN, count, calload);
                         if (cali) {
-                            Toast.makeText(OperationActivity.this,"标定成功",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OperationActivity.this, "标定成功", Toast.LENGTH_SHORT).show();
                             showMessage("标定成功");
 //                            insertOperationLog("标定成功" + "!零点内码值:" + zeroISN + ",标定的重量:" + calload
 //                                    + ",标定时的内码值:" + count);
                         } else {
-                            Toast.makeText(OperationActivity.this,"标定失败",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OperationActivity.this, "标定失败", Toast.LENGTH_SHORT).show();
                             showMessage("标定失败");
 //                            insertOperationLog("标定失败" + "!零点内码值:" + zeroISN + ",标定的重量:" + calload
 //                                    + ",标定时的内码值:" + count);
-                       }
+                        }
                         ((Button) (v)).setText("标定");
                         step = 0;
                     }
@@ -565,7 +566,7 @@ public class OperationActivity extends BaseActivity {
                         String text = zeroTv.getText().toString();
 //                        mConManager.insert("ZeroCodeValue", text);
                         showMessage("零点内码保存成功！");
-                        Toast.makeText(OperationActivity.this,"零点内码保存成功",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(OperationActivity.this, "零点内码保存成功", Toast.LENGTH_SHORT).show();
                         mZeroCodeBtn.setText("重新设置");
                         zeroStep = 0;
                     }

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by pc on 2018/2/7.
+ * 扫码上车
  */
 
 public class OrderFinishFrag extends Fragment implements View.OnClickListener {
@@ -45,14 +45,26 @@ public class OrderFinishFrag extends Fragment implements View.OnClickListener {
     private Misc mMisc;
     private int page = 1;
     private int totalPage;
-    private String returnMessage="";
+    private String returnMessage = "";
     View view;
+    Toast mToast = null;
+
+    private void myToast(String msg) {
+        if (mToast == null) {
+            mToast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(msg);
+            mToast.setDuration(Toast.LENGTH_SHORT);
+        }
+        mToast.show();
+    }
+
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case 0x111:
                     orderAdapter.setNewData(tableOrderList);
-                    Toast.makeText(getContext(), "暂无数据", Toast.LENGTH_SHORT).show();
+                    myToast("暂无数据");
                     loadingDialog.dismissDialogs();
                     break;
                 case 0x222:
@@ -60,17 +72,17 @@ public class OrderFinishFrag extends Fragment implements View.OnClickListener {
                     tvPage.setText(page + "：" + totalPage);
                     loadingDialog.dismissDialogs();
                     break;
-                case  0x333:
+                case 0x333:
                     loadingDialog.dismissDialogs();
-                    Toast.makeText(getContext(), returnMessage, Toast.LENGTH_SHORT).show();
+                    myToast(returnMessage);
                     break;
             }
-        };
+        }
     };
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-         view = inflater.inflate(R.layout.fragment_order_finish, container, false);
+        view = inflater.inflate(R.layout.fragment_order_finish, container, false);
         initView();
         initAdapter();
         initListener();
@@ -117,7 +129,7 @@ public class OrderFinishFrag extends Fragment implements View.OnClickListener {
         BaseActivity.httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.getOrderList(mType,"", page);
+                ApiResult api = UploadDataHttp.getOrderList(mType, "", page);
                 returnMessage = api.ResultMessage;
                 if (api.Result) {
                     tableOrderList.clear();
@@ -140,8 +152,8 @@ public class OrderFinishFrag extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-        if (view.getVisibility()==View.VISIBLE)
-        getOrderList();
+        if (view.getVisibility() == View.VISIBLE)
+            getOrderList();
     }
 
     @Override
@@ -164,14 +176,14 @@ public class OrderFinishFrag extends Fragment implements View.OnClickListener {
                     page -= 1;
                     getOrderList();
                 } else
-                    Toast.makeText(getContext(), "已到首页！", Toast.LENGTH_SHORT).show();
+                    myToast("已到首页");
                 break;
             case R.id.bt_order_finish_next_page:
                 if (page < totalPage) {
                     page += 1;
                     getOrderList();
                 } else
-                    Toast.makeText(getContext(), "已到最后一页！", Toast.LENGTH_SHORT).show();
+                    myToast("已到最后一页");
                 break;
         }
     }

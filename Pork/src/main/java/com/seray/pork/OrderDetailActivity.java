@@ -23,6 +23,7 @@ import com.seray.entity.OrderDetail;
 import com.seray.entity.OrderPick;
 import com.seray.entity.OrderProductDetail;
 import com.seray.http.UploadDataHttp;
+import com.seray.pork.dao.ConfigManager;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.seray.view.LoadingDialog;
@@ -51,6 +52,7 @@ public class OrderDetailActivity extends BaseActivity implements ScanGunKeyEvent
     private String returnMessage;
     ScanGunKeyEventHelper scanGunKeyEventHelper = null;
     LoadingDialog loadingDialog;
+    ConfigManager configManager = ConfigManager.getInstance();
     private OrderDetailHandler mHandler = new OrderDetailHandler(new WeakReference<>(this));
 
     @Override
@@ -191,7 +193,7 @@ public class OrderDetailActivity extends BaseActivity implements ScanGunKeyEvent
         BaseActivity.httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.updatetOrderVehicle(orderPicks.getOrderNumber(), details, state);
+                ApiResult api = UploadDataHttp.updatetOrderVehicle(orderPicks.getOrderNumber(), details,configManager.query("operator"),state);
                 returnMessage = api.ResultMessage;
                 state = 2;
                 if (api.Result) {

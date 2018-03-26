@@ -20,6 +20,7 @@ public class OrderProductDetail implements Serializable{
     private float ActualWeight;
     private String OrderDate;
     private String UserTelephone;
+    private int State;
 
     public OrderProductDetail(String orderDetailId,String customerName,String commodityName,String orderNumber,
                               int number,BigDecimal weight,int actualNumber,BigDecimal actualWeight,
@@ -135,6 +136,14 @@ public class OrderProductDetail implements Serializable{
         OrderDate = orderDate;
     }
 
+    public int getState() {
+        return State;
+    }
+
+    public void setState(int state) {
+        State = state;
+    }
+
     @Override
     public String toString() {
         return "OrderProductDetail{" +
@@ -148,6 +157,7 @@ public class OrderProductDetail implements Serializable{
                 ", ActualWeight=" + ActualWeight +
                 ", OrderDate='" + OrderDate + '\'' +
                 ", UserTelephone='" + UserTelephone + '\'' +
+                ", State=" + State +
                 '}';
     }
 }

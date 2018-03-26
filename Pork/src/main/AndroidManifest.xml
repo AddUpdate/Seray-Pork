@@ -36,12 +36,11 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
-        <activity android:name=".StartActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            >
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".StartActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -56,9 +55,8 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".BaseActivity"
-            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            />
+            android:screenOrientation="landscape" />
         <activity
             android:name=".SupplierSelectActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
@@ -97,6 +95,7 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
+
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
@@ -115,43 +114,43 @@
         <activity
             android:name="com.seray.stock.ConfirmGoodsHookActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.ConfirmInBulkActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.InBulkQuantityActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".FrozenLibraryActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".FinishProductActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ProductsSelectActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ExcessStockActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ManageActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".OrderActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".OrderDetailActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name=".OrderWeightActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
@@ -162,6 +161,7 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
+
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
@@ -196,19 +196,23 @@
         <activity
             android:name=".ManagementActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
         <activity
             android:name="com.seray.stock.InBulkGoodsActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"/>
-        <activity android:name="com.seray.stock.OtherWeightActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden"
-            android:screenOrientation="landscape"  />
-        <activity android:name=".QueryOrderActivity"
-            android:screenOrientation="landscape"/>
-        <activity android:name=".OrderProductsDetailActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.seray.stock.OtherWeightActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape" />
+        <activity
+            android:name=".QueryOrderActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".OrderProductsDetailActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape" />
+        <activity android:name=".ConfigActivity"></activity>
     </application>
 
 </manifest>

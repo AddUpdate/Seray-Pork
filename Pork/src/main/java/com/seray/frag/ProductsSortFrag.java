@@ -33,7 +33,17 @@ public class ProductsSortFrag extends Fragment {
     private Misc mMisc;
     LoadingDialog loadingDialog;
     View view;
+    Toast mToast = null;
 
+    private void myToast(String msg) {
+        if (mToast == null) {
+            mToast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(msg);
+            mToast.setDuration(Toast.LENGTH_SHORT);
+        }
+        mToast.show();
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_products_sort, container, false);
@@ -72,7 +82,7 @@ public class ProductsSortFrag extends Fragment {
                     public void onLoadSuccess(List<OrderProductDetail> result) {
                         if (result.isEmpty()){
                             tvProduct.setText("");
-                            Toast.makeText(getContext(), "暂无数据", Toast.LENGTH_SHORT).show();
+                            myToast("暂无数据");
                         }else {
                             tvProduct.setText(result.get(0).getCommodityName());
                         }
@@ -83,7 +93,7 @@ public class ProductsSortFrag extends Fragment {
                     @Override
                     public void onLoadFailed(String error) {
                         loadingDialog.dismissDialogs();
-                        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                        myToast(error);
                     }
                 });
             }

@@ -109,7 +109,7 @@ public class CustomScanDialog extends Dialog implements ScanGunKeyEventHelper.On
         final TextView msgView = (TextView) findViewById(R.id.dialog_message);
         msgView.setText("扫码成功");
         final String batch = barcode;
-        LogUtil.d("扫码读取",batch);
+        LogUtil.d("扫码读取", batch);
         msgView.postDelayed(new Runnable() {
             @Override
             public void run() {

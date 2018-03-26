@@ -11,7 +11,7 @@ import android.widget.Button;
 import com.seray.utils.NumFormatUtil;
 
 public class ManageActivity extends BaseActivity {
-    private Button operationBtn,backBtn, rebootBtn,managementBtn;
+    private Button operationBtn,backBtn, rebootBtn,configBtn,managementBtn;
     private AlertDialog rebootDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +25,7 @@ public class ManageActivity extends BaseActivity {
         operationBtn = (Button) findViewById(R.id.bt_manage_operation);
         backBtn = (Button) findViewById(R.id.back_to_main);
         rebootBtn = (Button) findViewById(R.id.reboot);
+        configBtn = (Button) findViewById(R.id.manage_config);
         managementBtn = (Button) findViewById(R.id.management);
     }
 
@@ -32,6 +33,7 @@ public class ManageActivity extends BaseActivity {
         operationBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
         rebootBtn.setOnClickListener(this);
+        configBtn.setOnClickListener(this);
         managementBtn.setOnClickListener(this);
     }
 
@@ -52,6 +54,9 @@ public class ManageActivity extends BaseActivity {
                 break;
             case R.id.reboot:
                 openRebootDialog();
+                break;
+            case R.id.manage_config:
+                openManageKey(NumFormatUtil.PASSWORD_TO_CONFIG);
                 break;
             case R.id.management:
                 openManageKey(NumFormatUtil.PASSWORD_TO_SETTING);

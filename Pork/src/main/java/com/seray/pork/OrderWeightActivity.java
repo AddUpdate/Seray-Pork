@@ -36,6 +36,7 @@ import com.gprinter.command.GpCom;
 import com.gprinter.io.GpDevice;
 import com.gprinter.io.PortParameters;
 import com.gprinter.service.GpPrintService;
+import com.gprinter.service.PrinterStatusBroadcastReceiver;
 import com.lzscale.scalelib.misclib.GpScalePrinter;
 import com.seray.cache.AppConfig;
 import com.seray.entity.ApiResult;
@@ -66,6 +67,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class OrderWeightActivity extends BaseActivity {
     private TextView nameTv, quantityTv, actualQuantityTv, weightTv, numberTv, floatingTv, printerTv;
@@ -123,6 +125,7 @@ public class OrderWeightActivity extends BaseActivity {
         initData();
         setReason();
         timer();
+        //registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
     }
 
     private void initView() {
@@ -237,7 +240,12 @@ public class OrderWeightActivity extends BaseActivity {
                 isByWeight = true;
             }
         }
-        connection();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                connection();
+            }
+        }).start();
     }
 
     public void setPieceNum(final TextView testview) {
@@ -369,10 +377,15 @@ public class OrderWeightActivity extends BaseActivity {
                 break;
             case R.id.bt_order_weight_confirm:
                 state = 2;
+//                try {
+//                    mGpService.queryPrinterStatus(0, 500, 0xfe);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
                 if (printerTv.getText().toString().equals("打印机已连接"))
-                    setData();
-                else
-                    showMessage("请连接打印机");
+                       setData();
+                    else
+                        showMessage("请重新连接打印机");
                 break;
             case R.id.bt_order_weight_finish:
                 state = 1;
@@ -704,12 +717,12 @@ public class OrderWeightActivity extends BaseActivity {
                     showMessage("打印机正在连接");
                     mPortParam.setPortOpenState(false);
                 } else if (type == GpDevice.STATE_NONE) {
-                    showMessage("打印机未连接");
+                    //   showMessage("打印机未连接");
                     mPortParam.setPortOpenState(false);
                     printerTv.setText("打印机未连接");
                     AppConfig.isUseGpPrinter = false;
                 } else if (type == GpDevice.STATE_VALID_PRINTER) {
-                    showMessage("打印机已连接");
+                    //  showMessage("打印机已连接");
                     mPortParam.setPortOpenState(true);
                     printerTv.setText("打印机已连接");
                     AppConfig.isUseGpPrinter = true;
@@ -858,12 +871,51 @@ public class OrderWeightActivity extends BaseActivity {
         GpScalePrinter.getInstance(mGpService).printOrder(detail, null);
     }
 
+    private BroadcastReceiver mPrintReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(GpCom.ACTION_DEVICE_REAL_STATUS)) {
+                int requestCode = intent.getIntExtra(GpCom.EXTRA_PRINTER_REQUEST_CODE, -1);
+                if (requestCode == 0xfe) {
+                    int status = intent.getIntExtra(GpCom.EXTRA_PRINTER_REAL_STATUS, 16);
+                            String str;
+                    LogUtil.d("BroadcastReceiver RECEIVE " + requestCode + "||||" + status);
+                    if (status == GpCom.STATE_NO_ERR) {
+                        AppConfig.isUseGpPrinter = true;
+                    } else {
+                        str = "打印机 ";
+                        if ((byte) (status & GpCom.STATE_OFFLINE) > 0) {
+                            str += "脱机";
+                        }
+                        if ((byte) (status & GpCom.STATE_PAPER_ERR) > 0) {
+                            str += "缺纸";
+                        }
+                        if ((byte) (status & GpCom.STATE_COVER_OPEN) > 0) {
+                            str += "开盖";
+                        }
+                        if ((byte) (status & GpCom.STATE_ERR_OCCURS) > 0) {
+                            str += "出错";
+                        }
+                        if ((byte) (status & GpCom.STATE_TIMES_OUT) > 0) {
+                            str += "查询超时";
+                        }
+                        AppConfig.isUseGpPrinter = false;
+                        showMessage(str);
+                    }
+                }
+            }
+        }
+    };
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         flag = false;
         mOrderWeightHandler.removeCallbacksAndMessages(null);
-        if (mGpService != null) {
+
+       if (mGpService != null) {
             try {
                 mGpService.closePort(0);
                 if (mPrintConnect != null) {
@@ -877,5 +929,6 @@ public class OrderWeightActivity extends BaseActivity {
         AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         am.cancel(pi);
         mPortParam = null;
+       // unregisterReceiver(mPrintReceiver);
     }
 }

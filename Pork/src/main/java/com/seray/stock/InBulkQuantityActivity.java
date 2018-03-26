@@ -204,8 +204,8 @@ public class InBulkQuantityActivity extends BaseActivity {
             }
         });
         numberEt.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (keyCode != KeyEvent.KEYCODE_BACK) {
                         mMisc.beep();

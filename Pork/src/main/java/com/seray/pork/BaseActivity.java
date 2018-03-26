@@ -159,6 +159,9 @@ public class BaseActivity extends FragmentActivity implements View.OnClickListen
                                 case NumFormatUtil.PASSWORD_TO_OPERATION:
                                     startActivity(OperationActivity.class);
                                     break;
+                                case NumFormatUtil.PASSWORD_TO_CONFIG:
+                                    startActivity(ConfigActivity.class);
+                                    break;
                                 case NumFormatUtil.PASSWORD_TO_SETTING:
                                     startActivity(ManagementActivity.class);
                                     break;

@@ -1,12 +1,7 @@
 package com.seray.pork;
 
-import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -14,38 +9,38 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
-
 import com.seray.adapter.ChooseFunctionAdapter;
+import com.seray.card.RFIDPay;
+import com.seray.card.ReturnValue;
+import com.seray.card.ReturnValueCallback;
 import com.seray.entity.ApiResult;
+import com.seray.entity.Config;
 import com.seray.http.UploadDataHttp;
+import com.seray.pork.dao.ConfigManager;
 import com.seray.stock.PurchaseActivity;
 import com.seray.utils.HttpUtils;
-import com.seray.utils.LocalServer;
 import com.seray.utils.LogUtil;
 import com.seray.view.LoadingDialog;
 import com.seray.view.LoginDialog;
-import com.seray.view.PromptDialog;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ChooseFunctionActivity extends BaseActivity {
 
-
     private GridView mGridViewBtn;
+    private TextView operatorTv, loginTv, hintTv,loginTvEt;
     private List<String> name = new ArrayList<>();
     List<String> mName = new ArrayList<>();
     private List<Integer> mPosition = new ArrayList<>();
     private ChooseFunctionAdapter adapter;
-    private String phoneNumber, passWord;
+    private String phoneNumber, passWord, cardId;
     private ChooseFunctionHandler chooseFunctionHandler = new ChooseFunctionHandler(new
             WeakReference<>(this));
-    boolean loginFlag = false;
     LoginDialog dialog;
-    LoadingDialog mLoadingDialog;
+      LoadingDialog mLoadingDialog;
+    ConfigManager configManager = ConfigManager.getInstance();
+    RFIDPay read = new RFIDPay();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +50,17 @@ public class ChooseFunctionActivity extends BaseActivity {
         dialog = new LoginDialog(this);
         initData();
         initAdapter();
-        showLogin("登录");
         initListener();
-        //updateAdapter();
+        read.readCardNumber(callback);
     }
 
     private void initView() {
         mGridViewBtn = (GridView) findViewById(R.id.gv_choose_function_button);
         TextView mIpTextView = (TextView) findViewById(R.id.tv_ip);
+        operatorTv = (TextView) findViewById(R.id.tv_choose_function_operator);
+        loginTv = (TextView) findViewById(R.id.tv_choose_function_login);
+        hintTv = (TextView) findViewById(R.id.tv_choose_function_hint);
+        loginTvEt = (TextView) findViewById(R.id.tv_choose_function_login_et);
         String ipAddress = HttpUtils.getLocalIpStr(getApplication());
         mIpTextView.setText(ipAddress);
     }
@@ -77,9 +75,6 @@ public class ChooseFunctionActivity extends BaseActivity {
         name.add("成品1、2号库");
         name.add("鲜品库");
         name.add("订单");
-//        for (int i = 0; i < 8; i++) {
-//            mPosition.add(i);
-//        }
     }
 
     private void initAdapter() {
@@ -88,6 +83,21 @@ public class ChooseFunctionActivity extends BaseActivity {
     }
 
     private void initListener() {
+        loginTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                hintTv.setText("请刷卡~");
+                read.readCardNumber(callback);
+            }
+        });
+        loginTvEt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMisc.beep();
+                showLogin("登录");
+            }
+        });
         mGridViewBtn.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -127,25 +137,48 @@ public class ChooseFunctionActivity extends BaseActivity {
     }
 
     private void submitLogin() {
-
         httpQueryThread.submit(new Runnable() {
             @Override
             public void run() {
-                ApiResult api = UploadDataHttp.LoginPost(phoneNumber, passWord);
-                mLoadingDialog.dismissDialogs();
+                ApiResult api = UploadDataHttp.LoginPost(cardId);
                 if (api.Result) {
-                    loginFlag = true;
                     mPosition.clear();
                     for (int i = 0; i < api.sourceDetail.length; i++) {
                         mPosition.add(Integer.valueOf(api.sourceDetail[i]));
                     }
+                    Config config = new Config();
+                    config.setKey("operator");
+                    config.setValue(api.ResultJsonStr);
+                    configManager.insertConfig(config);
                     showMessage("欢迎使用");
                     chooseFunctionHandler.sendEmptyMessage(1);
                 } else {
-                    loginFlag = false;
                     showMessage(api.ResultMessage);
                 }
-
+            }
+        });
+    }
+    private void submitLoginNumber() {
+        httpQueryThread.submit(new Runnable() {
+            @Override
+            public void run() {
+                ApiResult api = UploadDataHttp.LoginNumberPost(phoneNumber,passWord);
+                if (api.Result) {
+                    mPosition.clear();
+                    for (int i = 0; i < api.sourceDetail.length; i++) {
+                        mPosition.add(Integer.valueOf(api.sourceDetail[i]));
+                    }
+                    Config config = new Config();
+                    config.setKey("operator");
+                    config.setValue(api.ResultJsonStr);
+                    configManager.insertConfig(config);
+                    showMessage("欢迎使用");
+                    chooseFunctionHandler.sendEmptyMessage(1);
+                    mLoadingDialog.dismissDialogs();
+                } else {
+                    mLoadingDialog.dismissDialogs();
+                    showMessage(api.ResultMessage);
+                }
             }
         });
     }
@@ -167,12 +200,19 @@ public class ChooseFunctionActivity extends BaseActivity {
                     case 1:
                         activity.updateAdapter();
                         break;
+                    case 2:
+                        activity.hintTv.setText("读卡中~");
+                        break;
                 }
             }
         }
     }
 
     private void updateAdapter() {
+        loginTv.setVisibility(View.GONE);
+        hintTv.setVisibility(View.GONE);
+        loginTvEt.setVisibility(View.GONE);
+        operatorTv.setText("操作员:" + configManager.query("operator"));
         mName.clear();
         for (int i = 0; i < mPosition.size(); i++) {
             mName.add(name.get(mPosition.get(i)));
@@ -180,6 +220,26 @@ public class ChooseFunctionActivity extends BaseActivity {
         adapter.setNewData(mName, mPosition);
         dialog.dismiss();
     }
+
+    ReturnValueCallback callback = new ReturnValueCallback() {
+        @Override
+        public void run(ReturnValue result) {
+            boolean isSuccess = result.getIsSuccess();
+            if (isSuccess) {
+                cardId = result.getTag().toString();
+                chooseFunctionHandler.sendEmptyMessage(2);
+                LogUtil.d("读取卡内编号成功", result.getTag().toString());
+                submitLogin();
+            } else {
+                String message = result.getTag().toString();
+                if(message.equals("读取设置自动读卡模式超时")){
+                    message = "刷卡超时";
+                }
+                hintTv.setText(message);
+                LogUtil.d("读取卡内编号失败", result.getTag().toString());
+            }
+        }
+    };
 
     @Override
     protected void onDestroy() {
@@ -190,15 +250,21 @@ public class ChooseFunctionActivity extends BaseActivity {
         mMisc.beep();
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
+                if (callback != null) {
+                    LogUtil.d("callback", "取消读卡");
+                    read.cancelReadCard(callback);
+                }
                 finish();
                 return true;
             case KeyEvent.KEYCODE_MENU:// 桌秤
-
+            case KeyEvent.KEYCODE_MOVE_HOME:// 地秤
                 startActivity(ManageActivity.class);
                 return true;
-            case KeyEvent.KEYCODE_MOVE_HOME:// 地秤
-
-                startActivity(ManageActivity.class);
+            case KeyEvent.KEYCODE_NUMPAD_DIVIDE:// 取消
+                if (callback != null) {
+                    LogUtil.d("callback", "取消读卡");
+                    read.cancelReadCard(callback);
+                }
                 return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -218,9 +284,8 @@ public class ChooseFunctionActivity extends BaseActivity {
                 mLoadingDialog.showDialog();
                 phoneNumber = tel;
                 passWord = password;
-                submitLogin();
+                submitLoginNumber();
             }
         });
-
     }
 }
