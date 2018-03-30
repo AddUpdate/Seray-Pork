@@ -154,6 +154,7 @@ public class ChooseFunctionActivity extends BaseActivity {
                     chooseFunctionHandler.sendEmptyMessage(1);
                 } else {
                     showMessage(api.ResultMessage);
+                    chooseFunctionHandler.sendEmptyMessage(3);
                 }
             }
         });
@@ -203,6 +204,10 @@ public class ChooseFunctionActivity extends BaseActivity {
                     case 2:
                         activity.hintTv.setText("读卡中~");
                         break;
+                    case 3:
+                        activity.hintTv.setText("请重新刷卡~");
+                        activity.read.readCardNumber(activity.callback);
+                        break;
                 }
             }
         }
@@ -219,6 +224,7 @@ public class ChooseFunctionActivity extends BaseActivity {
         }
         adapter.setNewData(mName, mPosition);
         dialog.dismiss();
+
     }
 
     ReturnValueCallback callback = new ReturnValueCallback() {
