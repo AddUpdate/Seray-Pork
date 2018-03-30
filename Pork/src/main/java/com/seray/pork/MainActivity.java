@@ -179,14 +179,15 @@ public class MainActivity extends BaseActivity {
         Runnable timerRun = new Runnable() {
             @Override
             public void run() {
-                if (flag) {
-                    mMainHandler.sendEmptyMessage(1);
-                    mMainHandler.sendEmptyMessage(5);
-                    currWeight = mScale.getFloatNet();
-                    if (isStable()) {
-                        lastWeight = currWeight;
-                    }
+                if (!flag)
+                    return;
+                mMainHandler.sendEmptyMessage(1);
+                mMainHandler.sendEmptyMessage(5);
+                currWeight = mScale.getFloatNet();
+                if (isStable()) {
+                    lastWeight = currWeight;
                 }
+
             }
         };
         timerThreads.scheduleAtFixedRate(timerRun, 1500, 50, TimeUnit.MILLISECONDS);
@@ -201,7 +202,6 @@ public class MainActivity extends BaseActivity {
                     return;
                 switch (position) {
                     case 3:
-                        flag = false;
                         startActivity(ChooseFunctionActivity.class);
                         break;
                     case 7:
@@ -253,7 +253,6 @@ public class MainActivity extends BaseActivity {
                 return true;
             case KeyEvent.KEYCODE_MENU:// 桌秤
             case KeyEvent.KEYCODE_MOVE_HOME:// 地秤
-                flag = false;
                 startActivity(ChooseFunctionActivity.class);
                 return true;
             case KeyEvent.KEYCODE_F1:// 去皮
@@ -332,7 +331,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onRestart() {
         flag = true;
-        timer();
         super.onRestart();
     }
 
@@ -343,8 +341,15 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        flag = false;
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        timerThreads.shutdownNow();
         unregisterReceiver(timeReceiver);
         Intent intent = new Intent(this, BatteryService.class);
         stopService(intent);
