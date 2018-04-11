@@ -25,6 +25,7 @@ import com.seray.view.LoginDialog;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ChooseFunctionActivity extends BaseActivity {
 
@@ -95,6 +96,8 @@ public class ChooseFunctionActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 mMisc.beep();
+                read.cancelReadCard(callback);
+                hintTv.setText("已取消~");
                 showLogin("登录");
             }
         });
@@ -218,7 +221,7 @@ public class ChooseFunctionActivity extends BaseActivity {
         loginTv.setVisibility(View.GONE);
         hintTv.setVisibility(View.GONE);
         loginTvEt.setVisibility(View.GONE);
-        operatorTv.setText("操作员:" + configManager.query("operator"));
+        operatorTv.setText(String.format("操作员:%s", configManager.query("operator")));
         mName.clear();
         for (int i = 0; i < mPosition.size(); i++) {
             mName.add(name.get(mPosition.get(i)));

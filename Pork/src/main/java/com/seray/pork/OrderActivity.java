@@ -59,7 +59,7 @@ public class OrderActivity extends BaseActivity {
         setContentView(R.layout.activity_order);
         initView();
         init();
-      //  register();
+       register();
     }
 
     private void initView() {
@@ -85,12 +85,12 @@ public class OrderActivity extends BaseActivity {
         rbFinish.setOnClickListener(this);
         rbProductsSort.setOnClickListener(this);
         rbCompleteCar.setOnClickListener(this);
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                connection();
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                connection();
+            }
+        }).start();
     }
 
     @Override
@@ -322,20 +322,20 @@ public class OrderActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if (mGpService != null) {
-//            try {
-//                mGpService.closePort(0);
-//                if (mPrintConnect != null) {
-//                    unbindService(mPrintConnect);
-//                }
-//            } catch (RemoteException e) {
-//                LogUtil.e(e.getMessage());
-//            }
-//        }
-//        unregisterReceiver(PrinterStatusBroadcastReceiver);
-//        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-//        am.cancel(pi);
-//        mPortParam = null;
+        if (mGpService != null) {
+            try {
+                mGpService.closePort(0);
+                if (mPrintConnect != null) {
+                    unbindService(mPrintConnect);
+                }
+            } catch (RemoteException e) {
+                LogUtil.e(e.getMessage());
+            }
+        }
+        unregisterReceiver(PrinterStatusBroadcastReceiver);
+        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        am.cancel(pi);
+        mPortParam = null;
     }
 
 }

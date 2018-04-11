@@ -12,22 +12,16 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.lzscale.scalelib.misclib.Misc;
-import com.seray.cache.CacheHelper;
-import com.seray.stock.InBulkQuantityActivity;
 import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by pc on 2017/11/3.
@@ -48,10 +42,6 @@ public class BaseActivity extends FragmentActivity implements View.OnClickListen
 
     public static ExecutorService sqlInsertThread = Executors.newSingleThreadExecutor();
 
-    /**
-     * 执行定时任务固定数量线程池
-     */
-    public static ScheduledExecutorService timerThreads = Executors.newScheduledThreadPool(1);
     /**
      * 蜂鸣器控制器
      */

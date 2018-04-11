@@ -14,6 +14,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -107,23 +108,53 @@ public class EntryFragmentOne extends BaseTwoFragment {
         mInputImage.setOnClickListener(this);
         stockDateTv.setOnClickListener(this);
 
-        batchNumberEt.setInputType(InputType.TYPE_NULL);
+  //      batchNumberEt.setInputType(InputType.TYPE_NULL);
         detailsNumberEt.setInputType(InputType.TYPE_NULL);
 
 
-        batchNumberEt.setOnKeyListener(mEditInputListener);
+     //   batchNumberEt.setOnKeyListener(mEditInputListener);
         detailsNumberEt.setOnKeyListener(mEditInputListener);
 
         CustomEditTouchListener touchListener = new CustomEditTouchListener();
 
-        batchNumberEt.setOnTouchListener(touchListener);
+     //   batchNumberEt.setOnTouchListener(touchListener);
         detailsNumberEt.setOnTouchListener(touchListener);
 
         mTextWatcher = new CustomTextWatcher();
 
-        batchNumberEt.addTextChangedListener(mTextWatcher);
+    //    batchNumberEt.addTextChangedListener(mTextWatcher);
         detailsNumberEt.addTextChangedListener(mTextWatcher);
-
+        batchNumberEt.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    String txt = batchNumberEt.getText().toString();
+                    if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent
+                            .KEYCODE_NUMPAD_9) {
+                        mMisc.beep();
+                        txt += keyCode - KeyEvent.KEYCODE_NUMPAD_0;
+                    } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent
+                            .KEYCODE_9) {
+                        mMisc.beep();
+                        txt += keyCode - KeyEvent.KEYCODE_0;
+                    }else if (keyCode == KeyEvent.KEYCODE_E) {
+                        mMisc.beep();
+                        txt += ".";
+                    } else if (keyCode == KeyEvent.KEYCODE_NUM_LOCK) {
+                        mMisc.beep();
+                        txt = txt.substring(0, txt.length() - 1);
+                    } else if (keyCode == KeyEvent.KEYCODE_NUMPAD_DOT) {
+                        mMisc.beep();
+                        txt = "";
+                    } else {
+                        return false;
+                    }
+                    batchNumberEt.setText(txt);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private String getCurrentDay() {
@@ -146,6 +177,7 @@ public class EntryFragmentOne extends BaseTwoFragment {
     @Override
     void pushParameter() {
         if (sInterface != null) {
+            mSubtotal.setBatchNumber(batchNumberEt.getText().toString());
             if (mSubtotal != null)
                 if (!TextUtils.isEmpty(mSubtotal.getSupplier()) && !TextUtils.isEmpty(mSubtotal.getBatchNumber())) {
 

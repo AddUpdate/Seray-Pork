@@ -24,7 +24,6 @@ import com.seray.utils.LogUtil;
 import com.seray.utils.NumFormatUtil;
 import com.tscale.scalelib.jniscale.JNIScale;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -32,6 +31,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends BaseActivity {
@@ -39,13 +40,13 @@ public class MainActivity extends BaseActivity {
     private JNIScale mScale;
     private float currWeight = 0.0f;
     private float lastWeight = 0.0f;
-    private float divisionValue = 0.02f;
-    private boolean flag = true;
-
+    private float divisionValue = 0.f;
+    private boolean flag = false;
+    private ScheduledExecutorService timerThreads = Executors.newScheduledThreadPool(1);
     private MainHandler mMainHandler = new MainHandler(new WeakReference<>(this));
     private TextView tvWeight, tvTareWeight;
     private List<String> listPlu = new ArrayList<>();
-    ;
+
     private GridView gridView;
     private TextView mMaxUnitView, mTimeView;
     private ImageView mBatteryIv;
@@ -59,7 +60,7 @@ public class MainActivity extends BaseActivity {
             App.getApplication().openScreen();
         }
     }
-
+  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +82,7 @@ public class MainActivity extends BaseActivity {
         mTimeView = (TextView) findViewById(R.id.timer);
         mTimeView.setText(NumFormatUtil.getFormatDate());
         TextView versionView = (TextView) findViewById(R.id.version);
-        versionView.setText("版本V" + App.VersionName);
+        versionView.setText(String.format("版本V%s", App.VersionName));
     }
 
     private void initData() {
@@ -121,12 +122,13 @@ public class MainActivity extends BaseActivity {
 
     private void weightChangedCyclicity() {
         String strNet = mScale.getStringNet().trim();
-        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-        if (isOL()) {
-            tvWeight.setText(strNet);
-        } else {
-            tvWeight.setText(NumFormatUtil.df2.format(fW));
-        }
+//        LogUtil.d(strNet);
+//        float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+//        if (isOL()) {
+        tvWeight.setText(strNet);
+//        } else {
+//            tvWeight.setText(strNet);
+//        }
         if (isStable()) {
             //   backDisplay.showIsStable(true);
             findViewById(R.id.stableflag).setVisibility(View.VISIBLE);
@@ -145,7 +147,7 @@ public class MainActivity extends BaseActivity {
 
     private void initJNI() {
         mScale = JNIScale.getScale();
-        divisionValue = mScale.getDivisionValue();
+        divisionValue = mScale.getDivisionValue(); //小数位数的改变 divisionValue值也会改变
     }
 
     /**
@@ -187,7 +189,6 @@ public class MainActivity extends BaseActivity {
                 if (isStable()) {
                     lastWeight = currWeight;
                 }
-
             }
         };
         timerThreads.scheduleAtFixedRate(timerRun, 1500, 50, TimeUnit.MILLISECONDS);
@@ -329,20 +330,16 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onRestart() {
-        flag = true;
-        super.onRestart();
-    }
-
-    @Override
     protected void onResume() {
-        mMaxUnitView.setText(String.valueOf(mScale.getMainUnitFull()) + "kg");
+        flag = true;
+        mMaxUnitView.setText(String.format("%skg", String.valueOf(mScale.getMainUnitFull())));
         super.onResume();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+        LogUtil.d("onPause");
         flag = false;
     }
 

@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
 
-import com.seray.cache.CacheHelper;
 import com.seray.pork.dao.DaoManager;
 import com.seray.pork.dao.DaoSession;
 import com.seray.utils.LogUtil;

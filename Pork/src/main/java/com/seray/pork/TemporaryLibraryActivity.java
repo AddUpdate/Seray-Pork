@@ -395,12 +395,12 @@ public class TemporaryLibraryActivity extends BaseActivity {
     private void weightChangedCyclicity() {
         if (isByWeight) {
             String strNet = mScale.getStringNet().trim();
-            float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
-            if (isOL()) {
+        //    float fW = NumFormatUtil.isNumeric(strNet) ? Float.parseFloat(strNet) : 0;
+         //   if (isOL()) {
                 tvWeight.setText(strNet);
-            } else {
-                tvWeight.setText(NumFormatUtil.df2.format(fW));
-            }
+         //   } else {
+          //      tvWeight.setText(NumFormatUtil.df2.format(fW));
+          //  }
         }
         if (isStable()) {
             //   backDisplay.showIsStable(true);

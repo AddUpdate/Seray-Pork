@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Picture;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
@@ -120,12 +119,11 @@ public class OrderWeightActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_weight);
         initView();
-        register();
+     //   register();
         initJNI();
         initData();
         setReason();
         timer();
-        //registerReceiver(mPrintReceiver, new IntentFilter(GpCom.ACTION_DEVICE_REAL_STATUS));
     }
 
     private void initView() {
@@ -377,15 +375,17 @@ public class OrderWeightActivity extends BaseActivity {
                 break;
             case R.id.bt_order_weight_confirm:
                 state = 2;
+
 //                try {
-//                    mGpService.queryPrinterStatus(0, 500, 0xfe);
+//                  mGpService.queryPrinterStatus(0, 500, 0xfe);
 //                } catch (RemoteException e) {
 //                    e.printStackTrace();
 //                }
-                if (printerTv.getText().toString().equals("打印机已连接"))
-                       setData();
-                    else
-                        showMessage("请重新连接打印机");
+
+                if (getConnectState()) {
+                    setData();
+                } else
+                        showMessage("请退出订单重新连接打印机");
                 break;
             case R.id.bt_order_weight_finish:
                 state = 1;
@@ -702,7 +702,7 @@ public class OrderWeightActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mGpService = GpService.Stub.asInterface(service);
-            initPortParam();
+           // initPortParam();
         }
     }
 
@@ -925,10 +925,10 @@ public class OrderWeightActivity extends BaseActivity {
                 LogUtil.e(e.getMessage());
             }
         }
-        unregisterReceiver(PrinterStatusBroadcastReceiver);
-        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        am.cancel(pi);
-        mPortParam = null;
-       // unregisterReceiver(mPrintReceiver);
+//        unregisterReceiver(PrinterStatusBroadcastReceiver);
+//        AlarmManager am = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+//        am.cancel(pi);
+//        mPortParam = null;
+       // unregisterReceiver(mPrintReceiver);  热敏纸 打印机状态
     }
 }

@@ -214,6 +214,7 @@
             android:textSize="@dimen/pluTextSize" />
 
         <TextView
+            android:visibility="gone"
             android:id="@+id/tv_order_weight_printer"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_60"

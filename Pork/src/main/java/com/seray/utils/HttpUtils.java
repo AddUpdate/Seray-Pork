@@ -34,14 +34,14 @@ import java.util.concurrent.TimeUnit;
 public class HttpUtils {
 
     private static HttpUtils mInstance = null;
-    private OkHttpClient mClient = null;
-    private Handler mHandler = null;
+    private OkHttpClient mClient;
+    private Handler mHandler;
 
     private HttpUtils() {
         mClient = new OkHttpClient();
-        mClient.setConnectTimeout(15, TimeUnit.SECONDS);
-        mClient.setReadTimeout(15, TimeUnit.SECONDS);
-        mClient.setWriteTimeout(15, TimeUnit.SECONDS);
+        mClient.setConnectTimeout(30, TimeUnit.SECONDS);
+        mClient.setReadTimeout(30, TimeUnit.SECONDS);
+        mClient.setWriteTimeout(30, TimeUnit.SECONDS);
         mClient.setCookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
         mHandler = new Handler(Looper.getMainLooper());
     }
